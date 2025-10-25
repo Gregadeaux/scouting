@@ -1,0 +1,1 @@
+export { RoleBasedWrapper } from './RoleBasedWrapper';

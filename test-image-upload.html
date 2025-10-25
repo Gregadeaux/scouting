@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Image Upload</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Test Supabase Storage Image Upload</h1>
+
+    <div>
+        <input type="file" id="fileInput" accept="image/*">
+        <button onclick="uploadFile()">Upload</button>
+    </div>
+
+    <div id="status"></div>
+    <div id="error" style="color: red;"></div>
+    <div id="result"></div>
+
+    <script>
+        const SUPABASE_URL = 'https://yiqffkixukbyjdbbroue.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpcWZma2l4dWtieWpkYmJyb3VlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NzUwNzgsImV4cCI6MjA3NjU1MTA3OH0.njfgZ4aBE-RnZxYvOfAd2TmwWpiKZsJHX_cYUawg5vA';
+        const BUCKET_NAME = 'robot-photos';
+
+        const { createClient } = supabase;
+        const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const statusDiv = document.getElementById('status');
+            const errorDiv = document.getElementById('error');
+            const resultDiv = document.getElementById('result');
+
+            // Clear previous messages
+            statusDiv.textContent = '';
+            errorDiv.textContent = '';
+            resultDiv.textContent = '';
+
+            const file = fileInput.files[0];
+            if (!file) {
+                errorDiv.textContent = 'Please select a file';
+                return;
+            }
+
+            statusDiv.textContent = 'Uploading...';
+
+            try {
+                // Generate unique filename
+                const timestamp = Date.now();
+                const randomString = Math.random().toString(36).substring(7);
+                const extension = file.name.split('.').pop();
+                const filename = `test-${timestamp}-${randomString}.${extension}`;
+
+                console.log('Uploading file:', filename);
+                console.log('File size:', file.size);
+                console.log('File type:', file.type);
+
+                // Upload to Supabase Storage
+                const { data, error } = await client.storage
+                    .from(BUCKET_NAME)
+                    .upload(filename, file, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+
+                if (error) {
+                    console.error('Upload error:', error);
+                    errorDiv.textContent = `Error: ${error.message}`;
+                    statusDiv.textContent = '';
+                    return;
+                }
+
+                console.log('Upload successful:', data);
+
+                // Get public URL
+                const { data: urlData } = client.storage
+                    .from(BUCKET_NAME)
+                    .getPublicUrl(data.path);
+
+                console.log('Public URL:', urlData.publicUrl);
+
+                statusDiv.textContent = 'Upload successful!';
+                resultDiv.innerHTML = `
+                    <p><strong>File uploaded:</strong> ${filename}</p>
+                    <p><strong>Public URL:</strong> <a href="${urlData.publicUrl}" target="_blank">${urlData.publicUrl}</a></p>
+                    <img src="${urlData.publicUrl}" style="max-width: 300px; margin-top: 10px;">
+                `;
+
+            } catch (error) {
+                console.error('Unexpected error:', error);
+                errorDiv.textContent = `Unexpected error: ${error.message}`;
+                statusDiv.textContent = '';
+            }
+        }
+
+        // Check bucket exists on load
+        async function checkBucket() {
+            try {
+                const { data, error } = await client.storage.listBuckets();
+
+                console.log('Available buckets:', data);
+
+                if (error) {
+                    console.error('Error listing buckets:', error);
+                    document.getElementById('error').textContent = `Bucket check error: ${error.message}`;
+                    return;
+                }
+
+                const bucket = data.find(b => b.name === BUCKET_NAME);
+                if (!bucket) {
+                    document.getElementById('error').textContent = `Bucket '${BUCKET_NAME}' not found! Please create it in Supabase Dashboard.`;
+                } else {
+                    console.log('Bucket found:', bucket);
+                    document.getElementById('status').textContent = `✓ Bucket '${BUCKET_NAME}' exists (Public: ${bucket.public})`;
+                }
+            } catch (error) {
+                console.error('Error checking bucket:', error);
+            }
+        }
+
+        checkBucket();
+    </script>
+</body>
+</html>
