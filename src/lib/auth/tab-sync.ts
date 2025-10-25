@@ -10,7 +10,7 @@ export type AuthSyncEventType = 'login' | 'logout' | 'profile_update' | 'session
 export interface AuthSyncEvent {
   type: AuthSyncEventType;
   timestamp: number;
-  data?: any;
+  data?: unknown;
 }
 
 type AuthSyncListener = (event: AuthSyncEvent) => void;

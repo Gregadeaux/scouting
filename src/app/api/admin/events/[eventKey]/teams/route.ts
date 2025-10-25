@@ -41,7 +41,7 @@ export async function GET(
   } catch (error: unknown) {
     console.error('[API] Get event teams error:', error);
 
-    if (error.name === 'EntityNotFoundError') {
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'EntityNotFoundError') {
       return errorResponse('Event not found', 404);
     }
 

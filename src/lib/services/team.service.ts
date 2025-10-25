@@ -23,7 +23,13 @@ import type {
   TeamPhoto,
   TeamMatchSummary,
 } from '@/types/team-detail';
-import type { RobotCapabilities2025, AutonomousCapabilities2025 } from '@/types/season-2025';
+import type {
+  RobotCapabilities2025,
+  AutonomousCapabilities2025,
+  AutoPerformance2025,
+  TeleopPerformance2025,
+  EndgamePerformance2025,
+} from '@/types/season-2025';
 import {
   calculateAutoPoints,
   calculateTeleopPoints,
@@ -557,9 +563,10 @@ export class TeamService implements ITeamService {
     for (const match of matchScoutingData) {
       // Calculate points using season-specific functions
       try {
-        totalAutoPoints += calculateAutoPoints(match.auto_performance as AutoPerformance2025);
-        totalTeleopPoints += calculateTeleopPoints(match.teleop_performance as TeleopPerformance2025);
-        totalEndgamePoints += calculateEndgamePoints(match.endgame_performance as EndgamePerformance2025);
+        // Double cast needed for JSONB data (acknowledged anti-pattern, to be refactored)
+        totalAutoPoints += calculateAutoPoints(match.auto_performance as unknown as AutoPerformance2025);
+        totalTeleopPoints += calculateTeleopPoints(match.teleop_performance as unknown as TeleopPerformance2025);
+        totalEndgamePoints += calculateEndgamePoints(match.endgame_performance as unknown as EndgamePerformance2025);
 
         // Calculate reliability (no disconnects, disables, or tips)
         if (!match.robot_disconnected && !match.robot_disabled && !match.robot_tipped) {

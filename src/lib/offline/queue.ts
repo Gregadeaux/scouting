@@ -9,7 +9,7 @@ export interface QueuedSubmission {
   id: string;
   url: string;
   method: 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-  body: any;
+  body: unknown;
   headers?: Record<string, string>;
   timestamp: number;
   retryCount: number;

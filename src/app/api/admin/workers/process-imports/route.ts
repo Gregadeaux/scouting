@@ -3,6 +3,7 @@ import { getImportService } from '@/lib/services';
 import { createImportJobRepository } from '@/lib/repositories';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import { requireAdmin } from '@/lib/api/auth-middleware';
+import { getErrorMessage } from '@/lib/utils/error';
 
 /**
  * POST /api/admin/workers/process-imports
@@ -96,7 +97,7 @@ export async function POST(request: NextRequest) {
           job_id: job.job_id,
           event_key: job.event_key,
           status: 'failed',
-          error: error.message || 'Unknown error',
+          error: getErrorMessage(error),
         });
       }
     }

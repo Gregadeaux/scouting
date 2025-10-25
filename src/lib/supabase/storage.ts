@@ -229,7 +229,11 @@ export async function uploadRobotPhoto(file: File): Promise<string> {
     }
 
     // Upload using native fetch (bypassing Supabase client)
-    const uploadUrl = `${supabaseClient.storage.url}/object/${ROBOT_PHOTOS_BUCKET}/${filename}`;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (!supabaseUrl) {
+      throw new StorageError('Supabase URL not configured', 'CONFIG_ERROR');
+    }
+    const uploadUrl = `${supabaseUrl}/storage/v1/object/${ROBOT_PHOTOS_BUCKET}/${filename}`;
 
     const response = await fetch(uploadUrl, {
       method: 'POST',
@@ -248,7 +252,7 @@ export async function uploadRobotPhoto(file: File): Promise<string> {
     await response.json(); // Response contains { Key, Id }
 
     // Return public URL
-    const publicUrl = `${supabaseClient.storage.url}/object/public/${ROBOT_PHOTOS_BUCKET}/${filename}`;
+    const publicUrl = `${supabaseUrl}/storage/v1/object/public/${ROBOT_PHOTOS_BUCKET}/${filename}`;
     return publicUrl;
   } catch (error) {
     console.log('[Storage] Exception caught:', error);

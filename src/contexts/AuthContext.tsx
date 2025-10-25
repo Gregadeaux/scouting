@@ -88,9 +88,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     // Subscribe to cross-tab auth sync events
     const unsubscribe = authTabSync.subscribe((event) => {
-      if (event.type === 'login' && event.data?.user) {
-        setUser(event.data.user);
-        authStorage.setUser(event.data.user).catch(console.error);
+      if (event.type === 'login' && event.data) {
+        const user = event.data as AuthenticatedUser;
+        setUser(user);
+        authStorage.setUser(user).catch(console.error);
       } else if (event.type === 'logout') {
         setUser(null);
         authStorage.clearUser().catch(console.error);
@@ -102,9 +103,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
             authStorage.setUser(user).catch(console.error);
           }
         }).catch(console.error);
-      } else if (event.type === 'session_refresh' && event.data?.user) {
-        setUser(event.data.user);
-        authStorage.setUser(event.data.user).catch(console.error);
+      } else if (event.type === 'session_refresh' && event.data) {
+        const user = event.data as AuthenticatedUser;
+        setUser(user);
+        authStorage.setUser(user).catch(console.error);
       }
     });
 

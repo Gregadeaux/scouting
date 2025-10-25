@@ -295,8 +295,8 @@ export class MatchRepository implements IMatchRepository {
         // Check which positions have been scouted
         const scoutedTeams = new Set(
           (scoutingData || [])
-            .filter((s: any) => s.match_key === matchKey)
-            .map((s: any) => s.team_number)
+            .filter((s: { match_key: string }) => s.match_key === matchKey)
+            .map((s: { team_number: number }) => s.team_number)
         );
 
         if (match.red_1 && scoutedTeams.has(match.red_1)) positions.red_1 = true;

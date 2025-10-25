@@ -10,7 +10,7 @@ export interface FieldConfig {
   key: string;
   label: string;
   type: 'boolean' | 'select' | 'number' | 'text' | 'textarea' | 'counter';
-  options?: Array<{ value: any; label: string }>;
+  options?: Array<{ value: string | number; label: string }>;
   min?: number;
   max?: number;
   step?: number;
@@ -22,7 +22,7 @@ export interface FieldConfig {
 
 interface FieldRendererProps {
   field: FieldConfig;
-  value: any;
+  value: unknown;
   onChange: (value: unknown) => void;
   error?: string;
   className?: string;
@@ -105,7 +105,7 @@ export function FieldRenderer({
             {required && <span className="ml-1 text-red-500">*</span>}
           </label>
           <Select
-            value={value ?? ''}
+            value={typeof value === 'string' ? value : ''}
             onChange={(e) => onChange(e.target.value)}
             options={field.options}
             placeholder={placeholder || `Select ${label.toLowerCase()}`}
@@ -151,7 +151,7 @@ export function FieldRenderer({
           </label>
           <Input
             type="number"
-            value={value ?? ''}
+            value={typeof value === 'number' ? value : typeof value === 'string' ? value : ''}
             onChange={(e) => {
               const val = e.target.value === '' ? null : Number(e.target.value);
               onChange(val);
@@ -179,7 +179,7 @@ export function FieldRenderer({
           </label>
           <textarea
             id={field.key}
-            value={value ?? ''}
+            value={typeof value === 'string' ? value : ''}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
             disabled={disabled}
@@ -214,7 +214,7 @@ export function FieldRenderer({
           </label>
           <Input
             type="text"
-            value={value ?? ''}
+            value={typeof value === 'string' ? value : ''}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
             error={error}

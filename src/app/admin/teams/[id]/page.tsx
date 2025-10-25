@@ -100,14 +100,18 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
   interface EventTeamItem {
     event_key: string;
     created_at: string;
-    events: Omit<TeamEvent, 'team_registered_at'>;
+    events: Omit<TeamEvent, 'team_registered_at'>[] | null;
   }
 
   // Transform events data
-  const events: TeamEvent[] = eventTeamsData?.map((item: EventTeamItem) => ({
-    ...item.events,
-    team_registered_at: item.created_at
-  })) || [];
+  const events: TeamEvent[] = eventTeamsData?.map((item: EventTeamItem) => {
+    const eventData = item.events?.[0];
+    if (!eventData) return null;
+    return {
+      ...eventData,
+      team_registered_at: item.created_at
+    };
+  }).filter((event): event is TeamEvent => event !== null) || [];
 
   // Fetch scouters for this team
   const { data: teamMembersData, error: scoutersError } = await supabase
@@ -148,21 +152,25 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
     is_active: boolean;
     joined_at: string;
     left_at: string | null;
-    user_profiles: TeamScouter['user'];
+    user_profiles: TeamScouter['user'][] | null;
   }
 
   // Transform scouters data
-  const scouters: TeamScouter[] = teamMembersData?.map((item: TeamMemberItem) => ({
-    membership_id: item.id,
-    team_role: item.team_role,
-    can_submit_data: item.can_submit_data,
-    can_view_analytics: item.can_view_analytics,
-    can_manage_team: item.can_manage_team,
-    is_active: item.is_active,
-    joined_at: item.joined_at,
-    left_at: item.left_at,
-    user: item.user_profiles
-  })) || [];
+  const scouters: TeamScouter[] = teamMembersData?.map((item: TeamMemberItem) => {
+    const userProfile = item.user_profiles?.[0];
+    if (!userProfile) return null;
+    return {
+      membership_id: item.id,
+      team_role: item.team_role,
+      can_submit_data: item.can_submit_data,
+      can_view_analytics: item.can_view_analytics,
+      can_manage_team: item.can_manage_team,
+      is_active: item.is_active,
+      joined_at: item.joined_at,
+      left_at: item.left_at,
+      user: userProfile
+    };
+  }).filter((scouter): scouter is TeamScouter => scouter !== null) || [];
 
   if (eventsError) {
     console.error('Error fetching events:', eventsError);

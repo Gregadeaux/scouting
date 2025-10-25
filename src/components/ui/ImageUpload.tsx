@@ -214,6 +214,7 @@ export function ImageUpload({
               key={`${url}-${index}`}
               className="group relative aspect-square overflow-hidden rounded-lg border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800"
             >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={url}
                 alt={`Upload ${index + 1}`}

@@ -159,8 +159,10 @@ export function useSubmission(id?: string): UseSubmissionResult {
     const handleSyncEvent = (event: unknown) => {
       // Refresh if this submission was affected
       if (
-        event.submissionId === id ||
-        event.type === 'sync-complete'
+        event &&
+        typeof event === 'object' &&
+        (('submissionId' in event && event.submissionId === id) ||
+          ('type' in event && event.type === 'sync-complete'))
       ) {
         refresh();
       }

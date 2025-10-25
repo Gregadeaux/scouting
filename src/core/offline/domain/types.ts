@@ -133,14 +133,14 @@ export const Result = {
       : { ok: false, error: fn((result as { ok: false; error: E }).error) };
   },
 
-  unwrap<T>(result: Result<T, any>): T {
+  unwrap<T>(result: Result<T, Error>): T {
     if (result.ok) {
       return result.value;
     }
     throw new Error('Called unwrap on an Err result');
   },
 
-  unwrapOr<T>(result: Result<T, any>, defaultValue: T): T {
+  unwrapOr<T>(result: Result<T, Error>, defaultValue: T): T {
     if (result.ok) {
       return result.value;
     }

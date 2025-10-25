@@ -24,7 +24,7 @@ interface TeamMemberQueryResult {
     training_completed_at: string | null;
     last_login_at: string | null;
     created_at: string;
-  };
+  }[] | null;
 }
 
 /**
@@ -94,17 +94,21 @@ export async function GET(
     }
 
     // Transform the data to flatten user_profiles
-    const scouters = (data as TeamMemberQueryResult[])?.map((item) => ({
-      membership_id: item.id,
-      team_role: item.team_role,
-      can_submit_data: item.can_submit_data,
-      can_view_analytics: item.can_view_analytics,
-      can_manage_team: item.can_manage_team,
-      is_active: item.is_active,
-      joined_at: item.joined_at,
-      left_at: item.left_at,
-      user: item.user_profiles
-    })) || [];
+    const scouters = data?.map((item) => {
+      const userProfile = item.user_profiles?.[0];
+      if (!userProfile) return null;
+      return {
+        membership_id: item.id,
+        team_role: item.team_role,
+        can_submit_data: item.can_submit_data,
+        can_view_analytics: item.can_view_analytics,
+        can_manage_team: item.can_manage_team,
+        is_active: item.is_active,
+        joined_at: item.joined_at,
+        left_at: item.left_at,
+        user: userProfile
+      };
+    }).filter((scouter): scouter is NonNullable<typeof scouter> => scouter !== null) || [];
 
     return NextResponse.json({
       success: true,

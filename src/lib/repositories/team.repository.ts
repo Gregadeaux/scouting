@@ -5,7 +5,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { createServiceClient } from '@/lib/supabase/server';
-import type { Team } from '@/types';
+import type { Team, MatchSchedule } from '@/types';
 import type { QueryOptions } from './base.repository';
 import {
   RepositoryError,
@@ -83,10 +83,13 @@ export class TeamRepository implements ITeamRepository {
       // If event_teams has data, use it
       if (!eventTeamsError && eventTeams && eventTeams.length > 0) {
         const teams = eventTeams
-          .map((row: any) => row.teams)
-          .filter((team: any) => team !== null);
+          .map((row: { teams: Team[] | null }) => {
+            // Supabase returns foreign key relations as arrays
+            return row.teams?.[0] ?? null;
+          })
+          .filter((team): team is Team => team !== null);
 
-        return teams as Team[];
+        return teams;
       }
 
       // Fallback: derive teams from match schedule (for events imported before event_teams table)
@@ -101,7 +104,7 @@ export class TeamRepository implements ITeamRepository {
 
       // Extract unique team numbers from all alliance positions
       const teamNumbers = new Set<number>();
-      (matches || []).forEach((match: any) => {
+      (matches || []).forEach((match: Pick<MatchSchedule, 'red_1' | 'red_2' | 'red_3' | 'blue_1' | 'blue_2' | 'blue_3'>) => {
         if (match.red_1) teamNumbers.add(match.red_1);
         if (match.red_2) teamNumbers.add(match.red_2);
         if (match.red_3) teamNumbers.add(match.red_3);

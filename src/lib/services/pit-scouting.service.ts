@@ -289,7 +289,20 @@ export class PitScoutingService implements IPitScoutingService {
    * @private
    */
   private detectSchemaVersion(robotCapabilities: unknown): SupportedSchemaVersion {
-    const version = robotCapabilities?.schema_version;
+    // Type guard to check if robotCapabilities has schema_version property
+    if (
+      !robotCapabilities ||
+      typeof robotCapabilities !== 'object' ||
+      !('schema_version' in robotCapabilities)
+    ) {
+      throw new UnsupportedSchemaVersionError(
+        'Schema version is required in robot_capabilities',
+        'unknown',
+        [...SUPPORTED_SCHEMA_VERSIONS]
+      );
+    }
+
+    const version = (robotCapabilities as { schema_version: unknown }).schema_version;
 
     if (!version) {
       throw new UnsupportedSchemaVersionError(
@@ -302,7 +315,7 @@ export class PitScoutingService implements IPitScoutingService {
     if (!SUPPORTED_SCHEMA_VERSIONS.includes(version as SupportedSchemaVersion)) {
       throw new UnsupportedSchemaVersionError(
         `Unsupported schema version: ${version}`,
-        version,
+        String(version),
         [...SUPPORTED_SCHEMA_VERSIONS]
       );
     }

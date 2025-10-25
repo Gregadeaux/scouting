@@ -73,18 +73,18 @@ interface DialogTriggerProps {
 
 export function DialogTrigger({ asChild, children, onClick }: DialogTriggerProps) {
   if (asChild && React.isValidElement(children)) {
-    const childProps = children.props as any;
+    const childProps = children.props as Record<string, unknown>;
     return React.cloneElement(children, {
       ...childProps,
       onClick: (e: React.MouseEvent) => {
         // Call original onClick if it exists
         if (typeof childProps.onClick === 'function') {
-          childProps.onClick(e);
+          (childProps.onClick as (e: React.MouseEvent) => void)(e);
         }
         // Call the trigger onClick
         onClick?.();
       },
-    } as any);
+    } as React.Attributes);
   }
 
   return <button onClick={onClick}>{children}</button>;

@@ -32,6 +32,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useOfflineService } from './use-offline-service';
 import type { Submission } from '@/core/offline/domain/submission';
+import type { SubmissionId } from '@/core/offline/domain/types';
 import type { OfflineEvent } from '@/core/offline/ports/event-bus';
 
 export interface UseSubmissionsResult {
@@ -58,12 +59,12 @@ export interface UseSubmissionsResult {
   /**
    * Retry a failed submission
    */
-  retry: (id: string) => Promise<void>;
+  retry: (id: SubmissionId) => Promise<void>;
 
   /**
    * Remove a submission from queue
    */
-  remove: (id: string) => Promise<void>;
+  remove: (id: SubmissionId) => Promise<void>;
 
   /**
    * Refresh submissions data
@@ -112,9 +113,9 @@ export function useSubmissions(): UseSubmissionsResult {
   /**
    * Retry a failed submission
    */
-  const retry = useCallback(async (id: string) => {
+  const retry = useCallback(async (id: SubmissionId) => {
     try {
-      const result = await submissionService.retrySubmission(id as any);
+      const result = await submissionService.retrySubmission(id);
       if (!result.ok) {
         console.error('Failed to retry submission:', result.error);
       }
@@ -126,9 +127,9 @@ export function useSubmissions(): UseSubmissionsResult {
   /**
    * Remove a submission
    */
-  const remove = useCallback(async (id: string) => {
+  const remove = useCallback(async (id: SubmissionId) => {
     try {
-      const result = await submissionService.deleteSubmission(id as any);
+      const result = await submissionService.deleteSubmission(id);
       if (!result.ok) {
         console.error('Failed to delete submission:', result.error);
       }

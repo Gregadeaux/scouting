@@ -172,7 +172,7 @@ export class ImportJobRepository implements IImportJobRepository {
    */
   async updateProgress(jobId: string, progress: UpdateImportJobProgress): Promise<void> {
     try {
-      const updateData: any = {
+      const updateData: Record<string, unknown> = {
         processed_items: progress.processed_items,
         total_items: progress.total_items,
         progress_percent: progress.progress_percent,

@@ -29,7 +29,7 @@ export interface OfflineApiOptions {
   onQueued?: (queueId: string) => void;
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -62,7 +62,7 @@ function isNetworkError(error: unknown): boolean {
  * Automatically queues POST/PUT/PATCH/DELETE requests when offline.
  * GET requests fail immediately when offline (rely on service worker cache).
  */
-export async function offlineApi<T = any>(
+export async function offlineApi<T = unknown>(
   url: string,
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' = 'GET',
   body?: unknown,
@@ -182,7 +182,7 @@ export async function offlineApi<T = any>(
 /**
  * Convenience wrapper for POST requests
  */
-export async function offlinePost<T = any>(
+export async function offlinePost<T = unknown>(
   url: string,
   body: unknown,
   options?: OfflineApiOptions
@@ -193,7 +193,7 @@ export async function offlinePost<T = any>(
 /**
  * Convenience wrapper for PUT requests
  */
-export async function offlinePut<T = any>(
+export async function offlinePut<T = unknown>(
   url: string,
   body: unknown,
   options?: OfflineApiOptions
@@ -204,7 +204,7 @@ export async function offlinePut<T = any>(
 /**
  * Convenience wrapper for PATCH requests
  */
-export async function offlinePatch<T = any>(
+export async function offlinePatch<T = unknown>(
   url: string,
   body: unknown,
   options?: OfflineApiOptions
@@ -215,7 +215,7 @@ export async function offlinePatch<T = any>(
 /**
  * Convenience wrapper for DELETE requests
  */
-export async function offlineDelete<T = any>(
+export async function offlineDelete<T = unknown>(
   url: string,
   options?: OfflineApiOptions
 ): Promise<ApiResponse<T>> {
@@ -226,7 +226,7 @@ export async function offlineDelete<T = any>(
  * Convenience wrapper for GET requests
  * Note: GET requests don't queue - they rely on service worker cache
  */
-export async function offlineGet<T = any>(
+export async function offlineGet<T = unknown>(
   url: string,
   options?: Omit<OfflineApiOptions, 'queueIfOffline'>
 ): Promise<ApiResponse<T>> {

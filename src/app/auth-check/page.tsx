@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
+import Link from 'next/link';
 
 export default async function AuthCheckPage() {
   const supabase = await createClient();
@@ -74,9 +74,9 @@ export default async function AuthCheckPage() {
             <a href="/dashboard" className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
               User Dashboard
             </a>
-            <a href="/" className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+            <Link href="/" className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
               Home
-            </a>
+            </Link>
           </div>
         </div>
       </div>

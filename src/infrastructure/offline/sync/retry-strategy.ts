@@ -181,8 +181,8 @@ export function isRetryableError(error: unknown): boolean {
     }
 
     // HTTP status codes
-    if ('status' in error && typeof (error as any).status === 'number') {
-      const status = (error as any).status;
+    if ('status' in error && typeof (error as {status?: unknown}).status === 'number') {
+      const status = (error as {status: number}).status;
       // Retry on 5xx server errors and 429 rate limit
       return status >= 500 || status === 429;
     }
@@ -197,8 +197,8 @@ export function isRetryableError(error: unknown): boolean {
 export function shouldAbortRetry(error: unknown): boolean {
   if (error instanceof Error) {
     // Check for client errors that shouldn't be retried
-    if ('status' in error && typeof (error as any).status === 'number') {
-      const status = (error as any).status;
+    if ('status' in error && typeof (error as {status?: unknown}).status === 'number') {
+      const status = (error as {status: number}).status;
       // Don't retry 4xx client errors (except 429 rate limit)
       if (status >= 400 && status < 500 && status !== 429) {
         return true;

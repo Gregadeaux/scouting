@@ -18,7 +18,7 @@ interface EventTeamQueryResult {
     country: string | null;
     start_date: string;
     end_date: string;
-  };
+  }[] | null;
 }
 
 /**
@@ -82,10 +82,14 @@ export async function GET(
     }
 
     // Transform the data to flatten the events object
-    const events = (data as EventTeamQueryResult[])?.map((item) => ({
-      ...item.events,
-      team_registered_at: item.created_at
-    })) || [];
+    const events = data?.map((item) => {
+      const eventData = item.events?.[0];
+      if (!eventData) return null;
+      return {
+        ...eventData,
+        team_registered_at: item.created_at
+      };
+    }).filter((event): event is NonNullable<typeof event> => event !== null) || [];
 
     return NextResponse.json({
       success: true,

@@ -3,8 +3,9 @@
  * Defines how to merge TBA data with local database records
  */
 
-import type { Team, Event, EventType, MatchSchedule } from '@/types';
+import type { Team, Event, MatchSchedule } from '@/types';
 import type { TBATeam, TBAEvent, TBAMatch } from '@/types/tba';
+import { mapTBAEventType } from '@/lib/utils/tba';
 
 /**
  * Generic merge strategy interface
@@ -49,7 +50,7 @@ export class EventMergeStrategy implements IMergeStrategy<Event, TBAEvent> {
       event_name: tba.name,
       event_code: tba.event_code,
       year: tba.year,
-      event_type: this.mapEventType(tba.event_type),
+      event_type: mapTBAEventType(tba.event_type),
       district: tba.district?.abbreviation || undefined,
       week: tba.week || undefined,
       city: tba.city,
@@ -60,25 +61,6 @@ export class EventMergeStrategy implements IMergeStrategy<Event, TBAEvent> {
       // Preserve website from local if TBA doesn't have it
       // website: tba.website || local?.website,
     };
-  }
-
-  /**
-   * Map TBA event type codes to our EventType enum
-   * See: https://www.thebluealliance.com/apidocs/v3
-   */
-  private mapEventType(tbaEventType: number): EventType {
-    const mapping: Record<number, EventType> = {
-      0: 'regional',
-      1: 'district',
-      2: 'district_championship',
-      3: 'championship_subdivision',
-      4: 'championship',
-      5: 'district_championship', // District Championship Division
-      6: 'offseason', // Festival of Champions
-      99: 'offseason',
-      100: 'offseason', // Preseason
-    };
-    return mapping[tbaEventType] || 'offseason';
   }
 }
 

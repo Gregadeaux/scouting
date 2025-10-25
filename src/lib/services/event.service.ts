@@ -9,6 +9,7 @@ import type {
   Event,
   Team,
   MatchSchedule,
+  MatchScouting,
 } from '@/types';
 import type {
   EventDetail,
@@ -26,6 +27,7 @@ import type { IMatchRepository } from '@/lib/repositories/match.repository';
 import type { IScoutingDataRepository } from '@/lib/repositories/scouting-data.repository';
 import type { IImportJobRepository } from '@/lib/repositories/import-job.repository';
 import type { EventMergeStrategy } from '@/lib/strategies/merge-strategies';
+import { mapTBAEventType } from '@/lib/utils/tba';
 
 /**
  * Event Service Interface
@@ -312,12 +314,12 @@ export class EventService implements IEventService {
    */
   private calculateCoverageByCompLevel(
     matches: MatchSchedule[],
-    scoutingData: unknown[]
+    scoutingData: MatchScouting[]
   ): ScoutingCoverageStats['coverage_by_comp_level'] {
     const scoutedMatchIds = new Set(scoutingData.map((d) => d.match_id));
 
     const levels = ['qm', 'ef', 'qf', 'sf', 'f'] as const;
-    const coverage: Record<string, unknown> = {};
+    const coverage: Partial<ScoutingCoverageStats['coverage_by_comp_level']> = {};
 
     for (const level of levels) {
       const levelMatches = matches.filter((m) => m.comp_level === level);
@@ -333,7 +335,7 @@ export class EventService implements IEventService {
       };
     }
 
-    return coverage;
+    return coverage as ScoutingCoverageStats['coverage_by_comp_level'];
   }
 
   /**
@@ -559,10 +561,11 @@ export class EventService implements IEventService {
       // Create the event
       return await this.eventRepo.upsert(eventData);
     } catch (error: unknown) {
-      if (error.name === 'TBAApiError') {
+      if (error && typeof error === 'object' && 'name' in error && error.name === 'TBAApiError') {
         throw error;
       }
-      throw new Error(`Failed to import event from TBA: ${error.message}`);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Failed to import event from TBA: ${errorMsg}`);
     }
   }
 
@@ -575,7 +578,7 @@ export class EventService implements IEventService {
       event_name: tbaEvent.name,
       event_code: tbaEvent.event_code,
       year: tbaEvent.year,
-      event_type: tbaEvent.event_type as any,
+      event_type: mapTBAEventType(tbaEvent.event_type),
       district: tbaEvent.district?.key,
       week: tbaEvent.week ?? undefined,
       city: tbaEvent.city ?? undefined,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getImportService } from '@/lib/services';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import { requireAdmin } from '@/lib/api/auth-middleware';
+import { getErrorMessage } from '@/lib/utils/error';
 
 /**
  * GET /api/admin/import-jobs/[jobId]
@@ -36,7 +37,7 @@ export async function GET(
   } catch (error: unknown) {
     console.error('[API] Get import status error:', error);
 
-    if (error.name === 'EntityNotFoundError') {
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'EntityNotFoundError') {
       return errorResponse('Import job not found', 404);
     }
 
@@ -75,13 +76,16 @@ export async function DELETE(
   } catch (error: unknown) {
     console.error('[API] Cancel import error:', error);
 
-    if (error.name === 'EntityNotFoundError') {
-      return errorResponse('Import job not found', 404);
-    }
+    if (error && typeof error === 'object' && 'name' in error) {
+      if (error.name === 'EntityNotFoundError') {
+        return errorResponse('Import job not found', 404);
+      }
 
-    if (error.name === 'ValidationError') {
-      // Job is in a state that cannot be cancelled
-      return errorResponse(error.message, 400);
+      if (error.name === 'ValidationError') {
+        // Job is in a state that cannot be cancelled
+        const errorMsg = 'message' in error ? String(error.message) : 'Validation error';
+        return errorResponse(errorMsg, 400);
+      }
     }
 
     return errorResponse('Failed to cancel import job', 500);
@@ -139,7 +143,7 @@ export async function PATCH(
   } catch (error: unknown) {
     console.error('[API] Retry import error:', error);
 
-    if (error.name === 'EntityNotFoundError') {
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'EntityNotFoundError') {
       return errorResponse('Import job not found', 404);
     }
 

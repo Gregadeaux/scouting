@@ -11,7 +11,7 @@
  * - notes (DTO) ↔ scouting_notes (DB)
  */
 
-import type { PitScouting } from '@/types';
+import type { PitScouting, JSONBData, RobotCapabilities2025, AutonomousCapabilities2025 } from '@/types';
 import type {
   CreatePitScoutingDTO,
   UpdatePitScoutingDTO,
@@ -40,8 +40,8 @@ export class PitScoutingMapper {
       scouted_by: dto.scout_id, // DTO → DB mapping
 
       // Season-specific JSONB capabilities (cast to JSONBData for database storage)
-      robot_capabilities: dto.robot_capabilities as any,
-      autonomous_capabilities: dto.autonomous_capabilities as any,
+      robot_capabilities: dto.robot_capabilities as unknown as JSONBData,
+      autonomous_capabilities: dto.autonomous_capabilities as unknown as JSONBData,
 
       // Physical robot characteristics
       drive_train: dto.drive_train,
@@ -82,10 +82,10 @@ export class PitScoutingMapper {
 
     // Season-specific JSONB capabilities (cast to JSONBData for database storage)
     if (dto.robot_capabilities !== undefined) {
-      entity.robot_capabilities = dto.robot_capabilities as any;
+      entity.robot_capabilities = dto.robot_capabilities as unknown as JSONBData;
     }
     if (dto.autonomous_capabilities !== undefined) {
-      entity.autonomous_capabilities = dto.autonomous_capabilities as any;
+      entity.autonomous_capabilities = dto.autonomous_capabilities as unknown as JSONBData;
     }
 
     // Physical robot characteristics
@@ -140,8 +140,8 @@ export class PitScoutingMapper {
       scout_id: entity.scouted_by, // DB → DTO mapping
 
       // Season-specific JSONB capabilities (cast from JSONBData to specific types)
-      robot_capabilities: entity.robot_capabilities as any,
-      autonomous_capabilities: entity.autonomous_capabilities as any,
+      robot_capabilities: entity.robot_capabilities as unknown as RobotCapabilities2025 | undefined,
+      autonomous_capabilities: entity.autonomous_capabilities as unknown as AutonomousCapabilities2025 | undefined,
 
       // Physical robot characteristics
       drive_train: entity.drive_train,

@@ -174,7 +174,7 @@ export function successResponse<T>(data: T, status = 200): NextResponse {
 export function errorResponse(
   message: string,
   status = 400,
-  details?: any
+  details?: unknown
 ): NextResponse {
   return NextResponse.json(
     { success: false, error: message, details },
@@ -191,7 +191,7 @@ export function errorResponse(
  */
 export async function validateRequestBody<T>(
   request: NextRequest,
-  schema: (data: any) => T | null
+  schema: (data: unknown) => T | null
 ): Promise<{ data: T } | NextResponse> {
   try {
     const body = await request.json();

@@ -180,7 +180,10 @@ export class OfflineErrorBoundary extends React.Component<
   },
   { error: Error | null }
 > {
-  constructor(props: unknown) {
+  constructor(props: {
+    children: ReactNode;
+    fallback?: React.ComponentType<{ error: Error; reset: () => void }>;
+  }) {
     super(props);
     this.state = { error: null };
   }

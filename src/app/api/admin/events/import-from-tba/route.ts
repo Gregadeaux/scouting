@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getEventService, getImportService } from '@/lib/services';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import { requireAdmin } from '@/lib/api/auth-middleware';
+import { getErrorMessage } from '@/lib/utils/error';
 
 /**
  * POST /api/admin/events/import-from-tba
@@ -57,10 +58,11 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     console.error('[API] Import event from TBA error:', error);
 
-    if (error.name === 'TBAApiError') {
-      return errorResponse(`TBA API error: ${error.message}`, 502);
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'TBAApiError') {
+      const errorMsg = 'message' in error ? String(error.message) : 'Unknown TBA API error';
+      return errorResponse(`TBA API error: ${errorMsg}`, 502);
     }
 
-    return errorResponse(error.message || 'Failed to import event', 500);
+    return errorResponse(getErrorMessage(error) || 'Failed to import event', 500);
   }
 }

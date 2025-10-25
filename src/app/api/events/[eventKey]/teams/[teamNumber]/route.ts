@@ -8,6 +8,7 @@ import { TeamRepository } from '@/lib/repositories/team.repository';
 import { EventRepository } from '@/lib/repositories/event.repository';
 import { MatchRepository } from '@/lib/repositories/match.repository';
 import { ScoutingDataRepository } from '@/lib/repositories/scouting-data.repository';
+import { getErrorMessage } from '@/lib/utils/error';
 import { createTeamMergeStrategy } from '@/lib/strategies/merge-strategies';
 
 export async function GET(
@@ -66,6 +67,6 @@ export async function GET(
     return successResponse(teamDetail);
   } catch (error: unknown) {
     console.error('Error fetching team details:', error);
-    return errorResponse(error.message || 'Failed to fetch team details', 500);
+    return errorResponse(getErrorMessage(error) || 'Failed to fetch team details', 500);
   }
 }

@@ -37,7 +37,7 @@
 import { useState, useCallback, useTransition } from 'react';
 import { offlineApi, type ApiResponse } from '../api';
 
-export interface OptimisticSubmissionOptions<T = any> {
+export interface OptimisticSubmissionOptions<T = unknown> {
   /**
    * API endpoint URL
    */
@@ -79,7 +79,7 @@ export interface OptimisticSubmissionOptions<T = any> {
   autoRollback?: boolean;
 }
 
-export interface UseOptimisticSubmissionResult<T = any> {
+export interface UseOptimisticSubmissionResult<T = unknown> {
   /**
    * Submit data with optimistic update
    */
@@ -130,7 +130,7 @@ export interface UseOptimisticSubmissionResult<T = any> {
  *
  * @returns Submission function and state
  */
-export function useOptimisticSubmission<T = any>(): UseOptimisticSubmissionResult<T> {
+export function useOptimisticSubmission<T = unknown>(): UseOptimisticSubmissionResult<T> {
   const [isPending, startTransition] = useTransition();
   const [optimisticData, setOptimisticData] = useState<T | null>(null);
   const [serverData, setServerData] = useState<T | null>(null);

@@ -73,7 +73,7 @@ export interface FieldDefinition {
   key: string;
   label: string;
   type: FieldType;
-  defaultValue: any;
+  defaultValue: unknown;
   required?: boolean;
   min?: number;
   max?: number;

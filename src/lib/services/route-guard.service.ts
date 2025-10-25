@@ -171,7 +171,8 @@ export function getAccessibleRoutes(role: UserRole): string[] {
   const routes: string[] = [];
 
   for (const [route, requiredRoles] of Object.entries(ROUTE_GUARDS)) {
-    if (requiredRoles.includes(role)) {
+    // Type assertion needed because ROUTE_GUARDS uses 'as const'
+    if ((requiredRoles as readonly UserRole[]).includes(role)) {
       routes.push(route);
     }
   }

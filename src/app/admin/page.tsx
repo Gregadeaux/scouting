@@ -1,6 +1,6 @@
 import { createServiceClient } from '@/lib/supabase/server';
 import { DashboardView } from '@/components/admin/DashboardView';
-import { DashboardStats } from '@/types/admin';
+import { DashboardStats, ActivityItem } from '@/types/admin';
 
 // Types for Supabase query results
 interface RecentTeam {
@@ -119,11 +119,11 @@ async function getStats(): Promise<DashboardStats> {
     })),
     ...(recentAuditLog || []).map((log: RecentAuditLog) => ({
       id: `audit-${log.id}`,
-      type: log.action_type,
+      type: log.action_type as ActivityItem['type'],
       description: log.description,
       timestamp: log.created_at || new Date().toISOString(),
     })),
-  ];
+  ] as ActivityItem[];
 
   // Sort by timestamp (newest first) and take top 10
   const recentActivity = activities
