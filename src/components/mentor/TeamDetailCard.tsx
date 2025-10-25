@@ -34,7 +34,7 @@ export function TeamDetailCard({ team }: TeamDetailCardProps) {
             </CardTitle>
             {team.team_nickname && team.team_name !== team.team_nickname && (
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                "{team.team_nickname}"
+                &quot;{team.team_nickname}&quot;
               </p>
             )}
           </div>

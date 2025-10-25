@@ -67,13 +67,13 @@ export default function VerifyEmailPage() {
           </h1>
 
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            We've sent a verification email to your inbox. Please click the link in the
+            We&apos;ve sent a verification email to your inbox. Please click the link in the
             email to verify your account and complete registration.
           </p>
 
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
             <p className="text-sm text-blue-800 dark:text-blue-200">
-              <strong>Important:</strong> Check your spam folder if you don't see the email
+              <strong>Important:</strong> Check your spam folder if you don&apos;t see the email
               within a few minutes.
             </p>
           </div>

@@ -3,8 +3,6 @@
  * Additional types for admin functionality not covered in main types
  */
 
-import { Event, Team, MatchSchedule, MatchScouting, SeasonConfig } from './index';
-
 // ============================================================================
 // SCOUTER MANAGEMENT TYPES
 // ============================================================================

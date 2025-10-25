@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       },
       201
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API] Import event from TBA error:', error);
 
     if (error.name === 'TBAApiError') {

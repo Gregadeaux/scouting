@@ -215,7 +215,7 @@ export default function ComponentShowcase() {
             />
           </div>
           <p className="mt-2 text-sm text-gray-500">
-            First example has delete confirmation, second doesn't
+            First example has delete confirmation, second doesn&apos;t
           </p>
         </CardContent>
       </Card>

@@ -69,7 +69,7 @@ export class AuthTabSync {
   /**
    * Broadcast an auth event to all other tabs
    */
-  broadcast(type: AuthSyncEventType, data?: any): void {
+  broadcast(type: AuthSyncEventType, data?: unknown): void {
     if (!this.channel || !this.isSupported) {
       return;
     }

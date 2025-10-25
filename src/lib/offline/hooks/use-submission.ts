@@ -156,7 +156,7 @@ export function useSubmission(id?: string): UseSubmissionResult {
    * Listen for sync events that might affect this submission
    */
   useEffect(() => {
-    const handleSyncEvent = (event: any) => {
+    const handleSyncEvent = (event: unknown) => {
       // Refresh if this submission was affected
       if (
         event.submissionId === id ||

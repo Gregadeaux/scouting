@@ -38,7 +38,7 @@ export async function GET(
       team_count: sortedTeams.length,
       teams: sortedTeams,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API] Get event teams error:', error);
 
     if (error.name === 'EntityNotFoundError') {

@@ -88,7 +88,7 @@ export interface TBAMatch {
   post_result_time?: number; // Unix timestamp when results were posted
 
   // Score breakdown (game-specific, optional)
-  score_breakdown?: any; // This varies by year/game
+  score_breakdown?: Record<string, unknown>; // This varies by year/game
 
   // Video information
   videos?: Array<{
@@ -175,7 +175,7 @@ export class TBAApiError extends Error {
     message: string,
     public statusCode?: number,
     public endpoint?: string,
-    public details?: any
+    public details?: unknown
   ) {
     super(message);
     this.name = 'TBAApiError';
@@ -209,36 +209,36 @@ export class TBARateLimitError extends TBAApiError {
 }
 
 // Type guards
-export function isTBAEvent(data: any): data is TBAEvent {
+export function isTBAEvent(data: unknown): data is TBAEvent {
   return (
     typeof data === 'object' &&
     data !== null &&
-    typeof data.key === 'string' &&
-    typeof data.name === 'string' &&
-    typeof data.event_code === 'string' &&
-    typeof data.year === 'number'
+    typeof (data as TBAEvent).key === 'string' &&
+    typeof (data as TBAEvent).name === 'string' &&
+    typeof (data as TBAEvent).event_code === 'string' &&
+    typeof (data as TBAEvent).year === 'number'
   );
 }
 
-export function isTBATeam(data: any): data is TBATeam {
+export function isTBATeam(data: unknown): data is TBATeam {
   return (
     typeof data === 'object' &&
     data !== null &&
-    typeof data.key === 'string' &&
-    typeof data.team_number === 'number' &&
-    typeof data.nickname === 'string'
+    typeof (data as TBATeam).key === 'string' &&
+    typeof (data as TBATeam).team_number === 'number' &&
+    typeof (data as TBATeam).nickname === 'string'
   );
 }
 
-export function isTBAMatch(data: any): data is TBAMatch {
+export function isTBAMatch(data: unknown): data is TBAMatch {
   return (
     typeof data === 'object' &&
     data !== null &&
-    typeof data.key === 'string' &&
-    typeof data.comp_level === 'string' &&
-    typeof data.match_number === 'number' &&
-    data.alliances &&
-    data.alliances.red &&
-    data.alliances.blue
+    typeof (data as TBAMatch).key === 'string' &&
+    typeof (data as TBAMatch).comp_level === 'string' &&
+    typeof (data as TBAMatch).match_number === 'number' &&
+    !!(data as TBAMatch).alliances &&
+    !!(data as TBAMatch).alliances.red &&
+    !!(data as TBAMatch).alliances.blue
   );
 }

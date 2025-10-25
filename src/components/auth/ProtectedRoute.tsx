@@ -137,7 +137,7 @@ export function UnauthorizedPage() {
           Access Denied
         </h2>
         <p className="text-gray-600 dark:text-gray-400 mb-8">
-          You don't have permission to access this page. Please contact your team mentor or
+          You don&apos;t have permission to access this page. Please contact your team mentor or
           administrator if you believe this is an error.
         </p>
         <button

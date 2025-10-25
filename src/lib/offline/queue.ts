@@ -51,7 +51,7 @@ function openDB(): Promise<IDBDatabase> {
 export async function queueSubmission(
   url: string,
   method: 'POST' | 'PUT' | 'PATCH' | 'DELETE',
-  body: any,
+  body: unknown,
   headers?: Record<string, string>
 ): Promise<string> {
   const db = await openDB();

@@ -82,7 +82,7 @@ export function validateImageFile(file: File): ImageValidationResult {
   }
 
   // Check MIME type
-  if (!ALLOWED_MIME_TYPES.includes(file.type as any)) {
+  if (!ALLOWED_MIME_TYPES.includes(file.type as (typeof ALLOWED_MIME_TYPES)[number])) {
     return {
       valid: false,
       error: `File type "${file.type}" is not allowed. Allowed types: JPEG, PNG, WebP, GIF`,
@@ -113,7 +113,7 @@ function generateUniqueFilename(originalFilename: string): string {
   const extension = originalFilename.split('.').pop()?.toLowerCase() || 'jpg';
 
   // Validate extension
-  if (!ALLOWED_EXTENSIONS.includes(extension as any)) {
+  if (!ALLOWED_EXTENSIONS.includes(extension as (typeof ALLOWED_EXTENSIONS)[number])) {
     throw new StorageError(
       `Invalid file extension: ${extension}`,
       'INVALID_EXTENSION'
@@ -296,7 +296,7 @@ export async function deleteRobotPhoto(url: string): Promise<void> {
       throw new StorageError(
         `Delete failed: ${error.message}`,
         error.name,
-        (error as any).statusCode
+        (error as Error & { statusCode?: number }).statusCode
       );
     }
   } catch (error) {

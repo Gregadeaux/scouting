@@ -396,7 +396,7 @@ export class MatchService implements IMatchService {
   /**
    * Logging utility
    */
-  private log(message: string, data?: any): void {
+  private log(message: string, data?: unknown): void {
     console.log(`[MatchService] ${message}`, data || '');
   }
 }

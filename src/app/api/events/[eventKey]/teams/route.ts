@@ -85,8 +85,8 @@ export async function GET(
     // Extract teams from the joined data
     // Supabase returns data in format: [{ teams: {...} }, { teams: {...} }]
     const teams = data
-      .map((row: any) => row.teams)
-      .filter((team: any) => team !== null) as Team[];
+      .map((row: { teams: Team | null }) => row.teams)
+      .filter((team): team is Team => team !== null);
 
     return successResponse(teams);
   } catch (error) {

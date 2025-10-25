@@ -52,7 +52,7 @@ export class RepositoryError extends Error {
   constructor(
     message: string,
     public readonly code?: string,
-    public readonly details?: any
+    public readonly details?: unknown
   ) {
     super(message);
     this.name = 'RepositoryError';
@@ -63,7 +63,7 @@ export class RepositoryError extends Error {
  * Error thrown when an entity is not found
  */
 export class EntityNotFoundError extends RepositoryError {
-  constructor(entityName: string, id: any) {
+  constructor(entityName: string, id: unknown) {
     super(`${entityName} with ID ${id} not found`, 'ENTITY_NOT_FOUND', { entityName, id });
     this.name = 'EntityNotFoundError';
   }
@@ -73,7 +73,7 @@ export class EntityNotFoundError extends RepositoryError {
  * Error thrown when a duplicate entity would be created
  */
 export class DuplicateEntityError extends RepositoryError {
-  constructor(entityName: string, field: string, value: any) {
+  constructor(entityName: string, field: string, value: unknown) {
     super(
       `${entityName} with ${field} = ${value} already exists`,
       'DUPLICATE_ENTITY',
@@ -87,7 +87,7 @@ export class DuplicateEntityError extends RepositoryError {
  * Error thrown when database operation fails
  */
 export class DatabaseOperationError extends RepositoryError {
-  constructor(operation: string, details?: any) {
+  constructor(operation: string, details?: unknown) {
     super(`Database operation failed: ${operation}`, 'DATABASE_ERROR', details);
     this.name = 'DatabaseOperationError';
   }

@@ -45,7 +45,7 @@ export default async function TeamDetailPage({
           <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
             <h1 className="text-2xl font-bold text-red-900 mb-2">Access Denied</h1>
             <p className="text-red-700">
-              You don't have permission to view team details.
+              You don&apos;t have permission to view team details.
             </p>
             <a
               href="/dashboard"

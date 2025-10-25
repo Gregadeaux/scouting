@@ -81,7 +81,7 @@ export class TBAApiService implements ITBAApiService {
 
   // Rate limiting
   private requestTimestamps: number[] = [];
-  private requestQueue: Array<() => Promise<any>> = [];
+  private requestQueue: Array<() => Promise<unknown>> = [];
   private isProcessingQueue = false;
 
   constructor(config?: TBAApiConfig) {
@@ -452,7 +452,7 @@ export class TBAApiService implements ITBAApiService {
   /**
    * Logging utility
    */
-  private log(message: string, data?: any): void {
+  private log(message: string, data?: unknown): void {
     if (this.enableLogging) {
       console.log(`[TBAApiService] ${message}`, data || '');
     }

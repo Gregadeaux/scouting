@@ -312,12 +312,12 @@ export class EventService implements IEventService {
    */
   private calculateCoverageByCompLevel(
     matches: MatchSchedule[],
-    scoutingData: any[]
+    scoutingData: unknown[]
   ): ScoutingCoverageStats['coverage_by_comp_level'] {
     const scoutedMatchIds = new Set(scoutingData.map((d) => d.match_id));
 
     const levels = ['qm', 'ef', 'qf', 'sf', 'f'] as const;
-    const coverage: any = {};
+    const coverage: Record<string, unknown> = {};
 
     for (const level of levels) {
       const levelMatches = matches.filter((m) => m.comp_level === level);
@@ -558,7 +558,7 @@ export class EventService implements IEventService {
       this.log(`Importing new event: ${eventKey}`);
       // Create the event
       return await this.eventRepo.upsert(eventData);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.name === 'TBAApiError') {
         throw error;
       }
@@ -589,7 +589,7 @@ export class EventService implements IEventService {
   /**
    * Logging utility
    */
-  private log(message: string, data?: any): void {
+  private log(message: string, data?: unknown): void {
     console.log(`[EventService] ${message}`, data || '');
   }
 }

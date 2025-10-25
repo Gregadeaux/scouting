@@ -59,7 +59,7 @@ export function TBAImportEventModal({ onSuccess }: TBAImportEventModalProps) {
       } else {
         setError(data.error || 'Failed to import event');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError('Network error. Please try again.');
     } finally {
       setIsLoading(false);
@@ -90,7 +90,7 @@ export function TBAImportEventModal({ onSuccess }: TBAImportEventModalProps) {
         <DialogHeader>
           <DialogTitle>Import Event from The Blue Alliance</DialogTitle>
           <DialogDescription>
-            Enter a TBA event key (e.g., "2025txaus") to import event details, teams, matches, and results
+            Enter a TBA event key (e.g., &quot;2025txaus&quot;) to import event details, teams, matches, and results
           </DialogDescription>
         </DialogHeader>
 

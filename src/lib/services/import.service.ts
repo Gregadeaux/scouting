@@ -643,7 +643,7 @@ export class ImportService implements IImportService {
   /**
    * Logging utility
    */
-  private log(message: string, data?: any): void {
+  private log(message: string, data?: unknown): void {
     console.log(`[ImportService] ${message}`, data || '');
   }
 }

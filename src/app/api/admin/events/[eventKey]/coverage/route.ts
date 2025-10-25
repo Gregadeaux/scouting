@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getEventService } from '@/lib/services';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import { requireAdmin } from '@/lib/api/auth-middleware';
+import { getErrorMessage } from '@/lib/utils/error';
 
 /**
  * GET /api/admin/events/[eventKey]/coverage
@@ -31,13 +32,13 @@ export async function GET(
     const coverage = await eventService.getEventCoverageStats(eventKey);
 
     return successResponse(coverage);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API] Get coverage stats error:', error);
 
-    if (error.name === 'EntityNotFoundError') {
+    if (error instanceof Error && error.name === 'EntityNotFoundError') {
       return errorResponse('Event not found', 404);
     }
 
-    return errorResponse('Failed to fetch coverage statistics', 500);
+    return errorResponse(getErrorMessage(error), 500);
   }
 }

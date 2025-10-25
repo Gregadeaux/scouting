@@ -23,7 +23,7 @@ export interface FieldConfig {
 interface FieldRendererProps {
   field: FieldConfig;
   value: any;
-  onChange: (value: any) => void;
+  onChange: (value: unknown) => void;
   error?: string;
   className?: string;
 }

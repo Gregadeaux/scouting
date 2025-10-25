@@ -92,7 +92,7 @@ export function EventTeamRoster({ teams, eventKey }: EventTeamRosterProps) {
                   <>
                     <Search className="h-12 w-12 mx-auto mb-3 opacity-50" />
                     <p className="text-lg font-medium text-gray-600 dark:text-gray-400">
-                      No teams match "{search}"
+                      No teams match &quot;{search}&quot;
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
                       Try adjusting your search terms

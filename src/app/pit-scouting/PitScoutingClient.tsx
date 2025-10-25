@@ -156,7 +156,7 @@ export function PitScoutingClient({ userId }: Props) {
   };
 
   // Handle robot capabilities change
-  const handleRobotCapabilitiesChange = (key: string, value: any) => {
+  const handleRobotCapabilitiesChange = (key: string, value: unknown) => {
     setFormState((prev) => ({
       ...prev,
       robotCapabilities: { ...prev.robotCapabilities, [key]: value },
@@ -164,7 +164,7 @@ export function PitScoutingClient({ userId }: Props) {
   };
 
   // Handle autonomous capabilities change
-  const handleAutonomousCapabilitiesChange = (key: string, value: any) => {
+  const handleAutonomousCapabilitiesChange = (key: string, value: unknown) => {
     setFormState((prev) => ({
       ...prev,
       autonomousCapabilities: { ...prev.autonomousCapabilities, [key]: value },

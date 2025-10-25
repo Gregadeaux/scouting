@@ -3,6 +3,7 @@ import { getEventService } from '@/lib/services';
 import { createServiceClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import { requireAdmin } from '@/lib/api/auth-middleware';
+import { getErrorMessage } from '@/lib/utils/error';
 
 /**
  * GET /api/admin/events/[eventKey]
@@ -52,14 +53,14 @@ export async function GET(
     const eventDetail = await eventService.getEventDetail(eventKey);
 
     return successResponse(eventDetail);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API] Get event detail error:', error);
 
-    if (error.name === 'EntityNotFoundError') {
+    if (error instanceof Error && error.name === 'EntityNotFoundError') {
       return errorResponse('Event not found', 404);
     }
 
-    return errorResponse('Failed to fetch event details', 500);
+    return errorResponse(getErrorMessage(error), 500);
   }
 }
 
@@ -128,18 +129,20 @@ export async function PUT(
     }
 
     return successResponse(data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API] Update/refresh event error:', error);
 
-    if (error.name === 'EntityNotFoundError') {
-      return errorResponse('Event not found', 404);
+    if (error instanceof Error) {
+      if (error.name === 'EntityNotFoundError') {
+        return errorResponse('Event not found', 404);
+      }
+
+      if (error.name === 'TBAApiError') {
+        return errorResponse(`TBA API error: ${error.message}`, 502);
+      }
     }
 
-    if (error.name === 'TBAApiError') {
-      return errorResponse(`TBA API error: ${error.message}`, 502);
-    }
-
-    return errorResponse('Failed to update event', 500);
+    return errorResponse(getErrorMessage(error), 500);
   }
 }
 
@@ -193,8 +196,8 @@ export async function DELETE(
     }
 
     return successResponse({ message: 'Event deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API] Delete event error:', error);
-    return errorResponse('Failed to delete event', 500);
+    return errorResponse(getErrorMessage(error), 500);
   }
 }

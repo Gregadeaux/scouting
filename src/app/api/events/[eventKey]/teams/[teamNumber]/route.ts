@@ -64,7 +64,7 @@ export async function GET(
     }
 
     return successResponse(teamDetail);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching team details:', error);
     return errorResponse(error.message || 'Failed to fetch team details', 500);
   }

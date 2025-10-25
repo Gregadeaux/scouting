@@ -3,6 +3,7 @@ import { getImportService } from '@/lib/services';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import type { ImportOptions } from '@/lib/services';
 import { requireAdmin } from '@/lib/api/auth-middleware';
+import { getErrorMessage } from '@/lib/utils/error';
 
 /**
  * POST /api/admin/events/[eventKey]/import-tba
@@ -34,7 +35,7 @@ export async function POST(
     let options: ImportOptions;
     try {
       options = await request.json();
-    } catch (parseError) {
+    } catch {
       return errorResponse('Invalid JSON in request body', 400);
     }
 
@@ -70,26 +71,28 @@ export async function POST(
       },
       202
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API] Start import error:', error);
 
-    // Handle TBA API errors
-    if (error.name === 'TBAApiError') {
-      return errorResponse(`TBA API error: ${error.message}`, 502);
-    }
+    if (error instanceof Error) {
+      // Handle TBA API errors
+      if (error.name === 'TBAApiError') {
+        return errorResponse(`TBA API error: ${error.message}`, 502);
+      }
 
-    // Handle validation errors
-    if (error.name === 'ValidationError') {
-      return errorResponse(error.message, 400);
-    }
+      // Handle validation errors
+      if (error.name === 'ValidationError') {
+        return errorResponse(error.message, 400);
+      }
 
-    // Handle entity not found (event doesn't exist)
-    if (error.name === 'EntityNotFoundError') {
-      return errorResponse(`Event not found: ${error.message}`, 404);
+      // Handle entity not found (event doesn't exist)
+      if (error.name === 'EntityNotFoundError') {
+        return errorResponse(`Event not found: ${error.message}`, 404);
+      }
     }
 
     // Generic error
-    return errorResponse('Failed to start import job', 500);
+    return errorResponse(getErrorMessage(error), 500);
   }
 }
 
@@ -133,8 +136,8 @@ export async function GET(
       latest_job: sortedJobs[0],
       jobs: sortedJobs,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API] Get import history error:', error);
-    return errorResponse('Failed to fetch import job history', 500);
+    return errorResponse(getErrorMessage(error), 500);
   }
 }

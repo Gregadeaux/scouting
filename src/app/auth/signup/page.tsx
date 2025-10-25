@@ -44,7 +44,7 @@ export default function SignupPage() {
 
         <div className="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
           <p className="mb-2">
-            By creating an account, you agree to follow your team's code of conduct
+            By creating an account, you agree to follow your team&apos;s code of conduct
             and FRC gracious professionalism values.
           </p>
           <p>

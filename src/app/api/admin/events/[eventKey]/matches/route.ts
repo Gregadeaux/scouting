@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getMatchService } from '@/lib/services';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import { requireAdmin } from '@/lib/api/auth-middleware';
+import { getErrorMessage } from '@/lib/utils/error';
 
 /**
  * GET /api/admin/events/[eventKey]/matches
@@ -66,13 +67,13 @@ export async function GET(
       },
       matches,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API] Get event matches error:', error);
 
-    if (error.name === 'EntityNotFoundError') {
+    if (error instanceof Error && error.name === 'EntityNotFoundError') {
       return errorResponse('Event not found', 404);
     }
 
-    return errorResponse('Failed to fetch matches', 500);
+    return errorResponse(getErrorMessage(error), 500);
   }
 }

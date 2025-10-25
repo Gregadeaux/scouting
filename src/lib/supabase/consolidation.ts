@@ -359,7 +359,7 @@ export function consolidateMatchScoutingObservations(
  * Queries the database and consolidates multiple scout observations
  */
 export async function getConsolidatedMatchData(
-  supabase: any,
+  supabase: ReturnType<typeof import('@supabase/supabase-js').createClient>,
   matchId: number,
   teamNumber: number
 ): Promise<ConsolidatedMatchScouting | null> {

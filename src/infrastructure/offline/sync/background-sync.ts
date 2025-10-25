@@ -471,7 +471,7 @@ export class BackgroundSyncCoordinator implements ISyncCoordinator {
       );
     }
 
-    let currentSubmission = syncingResult.value;
+    const currentSubmission = syncingResult.value;
     const updateResult = await this.repository.update(currentSubmission);
     if (!updateResult.ok) {
       console.error('Failed to update submission as syncing:', updateResult.error);

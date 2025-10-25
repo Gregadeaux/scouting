@@ -13,7 +13,7 @@ import { successResponse, errorResponse } from '@/lib/api/auth-middleware';
  * Signs out the current user
  * Returns: { success: true, data: { success: true } }
  */
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const supabase = await createClient();
 

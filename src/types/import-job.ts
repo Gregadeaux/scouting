@@ -115,7 +115,7 @@ export interface ImportError {
   item_key: string; // e.g., team key or match key
   error_type: 'validation' | 'duplicate' | 'missing_dependency' | 'api_error' | 'unknown';
   message: string;
-  details?: any;
+  details?: Record<string, unknown>;
 }
 
 /**
@@ -125,7 +125,7 @@ export interface ImportWarning {
   item_key: string;
   warning_type: 'data_mismatch' | 'partial_data' | 'deprecated_field' | 'unknown';
   message: string;
-  details?: any;
+  details?: Record<string, unknown>;
 }
 
 /**
@@ -162,14 +162,14 @@ export const DEFAULT_IMPORT_OPTIONS: ImportOptions = {
 };
 
 // Type guards
-export function isImportJob(data: any): data is ImportJob {
+export function isImportJob(data: unknown): data is ImportJob {
   return (
     typeof data === 'object' &&
     data !== null &&
-    typeof data.job_id === 'string' &&
-    typeof data.event_key === 'string' &&
-    ['teams', 'matches', 'full', 'results'].includes(data.job_type) &&
-    ['pending', 'processing', 'completed', 'failed', 'cancelled'].includes(data.status)
+    typeof (data as ImportJob).job_id === 'string' &&
+    typeof (data as ImportJob).event_key === 'string' &&
+    ['teams', 'matches', 'full', 'results'].includes((data as ImportJob).job_type) &&
+    ['pending', 'processing', 'completed', 'failed', 'cancelled'].includes((data as ImportJob).status)
   );
 }
 

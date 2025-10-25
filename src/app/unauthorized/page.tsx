@@ -28,7 +28,7 @@ export default function UnauthorizedPage() {
         </h1>
 
         <p className="text-gray-600 dark:text-gray-400 mb-8">
-          You don't have permission to access this page. This area is restricted to administrators only.
+          You don&apos;t have permission to access this page. This area is restricted to administrators only.
         </p>
 
         <div className="space-y-3">

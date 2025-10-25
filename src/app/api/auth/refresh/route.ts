@@ -13,7 +13,7 @@ import { successResponse, errorResponse } from '@/lib/api/auth-middleware';
  * Refreshes the user's authentication session
  * Returns: { success: true, data: { user: AuthenticatedUser, session: Session } }
  */
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const supabase = await createClient();
 

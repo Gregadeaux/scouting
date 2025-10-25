@@ -127,8 +127,8 @@ export interface IPitScoutingService {
    * @returns ValidationResult with valid flag and any errors
    */
   validatePitScoutingData(data: {
-    robot_capabilities: any;
-    autonomous_capabilities: any;
+    robot_capabilities: unknown;
+    autonomous_capabilities: unknown;
   }): ValidationResult;
 
   /**
@@ -270,8 +270,8 @@ export class PitScoutingService implements IPitScoutingService {
    * Public method for standalone validation (e.g., in forms)
    */
   validatePitScoutingData(data: {
-    robot_capabilities: any;
-    autonomous_capabilities: any;
+    robot_capabilities: unknown;
+    autonomous_capabilities: unknown;
   }): ValidationResult {
     const schemaVersion = this.detectSchemaVersion(data.robot_capabilities);
     return this.validatePitScoutingDataWithVersion(data, schemaVersion);
@@ -288,7 +288,7 @@ export class PitScoutingService implements IPitScoutingService {
    * Detect schema version from robot_capabilities JSONB
    * @private
    */
-  private detectSchemaVersion(robotCapabilities: any): SupportedSchemaVersion {
+  private detectSchemaVersion(robotCapabilities: unknown): SupportedSchemaVersion {
     const version = robotCapabilities?.schema_version;
 
     if (!version) {
@@ -299,7 +299,7 @@ export class PitScoutingService implements IPitScoutingService {
       );
     }
 
-    if (!SUPPORTED_SCHEMA_VERSIONS.includes(version as any)) {
+    if (!SUPPORTED_SCHEMA_VERSIONS.includes(version as SupportedSchemaVersion)) {
       throw new UnsupportedSchemaVersionError(
         `Unsupported schema version: ${version}`,
         version,
@@ -317,8 +317,8 @@ export class PitScoutingService implements IPitScoutingService {
    */
   private validatePitScoutingDataWithVersion(
     data: {
-      robot_capabilities: any;
-      autonomous_capabilities: any;
+      robot_capabilities: unknown;
+      autonomous_capabilities: unknown;
     },
     schemaVersion: SupportedSchemaVersion
   ): ValidationResult {
@@ -342,7 +342,7 @@ export class PitScoutingService implements IPitScoutingService {
    * Logging utility
    * @private
    */
-  private log(message: string, data?: any): void {
+  private log(message: string, data?: unknown): void {
     console.log(`[PitScoutingService] ${message}`, data || '');
   }
 }

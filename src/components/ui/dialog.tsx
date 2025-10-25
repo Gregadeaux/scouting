@@ -25,9 +25,9 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
   // Clone children and inject onClick handler into DialogTrigger
   const processedChildren = React.Children.map(children, (child) => {
     if (React.isValidElement(child) && child.type === DialogTrigger) {
-      return React.cloneElement(child, {
+      return React.cloneElement(child as React.ReactElement<{ onClick?: () => void }>, {
         onClick: () => onOpenChange(true),
-      } as any);
+      });
     }
     return child;
   });

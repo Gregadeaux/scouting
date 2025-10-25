@@ -47,7 +47,7 @@ function isOnline(): boolean {
 /**
  * Check if an error is a network error
  */
-function isNetworkError(error: any): boolean {
+function isNetworkError(error: unknown): boolean {
   return (
     error instanceof TypeError &&
     (error.message.includes('fetch') ||
@@ -65,7 +65,7 @@ function isNetworkError(error: any): boolean {
 export async function offlineApi<T = any>(
   url: string,
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' = 'GET',
-  body?: any,
+  body?: unknown,
   options: OfflineApiOptions = {}
 ): Promise<ApiResponse<T>> {
   const {
@@ -184,7 +184,7 @@ export async function offlineApi<T = any>(
  */
 export async function offlinePost<T = any>(
   url: string,
-  body: any,
+  body: unknown,
   options?: OfflineApiOptions
 ): Promise<ApiResponse<T>> {
   return offlineApi<T>(url, 'POST', body, options);
@@ -195,7 +195,7 @@ export async function offlinePost<T = any>(
  */
 export async function offlinePut<T = any>(
   url: string,
-  body: any,
+  body: unknown,
   options?: OfflineApiOptions
 ): Promise<ApiResponse<T>> {
   return offlineApi<T>(url, 'PUT', body, options);
@@ -206,7 +206,7 @@ export async function offlinePut<T = any>(
  */
 export async function offlinePatch<T = any>(
   url: string,
-  body: any,
+  body: unknown,
   options?: OfflineApiOptions
 ): Promise<ApiResponse<T>> {
   return offlineApi<T>(url, 'PATCH', body, options);

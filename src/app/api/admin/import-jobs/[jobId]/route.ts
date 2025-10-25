@@ -33,7 +33,7 @@ export async function GET(
     }
 
     return successResponse(status);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API] Get import status error:', error);
 
     if (error.name === 'EntityNotFoundError') {
@@ -72,7 +72,7 @@ export async function DELETE(
       message: 'Import job cancelled successfully',
       job_id: jobId,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API] Cancel import error:', error);
 
     if (error.name === 'EntityNotFoundError') {
@@ -136,7 +136,7 @@ export async function PATCH(
       new_job_id: newJob.job_id,
       new_job: newJob,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API] Retry import error:', error);
 
     if (error.name === 'EntityNotFoundError') {

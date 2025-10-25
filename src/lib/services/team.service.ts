@@ -557,9 +557,9 @@ export class TeamService implements ITeamService {
     for (const match of matchScoutingData) {
       // Calculate points using season-specific functions
       try {
-        totalAutoPoints += calculateAutoPoints(match.auto_performance as any);
-        totalTeleopPoints += calculateTeleopPoints(match.teleop_performance as any);
-        totalEndgamePoints += calculateEndgamePoints(match.endgame_performance as any);
+        totalAutoPoints += calculateAutoPoints(match.auto_performance as AutoPerformance2025);
+        totalTeleopPoints += calculateTeleopPoints(match.teleop_performance as TeleopPerformance2025);
+        totalEndgamePoints += calculateEndgamePoints(match.endgame_performance as EndgamePerformance2025);
 
         // Calculate reliability (no disconnects, disables, or tips)
         if (!match.robot_disconnected && !match.robot_disabled && !match.robot_tipped) {
@@ -616,7 +616,7 @@ export class TeamService implements ITeamService {
   /**
    * Logging utility
    */
-  private log(message: string, data?: any): void {
+  private log(message: string, data?: unknown): void {
     console.log(`[TeamService] ${message}`, data || '');
   }
 }

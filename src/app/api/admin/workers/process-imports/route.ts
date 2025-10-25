@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
         });
 
         console.log(`[Worker] Job ${job.job_id} completed successfully`);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error(`[Worker] Failed to process job ${job.job_id}:`, error);
 
         results.push({
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
       results,
       timestamp: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Worker] Process imports error:', error);
     return errorResponse('Failed to process import jobs', 500);
   }
@@ -164,7 +164,7 @@ export async function GET(request: NextRequest) {
       })),
       timestamp: new Date().toISOString(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Worker] Get pending jobs error:', error);
     return errorResponse('Failed to fetch pending jobs', 500);
   }

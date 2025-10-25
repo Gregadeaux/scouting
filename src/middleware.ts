@@ -15,7 +15,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
-import { getRedirectPath, isAuthPage, isPublicRoute } from '@/lib/services/redirect.service';
+import { getRedirectPath } from '@/lib/services/redirect.service';
 import { canAccessRoute } from '@/lib/services/route-guard.service';
 import type { UserRole } from '@/types/auth';
 
