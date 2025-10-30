@@ -1,0 +1,138 @@
+name: Sync Issue Status to Project
+
+on:
+  issues:
+    types: [labeled, unlabeled]
+
+jobs:
+  sync-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync status label to project
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue = context.payload.issue;
+            const labelName = context.payload.label?.name;
+
+            // Only process status labels
+            if (!labelName || !labelName.startsWith('status:')) {
+              console.log('Not a status label, skipping');
+              return;
+            }
+
+            // Extract the status value from the label (e.g., "status: in progress" -> "in progress")
+            const statusValue = labelName.replace('status:', '').trim();
+
+            // Project configuration
+            const PROJECT_ID = 'PVT_kwHOAAc3Ns4BGyII';
+            const STATUS_FIELD_ID = 'PVTSSF_lAHOAAc3Ns4BGyIIzg3upxs';
+            const PROJECT_NUMBER = 3;
+
+            console.log(`Processing label "${labelName}" -> status "${statusValue}"`);
+
+            // Step 1: Get current status field options from the project
+            const getFieldOptionsQuery = `
+              query($fieldId: ID!) {
+                node(id: $fieldId) {
+                  ... on ProjectV2SingleSelectField {
+                    id
+                    name
+                    options {
+                      id
+                      name
+                    }
+                  }
+                }
+              }
+            `;
+
+            const fieldResult = await github.graphql(getFieldOptionsQuery, {
+              fieldId: STATUS_FIELD_ID
+            });
+
+            const statusOptions = fieldResult.node.options;
+            console.log('Available status options:', statusOptions.map(o => o.name).join(', '));
+
+            // Step 2: Find matching status option (case-insensitive)
+            const targetOption = statusOptions.find(
+              option => option.name.toLowerCase() === statusValue.toLowerCase()
+            );
+
+            if (!targetOption) {
+              console.log(`⚠️ No status option found matching "${statusValue}"`);
+              console.log('Available options:', statusOptions.map(o => o.name).join(', '));
+              console.log('Please add this status option to the project settings.');
+              return;
+            }
+
+            console.log(`Found matching status option: "${targetOption.name}" (${targetOption.id})`);
+
+            // Step 3: Find the project item for this issue
+            const getProjectItemQuery = `
+              query($owner: String!, $projectNumber: Int!, $issueNumber: Int!) {
+                user(login: $owner) {
+                  projectV2(number: $projectNumber) {
+                    id
+                    items(first: 100) {
+                      nodes {
+                        id
+                        content {
+                          ... on Issue {
+                            number
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            const projectResult = await github.graphql(getProjectItemQuery, {
+              owner: context.repo.owner,
+              projectNumber: PROJECT_NUMBER,
+              issueNumber: issue.number
+            });
+
+            const projectItem = projectResult.user.projectV2.items.nodes.find(
+              item => item.content?.number === issue.number
+            );
+
+            if (!projectItem) {
+              console.log(`⚠️ Issue #${issue.number} not found in project`);
+              console.log('The issue may need to be added to the project first.');
+              return;
+            }
+
+            console.log(`Found project item for issue #${issue.number}: ${projectItem.id}`);
+
+            // Step 4: Update the status field
+            const updateMutation = `
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                updateProjectV2ItemFieldValue(
+                  input: {
+                    projectId: $projectId
+                    itemId: $itemId
+                    fieldId: $fieldId
+                    value: {
+                      singleSelectOptionId: $optionId
+                    }
+                  }
+                ) {
+                  projectV2Item {
+                    id
+                  }
+                }
+              }
+            `;
+
+            await github.graphql(updateMutation, {
+              projectId: PROJECT_ID,
+              itemId: projectItem.id,
+              fieldId: STATUS_FIELD_ID,
+              optionId: targetOption.id
+            });
+
+            console.log(`✅ Updated issue #${issue.number} to status "${targetOption.name}"`);

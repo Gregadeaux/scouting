@@ -10,6 +10,7 @@ import type {
   MatchScouting,
 } from '@/types';
 import type { MatchWithScoutingStatus } from '@/types/event-detail';
+import type { MatchListOptions, MatchWithDetails, MatchListResult } from '@/types/admin';
 import type { IMatchRepository } from '@/lib/repositories/match.repository';
 import type { ITeamRepository } from '@/lib/repositories/team.repository';
 import type { IScoutingDataRepository } from '@/lib/repositories/scouting-data.repository';
@@ -82,6 +83,12 @@ export interface IMatchService {
   getTeamMatches(teamNumber: number, eventKey?: string): Promise<MatchSchedule[]>;
 
   /**
+   * Get recent matches for a team (most recent first)
+   * Used to show team's recent performance in match detail view
+   */
+  getTeamRecentMatches(teamNumber: number, limit?: number): Promise<MatchSchedule[]>;
+
+  /**
    * Get next scheduled match for an event
    */
   getNextMatch(eventKey: string): Promise<MatchSchedule | null>;
@@ -90,6 +97,12 @@ export interface IMatchService {
    * Get current/most recent match for an event
    */
   getCurrentMatch(eventKey: string): Promise<MatchSchedule | null>;
+
+  /**
+   * List matches with filtering, sorting, and pagination
+   * Used for the admin matches list page
+   */
+  listMatches(options: MatchListOptions): Promise<MatchListResult>;
 }
 
 /**
@@ -281,6 +294,238 @@ export class MatchService implements IMatchService {
     });
 
     return currentMatch || mostRecent || null;
+  }
+
+  /**
+   * Get recent matches for a team (most recent first)
+   * Used to show team's recent performance in match detail view
+   */
+  async getTeamRecentMatches(teamNumber: number, limit: number = 5): Promise<MatchSchedule[]> {
+    // We need to query the database directly since we need to search across all events
+    // Note: This requires using the Supabase client directly as the repository
+    // doesn't have a findByTeamNumber method yet
+    const { createServiceClient } = await import('@/lib/supabase/server');
+    const supabase = createServiceClient();
+
+    // Query matches where the team appears in any alliance position
+    const { data, error } = await supabase
+      .from('match_schedule')
+      .select('*')
+      .or(
+        `red_1.eq.${teamNumber},red_2.eq.${teamNumber},red_3.eq.${teamNumber},` +
+        `blue_1.eq.${teamNumber},blue_2.eq.${teamNumber},blue_3.eq.${teamNumber}`
+      )
+      .not('actual_time', 'is', null) // Only matches that have been played
+      .order('actual_time', { ascending: false }) // Most recent first
+      .limit(limit);
+
+    if (error) {
+      this.log(`Error fetching recent matches for team ${teamNumber}`, error);
+      throw new Error(`Failed to fetch recent matches for team ${teamNumber}`);
+    }
+
+    // If no matches with actual_time, fall back to scheduled_time
+    if (!data || data.length === 0) {
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('match_schedule')
+        .select('*')
+        .or(
+          `red_1.eq.${teamNumber},red_2.eq.${teamNumber},red_3.eq.${teamNumber},` +
+          `blue_1.eq.${teamNumber},blue_2.eq.${teamNumber},blue_3.eq.${teamNumber}`
+        )
+        .not('red_score', 'is', null) // Only matches with scores
+        .order('scheduled_time', { ascending: false }) // Most recent first
+        .limit(limit);
+
+      if (fallbackError) {
+        this.log(`Error fetching fallback matches for team ${teamNumber}`, fallbackError);
+        return [];
+      }
+
+      return (fallbackData || []) as MatchSchedule[];
+    }
+
+    return (data || []) as MatchSchedule[];
+  }
+
+  /**
+   * List matches with filtering, sorting, and pagination
+   */
+  async listMatches(options: MatchListOptions): Promise<MatchListResult> {
+    const { createServiceClient } = await import('@/lib/supabase/server');
+    const supabase = createServiceClient();
+
+    const limit = options.limit || 50;
+    const offset = ((options.page || 1) - 1) * limit;
+    const sortBy = options.sortBy || 'match_number';
+    const sortOrder = options.sortOrder || 'asc';
+
+    // Build query
+    let query = supabase
+      .from('match_schedule')
+      .select(`
+        *,
+        events!inner(event_name)
+      `, { count: 'exact' });
+
+    // Apply search filter
+    if (options.search) {
+      query = query.ilike('match_key', `%${options.search}%`);
+    }
+
+    // Apply event filter
+    if (options.eventKey) {
+      query = query.eq('event_key', options.eventKey);
+    }
+
+    // Apply comp level filter
+    if (options.compLevel && options.compLevel !== 'all') {
+      query = query.eq('comp_level', options.compLevel);
+    }
+
+    // Apply sorting
+    if (sortBy === 'event_name') {
+      query = query.order('event_name', { ascending: sortOrder === 'asc', foreignTable: 'events' });
+    } else {
+      query = query.order(sortBy, { ascending: sortOrder === 'asc' });
+    }
+
+    // Apply pagination
+    query = query.range(offset, offset + limit - 1);
+
+    const { data: matches, error, count } = await query;
+
+    if (error) {
+      this.log(`Error fetching matches list`, error);
+      throw new Error('Failed to fetch matches');
+    }
+
+    // Get scouting coverage for all matches
+    const matchKeys = (matches || []).map(m => m.match_key);
+    const scoutingCoverage = await this.getScoutingCoverageForMatches(matchKeys);
+
+    // Transform matches with details
+    const matchesWithDetails: MatchWithDetails[] = (matches || []).map(match => {
+      const coverage = scoutingCoverage[match.match_key];
+      const scoutedTeams = coverage?.scouted_positions || 0;
+      const totalTeams = coverage?.total_positions || 6; // Always 6 teams per match
+      const percentage = Math.round((scoutedTeams / totalTeams) * 100);
+
+      // Apply scouting status filter after calculation
+      const status = scoutedTeams === 6 ? 'complete' : scoutedTeams > 0 ? 'partial' : 'none';
+
+      return {
+        match_key: match.match_key,
+        event_key: match.event_key,
+        event_name: match.events?.event_name,
+        comp_level: match.comp_level,
+        set_number: match.set_number,
+        match_number: match.match_number,
+        red_1: match.red_1,
+        red_2: match.red_2,
+        red_3: match.red_3,
+        blue_1: match.blue_1,
+        blue_2: match.blue_2,
+        blue_3: match.blue_3,
+        red_score: match.red_score,
+        blue_score: match.blue_score,
+        winning_alliance: match.winning_alliance,
+        scheduled_time: match.scheduled_time,
+        actual_time: match.actual_time,
+        created_at: match.created_at,
+        updated_at: match.updated_at,
+        scouting_coverage: {
+          scouted_teams: scoutedTeams,
+          total_teams: totalTeams,
+          percentage,
+          status,
+        },
+      };
+    });
+
+    // Filter by scouting status if specified
+    let filteredMatches = matchesWithDetails;
+    if (options.scoutingStatus && options.scoutingStatus !== 'all') {
+      filteredMatches = matchesWithDetails.filter(m => m.scouting_coverage.status === options.scoutingStatus);
+    }
+
+    return {
+      data: filteredMatches,
+      pagination: {
+        total: count || 0,
+        limit,
+        offset,
+        has_more: (count || 0) > offset + limit,
+      },
+    };
+  }
+
+  /**
+   * Get scouting coverage for multiple matches
+   */
+  private async getScoutingCoverageForMatches(matchKeys: string[]): Promise<Record<string, { total_positions: number; scouted_positions: number; positions: { red_1: boolean; red_2: boolean; red_3: boolean; blue_1: boolean; blue_2: boolean; blue_3: boolean } }>> {
+    if (matchKeys.length === 0) return {};
+
+    const { createServiceClient } = await import('@/lib/supabase/server');
+    const supabase = createServiceClient();
+
+    const { data: scoutingData, error } = await supabase
+      .from('match_scouting')
+      .select('match_key, team_number, alliance_color')
+      .in('match_key', matchKeys);
+
+    if (error) {
+      this.log('Error fetching scouting coverage', error);
+      return {};
+    }
+
+    // Get match details to know team positions
+    const { data: matches, error: matchError } = await supabase
+      .from('match_schedule')
+      .select('match_key, red_1, red_2, red_3, blue_1, blue_2, blue_3')
+      .in('match_key', matchKeys);
+
+    if (matchError) {
+      this.log('Error fetching match details', matchError);
+      return {};
+    }
+
+    const coverage: Record<string, { total_positions: number; scouted_positions: number; positions: { red_1: boolean; red_2: boolean; red_3: boolean; blue_1: boolean; blue_2: boolean; blue_3: boolean } }> = {};
+
+    for (const match of (matches || [])) {
+      const matchScouting = (scoutingData || []).filter(s => s.match_key === match.match_key);
+
+      const positions = {
+        red_1: false,
+        red_2: false,
+        red_3: false,
+        blue_1: false,
+        blue_2: false,
+        blue_3: false,
+      };
+
+      for (const scout of matchScouting) {
+        if (scout.alliance_color === 'red') {
+          if (scout.team_number === match.red_1) positions.red_1 = true;
+          if (scout.team_number === match.red_2) positions.red_2 = true;
+          if (scout.team_number === match.red_3) positions.red_3 = true;
+        } else if (scout.alliance_color === 'blue') {
+          if (scout.team_number === match.blue_1) positions.blue_1 = true;
+          if (scout.team_number === match.blue_2) positions.blue_2 = true;
+          if (scout.team_number === match.blue_3) positions.blue_3 = true;
+        }
+      }
+
+      const scoutedCount = Object.values(positions).filter(v => v).length;
+
+      coverage[match.match_key] = {
+        total_positions: 6,
+        scouted_positions: scoutedCount,
+        positions,
+      };
+    }
+
+    return coverage;
   }
 
   /**

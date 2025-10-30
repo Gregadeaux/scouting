@@ -45,6 +45,7 @@ export interface ScoutingCoverageByMatch {
 export interface IMatchRepository {
   findByMatchKey(matchKey: string): Promise<MatchSchedule | null>;
   findByEventKey(eventKey: string, options?: MatchQueryOptions): Promise<MatchSchedule[]>;
+  findByTeam(teamNumber: number, eventKey?: string): Promise<MatchSchedule[]>;
   upsert(match: Partial<MatchSchedule>): Promise<MatchSchedule>;
   bulkUpsert(matches: Partial<MatchSchedule>[]): Promise<MatchSchedule[]>;
   updateScores(matchKey: string, redScore: number, blueScore: number): Promise<void>;
@@ -141,6 +142,44 @@ export class MatchRepository implements IMatchRepository {
         throw error;
       }
       throw new DatabaseOperationError('find matches by event', error);
+    }
+  }
+
+  /**
+   * Find matches by team number
+   * @param teamNumber - Team number to search for
+   * @param eventKey - Optional event key to filter by
+   * @returns Array of matches the team participates in
+   */
+  async findByTeam(teamNumber: number, eventKey?: string): Promise<MatchSchedule[]> {
+    try {
+      let query = this.client
+        .from('match_schedule')
+        .select('*')
+        .or(
+          `red_1.eq.${teamNumber},red_2.eq.${teamNumber},red_3.eq.${teamNumber},` +
+          `blue_1.eq.${teamNumber},blue_2.eq.${teamNumber},blue_3.eq.${teamNumber}`
+        );
+
+      if (eventKey) {
+        query = query.eq('event_key', eventKey);
+      }
+
+      const { data, error } = await query
+        .order('scheduled_time', { ascending: true })
+        .order('comp_level', { ascending: true })
+        .order('match_number', { ascending: true });
+
+      if (error) {
+        throw new DatabaseOperationError('find matches by team', error);
+      }
+
+      return (data || []) as MatchSchedule[];
+    } catch (error) {
+      if (error instanceof RepositoryError) {
+        throw error;
+      }
+      throw new DatabaseOperationError('find matches by team', error);
     }
   }
 

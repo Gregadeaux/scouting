@@ -638,6 +638,12 @@ export class ImportService implements IImportService {
       post_result_time: tbaMatch.post_result_time
         ? new Date(tbaMatch.post_result_time * 1000).toISOString()
         : undefined,
+      // Extract TBA detailed data (JSONB fields)
+      score_breakdown: tbaMatch.score_breakdown ?? undefined,
+      videos: tbaMatch.videos?.map(v => ({
+        key: v.key,
+        type: (v.type === 'youtube' || v.type === 'tba') ? v.type : 'tba' as const,
+      })) ?? undefined,
     };
   }
 

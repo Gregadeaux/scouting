@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { requireAdmin } from '@/lib/api/auth-middleware';
+import { getEventService } from '@/lib/services';
 
 // GET /api/admin/events - List events with pagination, filtering, and sorting
 export async function GET(request: NextRequest) {
@@ -11,7 +12,6 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = createServiceClient();
     const searchParams = request.nextUrl.searchParams;
 
     const page = parseInt(searchParams.get('page') || '1');
@@ -19,40 +19,24 @@ export async function GET(request: NextRequest) {
     const sortBy = searchParams.get('sortBy') || 'start_date';
     const sortOrder = (searchParams.get('sortOrder') || 'desc') as 'asc' | 'desc';
     const search = searchParams.get('search') || '';
+    const yearParam = searchParams.get('year');
+    const year = yearParam ? parseInt(yearParam) : undefined;
 
-    const offset = (page - 1) * limit;
-
-    let query = supabase.from('events').select('*', { count: 'exact' });
-
-    // Apply search filter
-    if (search) {
-      query = query.or(
-        `event_name.ilike.%${search}%,event_key.ilike.%${search}%,city.ilike.%${search}%,state_province.ilike.%${search}%`
-      );
-    }
-
-    // Apply sorting
-    query = query.order(sortBy, { ascending: sortOrder === 'asc' });
-
-    // Apply pagination
-    query = query.range(offset, offset + limit - 1);
-
-    const { data, error, count } = await query;
-
-    if (error) {
-      console.error('Error fetching events:', error);
-      return NextResponse.json({ error: 'Failed to fetch events' }, { status: 500 });
-    }
+    // Use EventService to get events with filtering
+    const eventService = getEventService();
+    const result = await eventService.listEvents({
+      page,
+      limit,
+      sortBy,
+      sortOrder,
+      search,
+      year,
+    });
 
     return NextResponse.json({
       success: true,
-      data: data || [],
-      pagination: {
-        total: count || 0,
-        limit,
-        offset,
-        has_more: (count || 0) > offset + limit,
-      },
+      data: result.data,
+      pagination: result.pagination,
     });
   } catch (error) {
     console.error('Error in GET /api/admin/events:', error);

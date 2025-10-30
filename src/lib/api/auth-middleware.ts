@@ -134,6 +134,28 @@ export async function requireMentor(
   return requireAuth(request, { requireRole: 'mentor' });
 }
 
+/**
+ * Require admin or mentor role
+ */
+export async function requireAdminOrMentor(
+  request: NextRequest
+): Promise<{ user: AuthenticatedUser } | NextResponse> {
+  const result = await requireAuth(request);
+
+  if (result instanceof NextResponse) {
+    return result;
+  }
+
+  const { user } = result;
+
+  // Check if user is admin or mentor
+  if (user.profile.role !== 'admin' && user.profile.role !== 'mentor') {
+    return forbiddenResponse('Admin or mentor access required');
+  }
+
+  return result;
+}
+
 // ============================================================================
 // RESPONSE HELPERS
 // ============================================================================

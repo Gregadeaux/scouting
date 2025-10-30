@@ -1,0 +1,426 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e6] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e7]:
+      - img [ref=e8]
+    - generic [ref=e11]:
+      - button "Open issues overlay" [ref=e12]:
+        - generic [ref=e13]:
+          - generic [ref=e14]: "1"
+          - generic [ref=e15]: "2"
+        - generic [ref=e16]:
+          - text: Issue
+          - generic [ref=e17]: s
+      - button "Collapse issues badge" [ref=e18]:
+        - img [ref=e19]
+  - generic [ref=e21]:
+    - button [ref=e22] [cursor=pointer]:
+      - img [ref=e23]
+    - complementary [ref=e25]:
+      - generic [ref=e26]:
+        - heading "FRC Scouting Admin" [level=1] [ref=e28]
+        - navigation [ref=e29]:
+          - link "Dashboard" [ref=e30] [cursor=pointer]:
+            - /url: /admin
+            - img [ref=e31]
+            - text: Dashboard
+          - link "Events" [ref=e33] [cursor=pointer]:
+            - /url: /admin/events
+            - img [ref=e34]
+            - text: Events
+          - link "Teams" [ref=e36] [cursor=pointer]:
+            - /url: /admin/teams
+            - img [ref=e37]
+            - text: Teams
+          - link "Matches" [ref=e39] [cursor=pointer]:
+            - /url: /admin/matches
+            - img [ref=e40]
+            - text: Matches
+          - link "Users" [ref=e42] [cursor=pointer]:
+            - /url: /admin/users
+            - img [ref=e43]
+            - text: Users
+          - link "Scouters" [ref=e45] [cursor=pointer]:
+            - /url: /admin/scouters
+            - img [ref=e46]
+            - text: Scouters
+          - link "Scouting Data" [ref=e48] [cursor=pointer]:
+            - /url: /admin/scouting
+            - img [ref=e49]
+            - text: Scouting Data
+          - link "Seasons" [ref=e51] [cursor=pointer]:
+            - /url: /admin/seasons
+            - img [ref=e52]
+            - text: Seasons
+        - paragraph [ref=e56]: FRC Scouting System v1.0
+    - generic [ref=e58]:
+      - banner [ref=e59]:
+        - generic [ref=e60]:
+          - heading "Data Portal" [level=2] [ref=e62]
+          - button [ref=e64] [cursor=pointer]:
+            - img [ref=e65]
+      - main [ref=e67]:
+        - generic [ref=e69]:
+          - generic [ref=e70]:
+            - heading "JSONB Data Display Component Demo" [level=1] [ref=e71]
+            - paragraph [ref=e72]: Testing the JSONBDataDisplay component with 2025 Reefscape sample data
+          - generic [ref=e73]:
+            - heading "Autonomous Period - Standard View" [level=3] [ref=e75]
+            - generic [ref=e77]:
+              - generic [ref=e78]:
+                - heading "Auto Performance" [level=3] [ref=e79]
+                - button "Copy" [ref=e80] [cursor=pointer]:
+                  - img [ref=e81]
+                  - text: Copy
+              - button "Coral Scoring 5 fields" [ref=e85] [cursor=pointer]:
+                - generic [ref=e86]:
+                  - img [ref=e87]
+                  - heading "Coral Scoring" [level=4] [ref=e89]
+                  - generic [ref=e90]: 5 fields
+              - button "Mobility 1 field" [ref=e92] [cursor=pointer]:
+                - generic [ref=e93]:
+                  - img [ref=e94]
+                  - heading "Mobility" [level=4] [ref=e96]
+                  - generic [ref=e97]: 1 field
+              - button "Notes 1 field" [ref=e99] [cursor=pointer]:
+                - generic [ref=e100]:
+                  - img [ref=e101]
+                  - heading "Notes" [level=4] [ref=e103]
+                  - generic [ref=e104]: 1 field
+              - button "Preloaded 2 fields" [ref=e106] [cursor=pointer]:
+                - generic [ref=e107]:
+                  - img [ref=e108]
+                  - heading "Preloaded" [level=4] [ref=e110]
+                  - generic [ref=e111]: 2 fields
+          - generic [ref=e112]:
+            - heading "Autonomous Period - Compact View" [level=3] [ref=e114]
+            - generic [ref=e116]:
+              - button "Coral Scoring 5 fields" [ref=e118] [cursor=pointer]:
+                - generic [ref=e119]:
+                  - img [ref=e120]
+                  - heading "Coral Scoring" [level=4] [ref=e122]
+                  - generic [ref=e123]: 5 fields
+                - button [ref=e124]:
+                  - img [ref=e125]
+              - button "Mobility 1 field" [ref=e129] [cursor=pointer]:
+                - generic [ref=e130]:
+                  - img [ref=e131]
+                  - heading "Mobility" [level=4] [ref=e133]
+                  - generic [ref=e134]: 1 field
+                - button [ref=e135]:
+                  - img [ref=e136]
+              - button "Notes 1 field" [ref=e140] [cursor=pointer]:
+                - generic [ref=e141]:
+                  - img [ref=e142]
+                  - heading "Notes" [level=4] [ref=e144]
+                  - generic [ref=e145]: 1 field
+                - button [ref=e146]:
+                  - img [ref=e147]
+              - button "Preloaded 2 fields" [ref=e151] [cursor=pointer]:
+                - generic [ref=e152]:
+                  - img [ref=e153]
+                  - heading "Preloaded" [level=4] [ref=e155]
+                  - generic [ref=e156]: 2 fields
+                - button [ref=e157]:
+                  - img [ref=e158]
+          - generic [ref=e161]:
+            - heading "Teleoperated Period - Standard View" [level=3] [ref=e163]
+            - generic [ref=e165]:
+              - generic [ref=e166]:
+                - heading "Teleop Performance" [level=3] [ref=e167]
+                - button "Copy" [ref=e168] [cursor=pointer]:
+                  - img [ref=e169]
+                  - text: Copy
+              - button "Algae Scoring 3 fields" [ref=e173] [cursor=pointer]:
+                - generic [ref=e174]:
+                  - img [ref=e175]
+                  - heading "Algae Scoring" [level=4] [ref=e177]
+                  - generic [ref=e178]: 3 fields
+              - button "Coral Scoring 5 fields" [ref=e180] [cursor=pointer]:
+                - generic [ref=e181]:
+                  - img [ref=e182]
+                  - heading "Coral Scoring" [level=4] [ref=e184]
+                  - generic [ref=e185]: 5 fields
+              - button "Cycle Tracking 1 field" [ref=e187] [cursor=pointer]:
+                - generic [ref=e188]:
+                  - img [ref=e189]
+                  - heading "Cycle Tracking" [level=4] [ref=e191]
+                  - generic [ref=e192]: 1 field
+              - button "Defense 3 fields" [ref=e194] [cursor=pointer]:
+                - generic [ref=e195]:
+                  - img [ref=e196]
+                  - heading "Defense" [level=4] [ref=e198]
+                  - generic [ref=e199]: 3 fields
+              - button "Notes 1 field" [ref=e201] [cursor=pointer]:
+                - generic [ref=e202]:
+                  - img [ref=e203]
+                  - heading "Notes" [level=4] [ref=e205]
+                  - generic [ref=e206]: 1 field
+              - button "Penalties 1 field" [ref=e208] [cursor=pointer]:
+                - generic [ref=e209]:
+                  - img [ref=e210]
+                  - heading "Penalties" [level=4] [ref=e212]
+                  - generic [ref=e213]: 1 field
+              - button "Pickup - Algae 3 fields" [ref=e215] [cursor=pointer]:
+                - generic [ref=e216]:
+                  - img [ref=e217]
+                  - heading "Pickup - Algae" [level=4] [ref=e219]
+                  - generic [ref=e220]: 3 fields
+              - button "Pickup - Coral 2 fields" [ref=e222] [cursor=pointer]:
+                - generic [ref=e223]:
+                  - img [ref=e224]
+                  - heading "Pickup - Coral" [level=4] [ref=e226]
+                  - generic [ref=e227]: 2 fields
+          - generic [ref=e228]:
+            - heading "Teleoperated Period - Compact View (Max Info Density)" [level=3] [ref=e230]
+            - generic [ref=e232]:
+              - button "Algae Scoring 3 fields" [ref=e234] [cursor=pointer]:
+                - generic [ref=e235]:
+                  - img [ref=e236]
+                  - heading "Algae Scoring" [level=4] [ref=e238]
+                  - generic [ref=e239]: 3 fields
+                - button [ref=e240]:
+                  - img [ref=e241]
+              - button "Coral Scoring 5 fields" [ref=e245] [cursor=pointer]:
+                - generic [ref=e246]:
+                  - img [ref=e247]
+                  - heading "Coral Scoring" [level=4] [ref=e249]
+                  - generic [ref=e250]: 5 fields
+                - button [ref=e251]:
+                  - img [ref=e252]
+              - button "Cycle Tracking 1 field" [ref=e256] [cursor=pointer]:
+                - generic [ref=e257]:
+                  - img [ref=e258]
+                  - heading "Cycle Tracking" [level=4] [ref=e260]
+                  - generic [ref=e261]: 1 field
+                - button [ref=e262]:
+                  - img [ref=e263]
+              - button "Defense 3 fields" [ref=e267] [cursor=pointer]:
+                - generic [ref=e268]:
+                  - img [ref=e269]
+                  - heading "Defense" [level=4] [ref=e271]
+                  - generic [ref=e272]: 3 fields
+                - button [ref=e273]:
+                  - img [ref=e274]
+              - button "Notes 1 field" [ref=e278] [cursor=pointer]:
+                - generic [ref=e279]:
+                  - img [ref=e280]
+                  - heading "Notes" [level=4] [ref=e282]
+                  - generic [ref=e283]: 1 field
+                - button [ref=e284]:
+                  - img [ref=e285]
+              - button "Penalties 1 field" [ref=e289] [cursor=pointer]:
+                - generic [ref=e290]:
+                  - img [ref=e291]
+                  - heading "Penalties" [level=4] [ref=e293]
+                  - generic [ref=e294]: 1 field
+                - button [ref=e295]:
+                  - img [ref=e296]
+              - button "Pickup - Algae 3 fields" [ref=e300] [cursor=pointer]:
+                - generic [ref=e301]:
+                  - img [ref=e302]
+                  - heading "Pickup - Algae" [level=4] [ref=e304]
+                  - generic [ref=e305]: 3 fields
+                - button [ref=e306]:
+                  - img [ref=e307]
+              - button "Pickup - Coral 2 fields" [ref=e311] [cursor=pointer]:
+                - generic [ref=e312]:
+                  - img [ref=e313]
+                  - heading "Pickup - Coral" [level=4] [ref=e315]
+                  - generic [ref=e316]: 2 fields
+                - button [ref=e317]:
+                  - img [ref=e318]
+          - generic [ref=e321]:
+            - heading "Endgame Period - Standard View" [level=3] [ref=e323]
+            - generic [ref=e325]:
+              - generic [ref=e326]:
+                - heading "Endgame Performance" [level=3] [ref=e327]
+                - button "Copy" [ref=e328] [cursor=pointer]:
+                  - img [ref=e329]
+                  - text: Copy
+              - button "Cage Climbing 3 fields" [ref=e333] [cursor=pointer]:
+                - generic [ref=e334]:
+                  - img [ref=e335]
+                  - heading "Cage Climbing" [level=4] [ref=e337]
+                  - generic [ref=e338]: 3 fields
+              - button "Cooperation 1 field" [ref=e340] [cursor=pointer]:
+                - generic [ref=e341]:
+                  - img [ref=e342]
+                  - heading "Cooperation" [level=4] [ref=e344]
+                  - generic [ref=e345]: 1 field
+              - button "Notes 1 field" [ref=e347] [cursor=pointer]:
+                - generic [ref=e348]:
+                  - img [ref=e349]
+                  - heading "Notes" [level=4] [ref=e351]
+                  - generic [ref=e352]: 1 field
+              - button "Points 1 field" [ref=e354] [cursor=pointer]:
+                - generic [ref=e355]:
+                  - img [ref=e356]
+                  - heading "Points" [level=4] [ref=e358]
+                  - generic [ref=e359]: 1 field
+              - button "Timing 2 fields" [ref=e361] [cursor=pointer]:
+                - generic [ref=e362]:
+                  - img [ref=e363]
+                  - heading "Timing" [level=4] [ref=e365]
+                  - generic [ref=e366]: 2 fields
+          - generic [ref=e367]:
+            - heading "Inline Display (No Sections)" [level=3] [ref=e369]
+            - generic [ref=e371]:
+              - generic [ref=e372]:
+                - heading "Auto Performance" [level=4] [ref=e373]
+                - generic [ref=e375]:
+                  - generic [ref=e376]:
+                    - generic [ref=e377]:
+                      - generic [ref=e378]: "Left Starting Zone?:"
+                      - img [ref=e380]
+                    - generic [ref=e382]:
+                      - generic [ref=e383]: "Coral Scored - Level 1:"
+                      - generic [ref=e384]: "2"
+                    - generic [ref=e385]:
+                      - generic [ref=e386]: "Coral Scored - Level 2:"
+                      - generic [ref=e387]: "3"
+                    - generic [ref=e388]:
+                      - generic [ref=e389]: "Coral Scored - Level 3:"
+                      - generic [ref=e390]: "1"
+                    - generic [ref=e391]:
+                      - generic [ref=e392]: "Coral Scored - Level 4:"
+                      - generic [ref=e393]: "0"
+                    - generic [ref=e394]:
+                      - generic [ref=e395]: "Coral Missed:"
+                      - generic [ref=e396]: "1"
+                    - generic [ref=e397]:
+                      - generic [ref=e398]: "Preloaded Piece Scored?:"
+                      - img [ref=e400]
+                    - generic [ref=e402]:
+                      - generic [ref=e403]: "Preloaded Piece Type:"
+                      - generic [ref=e404]: Coral
+                    - generic [ref=e405]:
+                      - generic: "Auto Notes:"
+                      - generic [ref=e406]: Strong auto performance with c...
+                  - button [ref=e407] [cursor=pointer]:
+                    - img [ref=e408]
+              - generic [ref=e411]:
+                - heading "Endgame Performance" [level=4] [ref=e412]
+                - generic [ref=e414]:
+                  - generic [ref=e415]:
+                    - generic [ref=e416]:
+                      - generic [ref=e417]: "Cage Climb Attempted?:"
+                      - img [ref=e419]
+                    - generic [ref=e421]:
+                      - generic [ref=e422]: "Cage Climb Successful?:"
+                      - img [ref=e424]
+                    - generic [ref=e426]:
+                      - generic [ref=e427]: "Endgame Points:"
+                      - generic [ref=e428]: "12"
+                    - generic [ref=e429]:
+                      - generic [ref=e430]: "Cage Level Achieved:"
+                      - generic [ref=e431]: Deep
+                    - generic [ref=e432]:
+                      - generic [ref=e433]: "Endgame Start Time (seconds):"
+                      - generic [ref=e434]: "125"
+                    - generic [ref=e435]:
+                      - generic [ref=e436]: "Time to Complete Endgame (seconds):"
+                      - generic [ref=e437]: "8"
+                    - generic [ref=e438]:
+                      - generic: "Alliance Cooperation Notes:"
+                      - generic [ref=e439]: Coordinated well with 1678, wa...
+                    - generic [ref=e440]:
+                      - generic: "Endgame Notes:"
+                      - generic [ref=e441]: Clean deep cage climb. Very re...
+                  - button [ref=e442] [cursor=pointer]:
+                    - img [ref=e443]
+          - generic [ref=e446]:
+            - heading "Section Filtering - Coral Scoring Only" [level=3] [ref=e448]
+            - generic [ref=e450]:
+              - button "Algae Scoring 3 fields" [ref=e452] [cursor=pointer]:
+                - generic [ref=e453]:
+                  - img [ref=e454]
+                  - heading "Algae Scoring" [level=4] [ref=e456]
+                  - generic [ref=e457]: 3 fields
+              - button "Coral Scoring 5 fields" [ref=e459] [cursor=pointer]:
+                - generic [ref=e460]:
+                  - img [ref=e461]
+                  - heading "Coral Scoring" [level=4] [ref=e463]
+                  - generic [ref=e464]: 5 fields
+          - generic [ref=e465]:
+            - generic [ref=e466]:
+              - heading "Auto" [level=3] [ref=e468]
+              - generic [ref=e470]:
+                - button "Coral Scoring 5 fields" [disabled] [ref=e472]:
+                  - generic [ref=e473]:
+                    - heading "Coral Scoring" [level=4] [ref=e474]
+                    - generic [ref=e475]: 5 fields
+                - button "Mobility 1 field" [disabled] [ref=e477]:
+                  - generic [ref=e478]:
+                    - heading "Mobility" [level=4] [ref=e479]
+                    - generic [ref=e480]: 1 field
+                - button "Notes 1 field" [disabled] [ref=e482]:
+                  - generic [ref=e483]:
+                    - heading "Notes" [level=4] [ref=e484]
+                    - generic [ref=e485]: 1 field
+                - button "Preloaded 2 fields" [disabled] [ref=e487]:
+                  - generic [ref=e488]:
+                    - heading "Preloaded" [level=4] [ref=e489]
+                    - generic [ref=e490]: 2 fields
+            - generic [ref=e491]:
+              - heading "Teleop" [level=3] [ref=e493]
+              - generic [ref=e495]:
+                - button "Algae Scoring 3 fields" [disabled] [ref=e497]:
+                  - generic [ref=e498]:
+                    - heading "Algae Scoring" [level=4] [ref=e499]
+                    - generic [ref=e500]: 3 fields
+                - button "Coral Scoring 5 fields" [disabled] [ref=e502]:
+                  - generic [ref=e503]:
+                    - heading "Coral Scoring" [level=4] [ref=e504]
+                    - generic [ref=e505]: 5 fields
+                - button "Cycle Tracking 1 field" [disabled] [ref=e507]:
+                  - generic [ref=e508]:
+                    - heading "Cycle Tracking" [level=4] [ref=e509]
+                    - generic [ref=e510]: 1 field
+                - button "Defense 3 fields" [disabled] [ref=e512]:
+                  - generic [ref=e513]:
+                    - heading "Defense" [level=4] [ref=e514]
+                    - generic [ref=e515]: 3 fields
+                - button "Notes 1 field" [disabled] [ref=e517]:
+                  - generic [ref=e518]:
+                    - heading "Notes" [level=4] [ref=e519]
+                    - generic [ref=e520]: 1 field
+                - button "Penalties 1 field" [disabled] [ref=e522]:
+                  - generic [ref=e523]:
+                    - heading "Penalties" [level=4] [ref=e524]
+                    - generic [ref=e525]: 1 field
+                - button "Pickup - Algae 3 fields" [disabled] [ref=e527]:
+                  - generic [ref=e528]:
+                    - heading "Pickup - Algae" [level=4] [ref=e529]
+                    - generic [ref=e530]: 3 fields
+                - button "Pickup - Coral 2 fields" [disabled] [ref=e532]:
+                  - generic [ref=e533]:
+                    - heading "Pickup - Coral" [level=4] [ref=e534]
+                    - generic [ref=e535]: 2 fields
+            - generic [ref=e536]:
+              - heading "Endgame" [level=3] [ref=e538]
+              - generic [ref=e540]:
+                - button "Cage Climbing 3 fields" [disabled] [ref=e542]:
+                  - generic [ref=e543]:
+                    - heading "Cage Climbing" [level=4] [ref=e544]
+                    - generic [ref=e545]: 3 fields
+                - button "Cooperation 1 field" [disabled] [ref=e547]:
+                  - generic [ref=e548]:
+                    - heading "Cooperation" [level=4] [ref=e549]
+                    - generic [ref=e550]: 1 field
+                - button "Notes 1 field" [disabled] [ref=e552]:
+                  - generic [ref=e553]:
+                    - heading "Notes" [level=4] [ref=e554]
+                    - generic [ref=e555]: 1 field
+                - button "Points 1 field" [disabled] [ref=e557]:
+                  - generic [ref=e558]:
+                    - heading "Points" [level=4] [ref=e559]
+                    - generic [ref=e560]: 1 field
+                - button "Timing 2 fields" [disabled] [ref=e562]:
+                  - generic [ref=e563]:
+                    - heading "Timing" [level=4] [ref=e564]
+                    - generic [ref=e565]: 2 fields
+  - alert [ref=e566]
+```

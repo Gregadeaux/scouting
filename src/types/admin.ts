@@ -145,3 +145,116 @@ export interface ActivityItem {
 export interface FormErrors {
   [key: string]: string;
 }
+
+// ============================================================================
+// MATCH LIST TYPES
+// ============================================================================
+
+export interface MatchListOptions {
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  search?: string;
+  eventKey?: string;
+  compLevel?: string;
+  scoutingStatus?: string;
+}
+
+export interface MatchWithDetails {
+  match_key: string;
+  event_key: string;
+  event_name?: string;
+  comp_level: 'qm' | 'ef' | 'qf' | 'sf' | 'f';
+  set_number?: number;
+  match_number: number;
+  red_1?: number;
+  red_2?: number;
+  red_3?: number;
+  blue_1?: number;
+  blue_2?: number;
+  blue_3?: number;
+  red_score?: number;
+  blue_score?: number;
+  winning_alliance?: 'red' | 'blue' | 'tie';
+  scheduled_time?: string;
+  actual_time?: string;
+  created_at?: string;
+  updated_at?: string;
+  scouting_coverage: {
+    scouted_teams: number;
+    total_teams: number;
+    percentage: number;
+    status: 'complete' | 'partial' | 'none';
+  };
+}
+
+export interface MatchListResult {
+  data: MatchWithDetails[];
+  pagination: PaginationInfo;
+}
+
+export interface PaginationInfo {
+  total: number;
+  limit: number;
+  offset: number;
+  has_more: boolean;
+}
+
+// ============================================================================
+// SCOUTING DATA LIST TYPES
+// ============================================================================
+
+export interface ScoutingListOptions {
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  search?: string;
+  eventKey?: string;
+  teamNumber?: number;
+  scoutName?: string;
+  matchKey?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  dataQuality?: string;
+}
+
+export interface PreviewMetrics {
+  auto_points: number;
+  teleop_points: number;
+  endgame_points: number;
+  total_points: number;
+}
+
+export interface ScoutingEntryWithDetails {
+  id: string;
+  match_key: string;
+  team_number: number;
+  scout_name: string;
+  event_key: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  auto_performance: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  teleop_performance: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  endgame_performance: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  overall_performance?: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  scout_metadata?: Record<string, any>;
+  created_at: string;
+  updated_at?: string;
+  // Enriched fields
+  team_name?: string;
+  event_name?: string;
+  match_number?: number;
+  comp_level?: string;
+  preview_metrics: PreviewMetrics;
+  data_quality: 'complete' | 'partial' | 'issues';
+}
+
+export interface ScoutingListResult {
+  data: ScoutingEntryWithDetails[];
+  pagination: PaginationInfo;
+}

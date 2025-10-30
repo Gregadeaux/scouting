@@ -19,6 +19,7 @@ export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [pagination, setPagination] = useState<PaginationConfig>({
     page: 1,
     limit: 20,
@@ -36,6 +37,7 @@ export default function EventsPage() {
         sortBy,
         sortOrder,
         ...(searchQuery && { search: searchQuery }),
+        ...(selectedYear && { year: selectedYear.toString() }),
       });
 
       const response = await fetch(`/api/admin/events?${params}`);
@@ -52,7 +54,7 @@ export default function EventsPage() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, pagination.limit, sortBy, sortOrder, searchQuery, showToast]);
+  }, [pagination.page, pagination.limit, sortBy, sortOrder, searchQuery, selectedYear, showToast]);
 
   useEffect(() => {
     fetchEvents();
@@ -71,6 +73,15 @@ export default function EventsPage() {
     setSearchQuery(query);
     setPagination((prev) => ({ ...prev, page: 1 }));
   };
+
+  const handleYearChange = (year: number | null) => {
+    setSelectedYear(year);
+    setPagination((prev) => ({ ...prev, page: 1 }));
+  };
+
+  // Generate year options (current year and past 5 years)
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: 6 }, (_, i) => currentYear - i);
 
   const handleDelete = async (eventKey: string) => {
     try {
@@ -205,11 +216,35 @@ export default function EventsPage() {
         </RoleBasedWrapper>
       </div>
 
-      {/* Search */}
-      <SearchBar
-        onSearch={handleSearch}
-        placeholder="Search events by name, location, or event key..."
-      />
+      {/* Search and Filters */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex-1">
+          <SearchBar
+            onSearch={handleSearch}
+            placeholder="Search events by name, location, or event key..."
+          />
+        </div>
+
+        {/* Year Filter */}
+        <div className="flex items-center gap-2">
+          <label htmlFor="year-filter" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Season:
+          </label>
+          <select
+            id="year-filter"
+            value={selectedYear || ''}
+            onChange={(e) => handleYearChange(e.target.value ? parseInt(e.target.value) : null)}
+            className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+          >
+            <option value="">All Seasons</option>
+            {yearOptions.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
 
       {/* Table */}
       <DataTable

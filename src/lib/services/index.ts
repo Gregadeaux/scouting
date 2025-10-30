@@ -22,6 +22,8 @@ import {
   EventService,
   createEventService as createEventServiceImpl,
   type IEventService,
+  type EventListOptions,
+  type EventListResult,
 } from './event.service';
 
 import {
@@ -49,6 +51,27 @@ import {
   type TBAApiConfig,
 } from './tba-api.service';
 
+import {
+  DashboardService,
+  createDashboardService as createDashboardServiceImpl,
+  type IDashboardService,
+} from './dashboard.service';
+
+import {
+  AdminTeamService,
+  createAdminTeamService as createAdminTeamServiceImpl,
+  type IAdminTeamService,
+  type AdminTeamDetail,
+  type TeamEvent,
+  type TeamScouter,
+} from './admin-team.service';
+
+import {
+  StatisticsService,
+  createStatisticsService as createStatisticsServiceImpl,
+  type IStatisticsService,
+} from './statistics.service';
+
 // Import repositories
 import {
   createImportJobRepository,
@@ -56,6 +79,7 @@ import {
   createMatchRepository,
   createEventRepository,
   createScoutingDataRepository,
+  createStatisticsRepository,
 } from '@/lib/repositories';
 
 // Import strategies
@@ -79,6 +103,8 @@ export type {
 
   // Event Service
   IEventService,
+  EventListOptions,
+  EventListResult,
 
   // Match Service
   IMatchService,
@@ -95,6 +121,18 @@ export type {
   // TBA API Service
   ITBAApiService,
   TBAApiConfig,
+
+  // Dashboard Service
+  IDashboardService,
+
+  // Admin Team Service
+  IAdminTeamService,
+  AdminTeamDetail,
+  TeamEvent,
+  TeamScouter,
+
+  // Statistics Service
+  IStatisticsService,
 };
 
 // ============================================================================
@@ -105,6 +143,9 @@ let importServiceInstance: IImportService | null = null;
 let eventServiceInstance: IEventService | null = null;
 let matchServiceInstance: IMatchService | null = null;
 let teamServiceInstance: ITeamService | null = null;
+let dashboardServiceInstance: IDashboardService | null = null;
+let adminTeamServiceInstance: IAdminTeamService | null = null;
+let statisticsServiceInstance: IStatisticsService | null = null;
 
 // ============================================================================
 // FACTORY FUNCTIONS
@@ -234,6 +275,65 @@ export function getTeamService(tbaApiConfig?: TBAApiConfig): ITeamService {
 }
 
 /**
+ * Create Dashboard Service with all dependencies
+ */
+export function createDashboardService(): IDashboardService {
+  return createDashboardServiceImpl();
+}
+
+/**
+ * Get or create singleton Dashboard Service instance
+ */
+export function getDashboardService(): IDashboardService {
+  if (!dashboardServiceInstance) {
+    dashboardServiceInstance = createDashboardService();
+  }
+  return dashboardServiceInstance;
+}
+
+/**
+ * Create Admin Team Service with all dependencies
+ */
+export function createAdminTeamService(): IAdminTeamService {
+  return createAdminTeamServiceImpl();
+}
+
+/**
+ * Get or create singleton Admin Team Service instance
+ */
+export function getAdminTeamService(): IAdminTeamService {
+  if (!adminTeamServiceInstance) {
+    adminTeamServiceInstance = createAdminTeamService();
+  }
+  return adminTeamServiceInstance;
+}
+
+/**
+ * Create Statistics Service with all dependencies
+ */
+export function createStatisticsService(): IStatisticsService {
+  const statisticsRepo = createStatisticsRepository();
+  const scoutingDataRepo = createScoutingDataRepository();
+  const matchRepo = createMatchRepository();
+
+  return createStatisticsServiceImpl(
+    statisticsRepo,
+    scoutingDataRepo,
+    matchRepo
+  );
+}
+
+/**
+ * Get or create singleton Statistics Service instance
+ */
+export function getStatisticsService(): IStatisticsService {
+  if (!statisticsServiceInstance) {
+    statisticsServiceInstance = createStatisticsService();
+  }
+  return statisticsServiceInstance;
+}
+
+/**
  * Reset all singleton instances (useful for testing)
  */
 export function resetServiceInstances(): void {
@@ -241,6 +341,9 @@ export function resetServiceInstances(): void {
   eventServiceInstance = null;
   matchServiceInstance = null;
   teamServiceInstance = null;
+  dashboardServiceInstance = null;
+  adminTeamServiceInstance = null;
+  statisticsServiceInstance = null;
 }
 
 /**
@@ -252,6 +355,9 @@ export function createAllServices(tbaApiConfig?: TBAApiConfig) {
     eventService: createEventService(tbaApiConfig),
     matchService: createMatchService(),
     teamService: createTeamService(tbaApiConfig),
+    dashboardService: createDashboardService(),
+    adminTeamService: createAdminTeamService(),
+    statisticsService: createStatisticsService(),
   };
 }
 
@@ -264,6 +370,9 @@ export function getAllServices(tbaApiConfig?: TBAApiConfig) {
     eventService: getEventService(tbaApiConfig),
     matchService: getMatchService(),
     teamService: getTeamService(tbaApiConfig),
+    dashboardService: getDashboardService(),
+    adminTeamService: getAdminTeamService(),
+    statisticsService: getStatisticsService(),
   };
 }
 
@@ -276,6 +385,9 @@ export {
   EventService,
   MatchService,
   TeamService,
+  DashboardService,
+  AdminTeamService,
+  StatisticsService,
   createTBAApiService,
   getTBAApiService,
 };

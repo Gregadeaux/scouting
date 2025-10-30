@@ -903,3 +903,9 @@ If implementing a new season and unsure about any step:
 **Remember**: The whole point of this architecture is that adding a new season is **mostly configuration, not code changes**. If you find yourself modifying core files beyond what's listed here, you may be doing something wrong!
 
 Last Updated: 2025-10-20
+- When I ask to add features, make sure there is a github issue with proper labels and milestone assignment to track it with. If there is one, reference it to refresh yourself on the requirements and acceptance criteria. Ask additional questions as needed when we begin work on a ticket.
+- When testing in Playwright, you can use login credentials gregadeaux@gmail.com : Gerg2010
+- when designing UI elements - focus on clarity and efficient use of screen space. Would prefer more information be on the screen at once to limit scrolling, if possible. Don't sacrifice usability for that, but do an honest assesment
+- Once you are finished with a feature, update the github issue, setting its status to "ready to test". When I ask you to test the project, go through all of the github issues for ones with the status "ready to test", and verify for accuracy and usability. If it needs updates, make a comment on the github issue and then set the status to "needs changes". If it is completed, mark it as completed.
+- Do not use the 'any' type. ESLint will error when building
+- When we start working on a feature, find the appropriate github issue and mark it as 'status: in progress'

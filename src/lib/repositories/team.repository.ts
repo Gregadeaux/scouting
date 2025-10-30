@@ -82,11 +82,14 @@ export class TeamRepository implements ITeamRepository {
 
       // If event_teams has data, use it
       if (!eventTeamsError && eventTeams && eventTeams.length > 0) {
-        const teams = eventTeams
-          .map((row: { teams: Team[] | null }) => {
-            // Supabase returns foreign key relations as arrays
-            return row.teams?.[0] ?? null;
-          })
+        // Type assertion needed because Supabase-js doesn't properly infer nested relation types
+        type EventTeamRow = {
+          team_number: number;
+          teams: Team | null;
+        };
+
+        const teams = (eventTeams as unknown as EventTeamRow[])
+          .map((row) => row.teams)
           .filter((team): team is Team => team !== null);
 
         return teams;

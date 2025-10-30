@@ -30,9 +30,39 @@ import type { EventMergeStrategy } from '@/lib/strategies/merge-strategies';
 import { mapTBAEventType } from '@/lib/utils/tba';
 
 /**
+ * Event list options for filtering, sorting, and pagination
+ */
+export interface EventListOptions {
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  search?: string;
+  year?: number;
+}
+
+/**
+ * Event list result with pagination info
+ */
+export interface EventListResult {
+  data: Event[];
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+    has_more: boolean;
+  };
+}
+
+/**
  * Event Service Interface
  */
 export interface IEventService {
+  /**
+   * List events with pagination, filtering, and sorting
+   */
+  listEvents(options: EventListOptions): Promise<EventListResult>;
+
   /**
    * Get complete event details with teams, matches, and coverage stats
    */
@@ -83,6 +113,62 @@ export class EventService implements IEventService {
     private readonly importJobRepo: IImportJobRepository,
     private readonly eventMergeStrategy: EventMergeStrategy
   ) {}
+
+  /**
+   * List events with pagination, filtering, and sorting
+   */
+  async listEvents(options: EventListOptions): Promise<EventListResult> {
+    const {
+      page = 1,
+      limit = 20,
+      sortBy = 'start_date',
+      sortOrder = 'desc',
+      search = '',
+      year,
+    } = options;
+
+    const offset = (page - 1) * limit;
+
+    // Build query using Supabase client
+    // TODO: Refactor repository to expose query builder instead of accessing private client
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const client = (this.eventRepo as any).client;
+    let query = client.from('events').select('*', { count: 'exact' });
+
+    // Apply year filter if provided
+    if (year !== undefined) {
+      query = query.eq('year', year);
+    }
+
+    // Apply search filter
+    if (search) {
+      query = query.or(
+        `event_name.ilike.%${search}%,event_key.ilike.%${search}%,city.ilike.%${search}%,state_province.ilike.%${search}%`
+      );
+    }
+
+    // Apply sorting
+    query = query.order(sortBy, { ascending: sortOrder === 'asc' });
+
+    // Apply pagination
+    query = query.range(offset, offset + limit - 1);
+
+    const { data, error, count } = await query;
+
+    if (error) {
+      throw new Error(`Failed to list events: ${error.message}`);
+    }
+
+    return {
+      data: (data || []) as Event[],
+      pagination: {
+        total: count || 0,
+        limit,
+        offset,
+        has_more: (count || 0) > offset + limit,
+      },
+    };
+  }
 
   /**
    * Get complete event detail

@@ -9,7 +9,7 @@
  * Based on: https://www.chiefdelphi.com/t/1678-match-data-collection-consolidation/166417
  */
 
-import type { MatchScouting, JSONBData } from '@/types';
+import type { MatchScouting, JSONBData, ScoutingSubmission } from '@/types';
 
 // ============================================================================
 // SCOUT PERFORMANCE TRACKING
@@ -24,21 +24,78 @@ export interface ScoutPerformanceRating {
 }
 
 /**
- * Calculate scout performance ratings based on historical data
- * This would typically query historical scouting data to calculate accuracy
- *
- * For now, returns equal weights (1.0) for all scouts
- * TODO: Implement actual SPR calculation based on historical agreement
+ * Calculate Scout Performance Rating (SPR)
+ * Based on:
+ * 1. Agreement with other scouts (inter-rater reliability)
+ * 2. Consistency over time
+ * 3. Outlier frequency
+ * Returns: 0.5 to 1.5 (1.0 = average scout)
+ */
+export function calculateScoutPerformanceRating(
+  scoutName: string,
+  historicalData: ScoutingSubmission[]
+): number {
+  if (historicalData.length === 0) return 1.0;
+
+  const scoutData = historicalData.filter(d => d.scout_name === scoutName);
+  if (scoutData.length === 0) return 1.0;
+
+  // Calculate agreement score (how often this scout agrees with others)
+  const agreementScores = scoutData
+    .map(d => d.agreement_score || 0.5)
+    .filter(score => score > 0);
+  const avgAgreement = agreementScores.length > 0
+    ? agreementScores.reduce((a, b) => a + b, 0) / agreementScores.length
+    : 0.5;
+
+  // Calculate consistency score (standard deviation of accuracy over time)
+  const accuracyScores = scoutData
+    .map(d => d.accuracy_score || 0.5)
+    .filter(score => score > 0);
+
+  let consistency = 1.0;
+  if (accuracyScores.length > 1) {
+    const mean = accuracyScores.reduce((a, b) => a + b, 0) / accuracyScores.length;
+    const variance = accuracyScores.reduce((sum, score) =>
+      sum + Math.pow(score - mean, 2), 0) / accuracyScores.length;
+    const stdDev = Math.sqrt(variance);
+    consistency = Math.max(0, 1 - stdDev); // Lower std dev = higher consistency
+  }
+
+  // Calculate outlier penalty (how often scout's data is an outlier)
+  const outlierRate = scoutData.filter(d =>
+    d.accuracy_score && d.accuracy_score < 0.3
+  ).length / scoutData.length;
+  const outlierPenalty = 1 - (outlierRate * 0.5); // Max 50% penalty for outliers
+
+  // Combine factors
+  const spr = avgAgreement * 0.4 + consistency * 0.3 + outlierPenalty * 0.3;
+
+  // Scale to 0.5 - 1.5 range
+  return 0.5 + spr;
+}
+
+/**
+ * Calculate scout weights based on historical performance
+ * Uses Scout Performance Rating (SPR) for weighting
  */
 export function calculateScoutWeights(
-  scoutNames: string[]
+  scoutNames: string[],
+  historicalData?: ScoutingSubmission[]
 ): Record<string, number> {
   const weights: Record<string, number> = {};
 
-  // Equal weights for now (each scout has weight 1.0)
-  // In production, calculate based on historical performance
+  if (!historicalData || historicalData.length === 0) {
+    // Equal weights if no historical data
+    for (const name of scoutNames) {
+      weights[name] = 1.0;
+    }
+    return weights;
+  }
+
+  // Calculate SPR for each scout
   for (const name of scoutNames) {
-    weights[name] = 1.0;
+    weights[name] = calculateScoutPerformanceRating(name, historicalData);
   }
 
   return weights;
@@ -112,6 +169,138 @@ export function mode<T>(values: T[]): T | null {
   }
 
   return modeValue;
+}
+
+// ============================================================================
+// OUTLIER DETECTION
+// ============================================================================
+
+/**
+ * Detect outliers using IQR (Interquartile Range) method
+ * Returns array of booleans where true = outlier
+ */
+export function detectOutliersIQR(values: number[]): boolean[] {
+  if (values.length < 4) {
+    // Need at least 4 values for IQR
+    return values.map(() => false);
+  }
+
+  const sorted = [...values].sort((a, b) => a - b);
+  const q1Index = Math.floor(values.length * 0.25);
+  const q3Index = Math.floor(values.length * 0.75);
+
+  const q1 = sorted[q1Index];
+  const q3 = sorted[q3Index];
+  const iqr = q3 - q1;
+
+  const lowerBound = q1 - 1.5 * iqr;
+  const upperBound = q3 + 1.5 * iqr;
+
+  return values.map(v => v < lowerBound || v > upperBound);
+}
+
+/**
+ * Detect outliers using Z-score method
+ * Returns array of booleans where true = outlier
+ */
+export function detectOutliersZScore(values: number[], threshold: number = 3): boolean[] {
+  if (values.length < 2) {
+    return values.map(() => false);
+  }
+
+  const mean = values.reduce((a, b) => a + b, 0) / values.length;
+  const variance = values.reduce((sum, v) =>
+    sum + Math.pow(v - mean, 2), 0) / values.length;
+  const stdDev = Math.sqrt(variance);
+
+  if (stdDev === 0) {
+    // All values are the same
+    return values.map(() => false);
+  }
+
+  return values.map(v => Math.abs((v - mean) / stdDev) > threshold);
+}
+
+/**
+ * Generic outlier detection
+ */
+export function detectOutliers<T extends number>(
+  values: T[],
+  method: 'iqr' | 'zscore' = 'iqr'
+): boolean[] {
+  if (method === 'zscore') {
+    return detectOutliersZScore(values);
+  } else {
+    return detectOutliersIQR(values);
+  }
+}
+
+// ============================================================================
+// TREND ANALYSIS
+// ============================================================================
+
+/**
+ * Calculate trend using linear regression
+ * Returns the trend direction and confidence level
+ */
+export function calculateTrend(
+  values: number[],
+  timestamps?: Date[]
+): { direction: 'improving' | 'stable' | 'declining'; confidence: number } {
+  if (values.length < 3) {
+    return { direction: 'stable', confidence: 0.5 };
+  }
+
+  // Create x values (time indices or actual timestamps)
+  const xValues = timestamps
+    ? timestamps.map(t => t.getTime())
+    : values.map((_, i) => i);
+
+  // Calculate means
+  const xMean = xValues.reduce((a, b) => a + b, 0) / xValues.length;
+  const yMean = values.reduce((a, b) => a + b, 0) / values.length;
+
+  // Calculate slope using linear regression
+  let numerator = 0;
+  let denominator = 0;
+
+  for (let i = 0; i < values.length; i++) {
+    numerator += (xValues[i] - xMean) * (values[i] - yMean);
+    denominator += Math.pow(xValues[i] - xMean, 2);
+  }
+
+  if (denominator === 0) {
+    return { direction: 'stable', confidence: 0.5 };
+  }
+
+  const slope = numerator / denominator;
+
+  // Calculate R-squared for confidence
+  const yPredicted = xValues.map(x => slope * (x - xMean) + yMean);
+  const ssRes = values.reduce((sum, y, i) =>
+    sum + Math.pow(y - yPredicted[i], 2), 0);
+  const ssTot = values.reduce((sum, y) =>
+    sum + Math.pow(y - yMean, 2), 0);
+
+  const rSquared = ssTot === 0 ? 0 : 1 - (ssRes / ssTot);
+
+  // Normalize slope to determine significance
+  const normalizedSlope = slope / (yMean || 1);
+
+  // Determine direction based on slope
+  let direction: 'improving' | 'stable' | 'declining';
+  if (Math.abs(normalizedSlope) < 0.05) {
+    direction = 'stable';
+  } else if (normalizedSlope > 0) {
+    direction = 'improving';
+  } else {
+    direction = 'declining';
+  }
+
+  return {
+    direction,
+    confidence: Math.max(0, Math.min(1, rSquared))
+  };
 }
 
 // ============================================================================
@@ -217,6 +406,7 @@ export function consolidatePerformanceData(
 
 export interface ConsolidatedMatchScouting {
   match_id: number;
+  match_key: string; // FK to match_schedule.match_key
   team_number: number;
   alliance_color: 'red' | 'blue';
   scout_count: number;
@@ -322,6 +512,7 @@ export function consolidateMatchScoutingObservations(
 
   return {
     match_id: first.match_id,
+    match_key: first.match_key,
     team_number: first.team_number,
     alliance_color: first.alliance_color,
     scout_count: observations.length,

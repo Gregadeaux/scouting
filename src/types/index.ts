@@ -53,6 +53,16 @@ export type EventType =
   | 'championship'
   | 'offseason';
 
+/**
+ * TBA Video metadata
+ * Videos linked to matches from The Blue Alliance API
+ */
+export interface TBAVideo {
+  key: string;
+  type: 'youtube' | 'tba';
+  url?: string;
+}
+
 export interface MatchSchedule {
   match_id: number;
   event_key: string;
@@ -79,6 +89,21 @@ export interface MatchSchedule {
   actual_time?: string;
   post_result_time?: string;
 
+  // TBA detailed data
+  /**
+   * Game-specific scoring breakdown from TBA API
+   * Structure varies by year/game (e.g., 2025 Reefscape, 2024 Crescendo)
+   * Contains alliance-specific scoring details, point breakdowns, fouls, etc.
+   * Example: { red: { totalPoints: 150, autoPoints: 45, ... }, blue: { ... } }
+   */
+  score_breakdown?: Record<string, unknown>;
+
+  /**
+   * Array of video links associated with this match
+   * Videos sourced from YouTube, TBA, and other platforms
+   */
+  videos?: TBAVideo[];
+
   created_at?: string;
   updated_at?: string;
 }
@@ -101,6 +126,7 @@ export interface MatchScouting<
 > {
   id: string;
   match_id: number;
+  match_key: string; // FK to match_schedule.match_key (NOT NULL)
   team_number: number;
   scout_name: string;
   device_id?: string;
@@ -220,7 +246,7 @@ export interface SeasonConfig {
 export interface TeamStatistics {
   id: string;
   team_number: number;
-  event_key: string;
+  event_key?: string; // Made optional for season-wide stats
 
   // Match counts
   matches_scouted: number;
@@ -251,6 +277,9 @@ export interface TeamStatistics {
   first_pick_ability?: number;
   second_pick_ability?: number;
   overall_rank?: number;
+
+  // Full aggregated statistics (JSONB)
+  aggregated_metrics?: AggregatedStatistics;
 
   // Calculation metadata
   last_calculated_at?: string;
@@ -470,6 +499,76 @@ export interface ValidationError {
 export interface ValidationResult {
   valid: boolean;
   errors: ValidationError[];
+}
+
+// ============================================================================
+// AGGREGATED STATISTICS TYPES
+// ============================================================================
+
+export interface AggregatedStatistics {
+  schema_version: string;
+  team_number: number;
+  event_key: string | null;
+  matches_played: number;
+  matches_expected: number;
+
+  // Auto statistics
+  auto_stats: {
+    avg_points: number;
+    std_dev: number;
+    min: number;
+    max: number;
+    consistency_score: number; // 0-100
+  };
+
+  // Teleop statistics
+  teleop_stats: {
+    avg_points: number;
+    std_dev: number;
+    avg_cycles: number;
+    avg_cycle_time: number;
+    efficiency_score: number; // 0-100
+  };
+
+  // Endgame statistics
+  endgame_stats: {
+    avg_points: number;
+    success_rate: number; // 0-100
+  };
+
+  // Reliability metrics
+  reliability: {
+    played_percentage: number; // 0-100
+    breakdown_rate: number; // 0-100
+    defense_rating: number; // 0-10
+  };
+
+  // Trends
+  trends: {
+    direction: 'improving' | 'stable' | 'declining';
+    confidence: number; // 0-1
+  };
+
+  // Rankings (within event)
+  percentile_rankings?: {
+    auto: number; // 0-100 (higher = better)
+    teleop: number;
+    endgame: number;
+    overall: number;
+  };
+
+  last_calculated: string; // ISO timestamp
+}
+
+// Scout performance for multi-scout consolidation
+export interface ScoutingSubmission {
+  scout_name: string;
+  timestamp: string;
+  match_key?: string;
+  team_number: number;
+  data_type: 'match' | 'pit';
+  accuracy_score?: number; // 0-1
+  agreement_score?: number; // 0-1
 }
 
 // ============================================================================
