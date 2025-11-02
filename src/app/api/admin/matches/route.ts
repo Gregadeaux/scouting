@@ -27,6 +27,9 @@ export async function GET(request: NextRequest) {
       eventKey: searchParams.get('eventKey') || undefined,
       compLevel: searchParams.get('compLevel') || undefined,
       scoutingStatus: searchParams.get('scoutingStatus') || undefined,
+      teamNumber: searchParams.get('teamNumber') ? parseInt(searchParams.get('teamNumber')!) : undefined,
+      dateFrom: searchParams.get('dateFrom') || undefined,
+      dateTo: searchParams.get('dateTo') || undefined,
     };
 
     // Initialize repositories and service

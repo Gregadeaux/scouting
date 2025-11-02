@@ -26,6 +26,7 @@ import {
   shouldAbortRetry,
   type RetryConfig as InfraRetryConfig
 } from './retry-strategy';
+import { BackgroundSyncAdapter } from '../adapters/BackgroundSyncAdapter';
 
 /**
  * Sync configuration
@@ -64,6 +65,7 @@ export class BackgroundSyncCoordinator implements ISyncCoordinator {
   private readonly config: Required<Omit<SyncConfig, 'retryConfig'>> & Pick<SyncConfig, 'retryConfig'>;
   private readonly retryStrategy: RetryStrategy;
   private readonly retryConfig: PortRetryConfig;
+  private readonly bgSyncAdapter: BackgroundSyncAdapter;
   private syncInterval: NodeJS.Timeout | null = null;
   private isSyncingFlag = false;
 
@@ -81,6 +83,7 @@ export class BackgroundSyncCoordinator implements ISyncCoordinator {
     };
 
     this.retryStrategy = createRetryStrategy(config.retryConfig);
+    this.bgSyncAdapter = BackgroundSyncAdapter.getInstance();
 
     // Map infrastructure retry config to port retry config
     const infraConfig = config.retryConfig || {};
@@ -269,6 +272,17 @@ export class BackgroundSyncCoordinator implements ISyncCoordinator {
 
     this.isSyncingFlag = true;
     this.eventBus.publish<SyncStartedEvent>({ type: 'sync.started', submissionIds: [], count: 0 });
+
+    // Register background sync if supported and enabled
+    if (this.config.enableBackgroundSync && this.bgSyncAdapter.isSupported()) {
+      try {
+        await this.bgSyncAdapter.registerSync('submission-sync');
+        console.info('Background sync registered for pending submissions');
+      } catch (error) {
+        console.warn('Failed to register background sync:', error);
+        // Continue with regular sync
+      }
+    }
 
     try {
       // Get pending submissions

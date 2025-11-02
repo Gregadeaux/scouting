@@ -383,6 +383,23 @@ export class MatchService implements IMatchService {
       query = query.eq('comp_level', options.compLevel);
     }
 
+    // Apply team number filter
+    if (options.teamNumber) {
+      query = query.or(
+        `red_1.eq.${options.teamNumber},red_2.eq.${options.teamNumber},red_3.eq.${options.teamNumber},` +
+        `blue_1.eq.${options.teamNumber},blue_2.eq.${options.teamNumber},blue_3.eq.${options.teamNumber}`
+      );
+    }
+
+    // Apply date range filters
+    if (options.dateFrom) {
+      query = query.gte('scheduled_time', options.dateFrom);
+    }
+
+    if (options.dateTo) {
+      query = query.lte('scheduled_time', options.dateTo);
+    }
+
     // Apply sorting
     if (sortBy === 'event_name') {
       query = query.order('event_name', { ascending: sortOrder === 'asc', foreignTable: 'events' });

@@ -45,11 +45,12 @@ const nextConfig: NextConfig = {
 
 export default withPWA({
   dest: 'public',
-  disable: process.env.NODE_ENV === 'development',
+  disable: process.env.NODE_ENV === 'development' && process.env.ENABLE_PWA_DEV !== 'true',
   register: true,
   workboxOptions: {
     skipWaiting: true,
     clientsClaim: true,
+    importScripts: ['/sw-custom.js'],
     runtimeCaching: [
       {
         urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,

@@ -908,4 +908,5 @@ Last Updated: 2025-10-20
 - when designing UI elements - focus on clarity and efficient use of screen space. Would prefer more information be on the screen at once to limit scrolling, if possible. Don't sacrifice usability for that, but do an honest assesment
 - Once you are finished with a feature, update the github issue, setting its status to "ready to test". When I ask you to test the project, go through all of the github issues for ones with the status "ready to test", and verify for accuracy and usability. If it needs updates, make a comment on the github issue and then set the status to "needs changes". If it is completed, mark it as completed.
 - Do not use the 'any' type. ESLint will error when building
-- When we start working on a feature, find the appropriate github issue and mark it as 'status: in progress'
+- When we start working on a feature, find the appropriate github issue and mark its status as 'in progress'
+- When working with github issues and projects, please use the status property to mark things as "In Progress", "Ready to Test", "Needs Changes", and "Done

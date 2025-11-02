@@ -159,6 +159,9 @@ export interface MatchListOptions {
   eventKey?: string;
   compLevel?: string;
   scoutingStatus?: string;
+  teamNumber?: number;
+  dateFrom?: string;
+  dateTo?: string;
 }
 
 export interface MatchWithDetails {

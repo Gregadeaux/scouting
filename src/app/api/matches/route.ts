@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
 
     let query = supabase
-      .from('matches')
+      .from('match_schedule')
       .select('*')
       .range(offset, offset + limit - 1)
       .order('match_number', { ascending: true });
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     const { data, error } = await supabase
-      .from('matches')
+      .from('match_schedule')
       .insert(body)
       .select()
       .single();

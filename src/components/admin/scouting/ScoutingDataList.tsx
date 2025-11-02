@@ -203,22 +203,22 @@ export function ScoutingDataList({
                 </td>
                 <td className="whitespace-nowrap px-2 py-2 text-center">
                   <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                    {entry.preview_metrics.auto_points || '-'}
+                    {entry.preview_metrics.auto_points ?? '-'}
                   </span>
                 </td>
                 <td className="whitespace-nowrap px-2 py-2 text-center">
                   <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                    {entry.preview_metrics.teleop_points || '-'}
+                    {entry.preview_metrics.teleop_points ?? '-'}
                   </span>
                 </td>
                 <td className="whitespace-nowrap px-2 py-2 text-center">
                   <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                    {entry.preview_metrics.endgame_points || '-'}
+                    {entry.preview_metrics.endgame_points ?? '-'}
                   </span>
                 </td>
                 <td className="whitespace-nowrap px-2 py-2 text-center">
                   <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
-                    {entry.preview_metrics.total_points}
+                    {entry.preview_metrics.total_points ?? '-'}
                   </span>
                 </td>
                 <td className="whitespace-nowrap px-3 py-2 text-center">

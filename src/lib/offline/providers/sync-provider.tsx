@@ -179,6 +179,31 @@ export function SyncProvider({
   }, [onSyncComplete, onSyncError]);
 
   /**
+   * Listen for service worker messages about background sync completion
+   */
+  useEffect(() => {
+    const handleServiceWorkerMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'SYNC_COMPLETE') {
+        console.log(`Background sync completed: ${event.data.successCount}/${event.data.totalCount} succeeded`);
+        setIsSyncing(false);
+        setLastSyncTime(Date.now());
+        // Trigger a refresh of pending count
+        sync();
+      }
+    };
+
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.addEventListener('message', handleServiceWorkerMessage);
+    }
+
+    return () => {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
+      }
+    };
+  }, [sync]);
+
+  /**
    * Sync when coming online
    */
   useEffect(() => {

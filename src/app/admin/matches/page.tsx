@@ -2,23 +2,46 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Event } from '@/types';
 import { Column, PaginationConfig, MatchWithDetails } from '@/types/admin';
 import { DataTable } from '@/components/admin/DataTable';
 import { SearchBar } from '@/components/admin/SearchBar';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/admin/Toast';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, X } from 'lucide-react';
+
+const LOCALSTORAGE_KEY = 'matchFilters';
+
+interface FilterState {
+  searchQuery: string;
+  selectedEvent: string;
+  selectedCompLevel: string;
+  selectedScoutingStatus: string;
+  teamNumber: string;
+  dateFrom: string;
+  dateTo: string;
+}
 
 export default function MatchesPage() {
   const { showToast } = useToast();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [matches, setMatches] = useState<MatchWithDetails[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
+
+  // Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedEvent, setSelectedEvent] = useState<string>('');
   const [selectedCompLevel, setSelectedCompLevel] = useState<string>('');
   const [selectedScoutingStatus, setSelectedScoutingStatus] = useState<string>('');
+  const [teamNumber, setTeamNumber] = useState<string>('');
+  const [dateFrom, setDateFrom] = useState<string>('');
+  const [dateTo, setDateTo] = useState<string>('');
+
   const [pagination, setPagination] = useState<PaginationConfig>({
     page: 1,
     limit: 50,
@@ -26,6 +49,77 @@ export default function MatchesPage() {
   });
   const [sortBy, setSortBy] = useState<string>('match_number');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  // Initialize filters from URL params or localStorage
+  useEffect(() => {
+    if (initialized) return;
+
+    // Priority: URL params > localStorage > defaults
+    const urlSearch = searchParams.get('search') || '';
+    const urlEvent = searchParams.get('event') || '';
+    const urlCompLevel = searchParams.get('compLevel') || '';
+    const urlScoutingStatus = searchParams.get('scoutingStatus') || '';
+    const urlTeamNumber = searchParams.get('teamNumber') || '';
+    const urlDateFrom = searchParams.get('dateFrom') || '';
+    const urlDateTo = searchParams.get('dateTo') || '';
+
+    // Check if any URL params exist
+    const hasUrlParams = urlSearch || urlEvent || urlCompLevel || urlScoutingStatus ||
+                         urlTeamNumber || urlDateFrom || urlDateTo;
+
+    if (hasUrlParams) {
+      // Load from URL
+      setSearchQuery(urlSearch);
+      setSelectedEvent(urlEvent);
+      setSelectedCompLevel(urlCompLevel);
+      setSelectedScoutingStatus(urlScoutingStatus);
+      setTeamNumber(urlTeamNumber);
+      setDateFrom(urlDateFrom);
+      setDateTo(urlDateTo);
+    } else {
+      // Try to load from localStorage
+      try {
+        const saved = localStorage.getItem(LOCALSTORAGE_KEY);
+        if (saved) {
+          const filters: FilterState = JSON.parse(saved);
+          setSearchQuery(filters.searchQuery || '');
+          setSelectedEvent(filters.selectedEvent || '');
+          setSelectedCompLevel(filters.selectedCompLevel || '');
+          setSelectedScoutingStatus(filters.selectedScoutingStatus || '');
+          setTeamNumber(filters.teamNumber || '');
+          setDateFrom(filters.dateFrom || '');
+          setDateTo(filters.dateTo || '');
+        }
+      } catch (error) {
+        console.error('Error loading filters from localStorage:', error);
+      }
+    }
+
+    setInitialized(true);
+  }, [initialized, searchParams]);
+
+  // Sync filters to URL and localStorage
+  const updateFiltersInUrlAndStorage = useCallback((filters: FilterState) => {
+    // Save to localStorage
+    try {
+      localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(filters));
+    } catch (error) {
+      console.error('Error saving filters to localStorage:', error);
+    }
+
+    // Update URL
+    const params = new URLSearchParams();
+    if (filters.searchQuery) params.set('search', filters.searchQuery);
+    if (filters.selectedEvent) params.set('event', filters.selectedEvent);
+    if (filters.selectedCompLevel) params.set('compLevel', filters.selectedCompLevel);
+    if (filters.selectedScoutingStatus) params.set('scoutingStatus', filters.selectedScoutingStatus);
+    if (filters.teamNumber) params.set('teamNumber', filters.teamNumber);
+    if (filters.dateFrom) params.set('dateFrom', filters.dateFrom);
+    if (filters.dateTo) params.set('dateTo', filters.dateTo);
+
+    const queryString = params.toString();
+    router.push(`/admin/matches${queryString ? `?${queryString}` : ''}`, { scroll: false });
+  }, [router]);
 
   // Fetch events for dropdown
   const fetchEvents = async () => {
@@ -41,6 +135,8 @@ export default function MatchesPage() {
   };
 
   const fetchMatches = useCallback(async () => {
+    if (!initialized) return; // Wait for initialization
+
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -52,6 +148,9 @@ export default function MatchesPage() {
         ...(selectedEvent && { eventKey: selectedEvent }),
         ...(selectedCompLevel && { compLevel: selectedCompLevel }),
         ...(selectedScoutingStatus && { scoutingStatus: selectedScoutingStatus }),
+        ...(teamNumber && { teamNumber: teamNumber }),
+        ...(dateFrom && { dateFrom: dateFrom }),
+        ...(dateTo && { dateTo: dateTo }),
       });
 
       const response = await fetch(`/api/admin/matches?${params}`);
@@ -68,7 +167,7 @@ export default function MatchesPage() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, pagination.limit, sortBy, sortOrder, searchQuery, selectedEvent, selectedCompLevel, selectedScoutingStatus, showToast]);
+  }, [initialized, pagination.page, pagination.limit, sortBy, sortOrder, searchQuery, selectedEvent, selectedCompLevel, selectedScoutingStatus, teamNumber, dateFrom, dateTo, showToast]);
 
   useEffect(() => {
     fetchEvents();
@@ -90,21 +189,120 @@ export default function MatchesPage() {
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     setPagination((prev) => ({ ...prev, page: 1 }));
+    updateFiltersInUrlAndStorage({
+      searchQuery: query,
+      selectedEvent,
+      selectedCompLevel,
+      selectedScoutingStatus,
+      teamNumber,
+      dateFrom,
+      dateTo,
+    });
   };
 
   const handleEventChange = (eventKey: string) => {
     setSelectedEvent(eventKey);
     setPagination((prev) => ({ ...prev, page: 1 }));
+    updateFiltersInUrlAndStorage({
+      searchQuery,
+      selectedEvent: eventKey,
+      selectedCompLevel,
+      selectedScoutingStatus,
+      teamNumber,
+      dateFrom,
+      dateTo,
+    });
   };
 
   const handleCompLevelChange = (compLevel: string) => {
     setSelectedCompLevel(compLevel);
     setPagination((prev) => ({ ...prev, page: 1 }));
+    updateFiltersInUrlAndStorage({
+      searchQuery,
+      selectedEvent,
+      selectedCompLevel: compLevel,
+      selectedScoutingStatus,
+      teamNumber,
+      dateFrom,
+      dateTo,
+    });
   };
 
   const handleScoutingStatusChange = (status: string) => {
     setSelectedScoutingStatus(status);
     setPagination((prev) => ({ ...prev, page: 1 }));
+    updateFiltersInUrlAndStorage({
+      searchQuery,
+      selectedEvent,
+      selectedCompLevel,
+      selectedScoutingStatus: status,
+      teamNumber,
+      dateFrom,
+      dateTo,
+    });
+  };
+
+  const handleTeamNumberChange = (team: string) => {
+    setTeamNumber(team);
+    setPagination((prev) => ({ ...prev, page: 1 }));
+    updateFiltersInUrlAndStorage({
+      searchQuery,
+      selectedEvent,
+      selectedCompLevel,
+      selectedScoutingStatus,
+      teamNumber: team,
+      dateFrom,
+      dateTo,
+    });
+  };
+
+  const handleDateFromChange = (date: string) => {
+    setDateFrom(date);
+    setPagination((prev) => ({ ...prev, page: 1 }));
+    updateFiltersInUrlAndStorage({
+      searchQuery,
+      selectedEvent,
+      selectedCompLevel,
+      selectedScoutingStatus,
+      teamNumber,
+      dateFrom: date,
+      dateTo,
+    });
+  };
+
+  const handleDateToChange = (date: string) => {
+    setDateTo(date);
+    setPagination((prev) => ({ ...prev, page: 1 }));
+    updateFiltersInUrlAndStorage({
+      searchQuery,
+      selectedEvent,
+      selectedCompLevel,
+      selectedScoutingStatus,
+      teamNumber,
+      dateFrom,
+      dateTo: date,
+    });
+  };
+
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setSelectedEvent('');
+    setSelectedCompLevel('');
+    setSelectedScoutingStatus('');
+    setTeamNumber('');
+    setDateFrom('');
+    setDateTo('');
+    setPagination((prev) => ({ ...prev, page: 1 }));
+
+    // Clear localStorage
+    try {
+      localStorage.removeItem(LOCALSTORAGE_KEY);
+    } catch (error) {
+      console.error('Error clearing localStorage:', error);
+    }
+
+    // Clear URL params
+    router.push('/admin/matches', { scroll: false });
   };
 
   const getCompLevelBadge = (compLevel: string) => {
@@ -258,18 +456,29 @@ export default function MatchesPage() {
 
       {/* Search and Filters */}
       <div className="flex flex-col gap-4">
-        <div className="flex-1">
-          <SearchBar
-            onSearch={handleSearch}
-            placeholder="Search by match key..."
-          />
+        <div className="flex gap-3 items-center">
+          <div className="flex-1">
+            <SearchBar
+              onSearch={handleSearch}
+              placeholder="Search by match key..."
+            />
+          </div>
+          <Button
+            onClick={handleClearFilters}
+            variant="secondary"
+            size="sm"
+            className="whitespace-nowrap"
+          >
+            <X className="h-4 w-4 mr-2" />
+            Clear Filters
+          </Button>
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {/* Event Filter */}
-          <div className="flex items-center gap-2">
-            <label htmlFor="event-filter" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Event:
+          <div className="flex flex-col gap-1">
+            <label htmlFor="event-filter" className="text-xs font-medium text-gray-700 dark:text-gray-300">
+              Event
             </label>
             <select
               id="event-filter"
@@ -287,9 +496,9 @@ export default function MatchesPage() {
           </div>
 
           {/* Competition Level Filter */}
-          <div className="flex items-center gap-2">
-            <label htmlFor="comp-level-filter" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Level:
+          <div className="flex flex-col gap-1">
+            <label htmlFor="comp-level-filter" className="text-xs font-medium text-gray-700 dark:text-gray-300">
+              Competition Level
             </label>
             <select
               id="comp-level-filter"
@@ -307,9 +516,9 @@ export default function MatchesPage() {
           </div>
 
           {/* Scouting Status Filter */}
-          <div className="flex items-center gap-2">
-            <label htmlFor="scouting-status-filter" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Scouting:
+          <div className="flex flex-col gap-1">
+            <label htmlFor="scouting-status-filter" className="text-xs font-medium text-gray-700 dark:text-gray-300">
+              Scouting Status
             </label>
             <select
               id="scouting-status-filter"
@@ -322,6 +531,49 @@ export default function MatchesPage() {
               <option value="partial">Partial (1-99%)</option>
               <option value="none">None (0%)</option>
             </select>
+          </div>
+
+          {/* Team Number Filter */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="team-number-filter" className="text-xs font-medium text-gray-700 dark:text-gray-300">
+              Team Number
+            </label>
+            <input
+              id="team-number-filter"
+              type="number"
+              value={teamNumber}
+              onChange={(e) => handleTeamNumberChange(e.target.value)}
+              placeholder="e.g., 930"
+              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+            />
+          </div>
+
+          {/* Date From Filter */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="date-from-filter" className="text-xs font-medium text-gray-700 dark:text-gray-300">
+              From Date
+            </label>
+            <input
+              id="date-from-filter"
+              type="date"
+              value={dateFrom}
+              onChange={(e) => handleDateFromChange(e.target.value)}
+              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+            />
+          </div>
+
+          {/* Date To Filter */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="date-to-filter" className="text-xs font-medium text-gray-700 dark:text-gray-300">
+              To Date
+            </label>
+            <input
+              id="date-to-filter"
+              type="date"
+              value={dateTo}
+              onChange={(e) => handleDateToChange(e.target.value)}
+              className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+            />
           </div>
         </div>
       </div>
