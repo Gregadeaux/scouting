@@ -17,35 +17,48 @@ interface EnrichedRecentMatch extends MatchSchedule {
 }
 
 /**
- * Transform TBA score breakdown from camelCase to snake_case
- * TBA API returns fields like totalPoints, autoPoints, etc.
- * Our component expects total_points, auto_points, etc.
+ * Transform TBA 2025 Reefscape score breakdown to component format
+ * TBA structure has nested objects for reef levels and different naming
  */
 function transformScoreBreakdown(
   breakdown: Record<string, unknown> | null
 ): Record<string, number | null> | null {
   if (!breakdown) return null;
 
+  // Extract teleop reef data (nested structure)
+  const teleopReef = breakdown.teleopReef as Record<string, unknown> | undefined;
+  const autoReef = breakdown.autoReef as Record<string, unknown> | undefined;
+
+  // Count cage climbs by type
+  const robots = [
+    breakdown.endGameRobot1 as string,
+    breakdown.endGameRobot2 as string,
+    breakdown.endGameRobot3 as string,
+  ];
+  const shallowCount = robots.filter(r => r === 'ShallowCage').length;
+  const deepCount = robots.filter(r => r === 'DeepCage').length;
+
   return {
     // Main scoring categories
     total_points: (breakdown.totalPoints as number) ?? null,
     auto_points: (breakdown.autoPoints as number) ?? null,
     teleop_points: (breakdown.teleopPoints as number) ?? null,
-    endgame_points: (breakdown.endgamePoints as number) ?? null,
+    endgame_points: (breakdown.endGameBargePoints as number) ?? null,
 
-    // 2025 Reefscape - Coral scoring (L1-L4)
-    coral_L1: (breakdown.coralLevel1 as number) ?? null,
-    coral_L2: (breakdown.coralLevel2 as number) ?? null,
-    coral_L3: (breakdown.coralLevel3 as number) ?? null,
-    coral_L4: (breakdown.coralLevel4 as number) ?? null,
+    // 2025 Reefscape - Coral scoring on reef
+    // L1 = trough (lowest), L2 = bottom row, L3 = middle row, L4 = top row
+    coral_L1: (teleopReef?.trough as number) ?? 0,
+    coral_L2: (teleopReef?.tba_botRowCount as number) ?? 0,
+    coral_L3: (teleopReef?.tba_midRowCount as number) ?? 0,
+    coral_L4: (teleopReef?.tba_topRowCount as number) ?? 0,
 
-    // 2025 Reefscape - Algae scoring
-    algae_barge: (breakdown.algaeBarge as number) ?? null,
-    algae_processor: (breakdown.algaeProcessor as number) ?? null,
+    // 2025 Reefscape - Algae scoring (counts, not points)
+    algae_barge: (breakdown.netAlgaeCount as number) ?? 0, // Net = barge algae count
+    algae_processor: (breakdown.wallAlgaeCount as number) ?? 0, // Wall = processor algae count
 
-    // 2025 Reefscape - Cage climb
-    cage_shallow: (breakdown.cageShallow as number) ?? null,
-    cage_deep: (breakdown.cageDeep as number) ?? null,
+    // 2025 Reefscape - Cage climb counts
+    cage_shallow: shallowCount,
+    cage_deep: deepCount,
   };
 }
 
