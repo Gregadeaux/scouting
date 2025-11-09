@@ -3,14 +3,16 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/Card';
 import { ExternalLink } from 'lucide-react';
 import type { Team } from '@/types';
+import type { ScoutingEntryWithDetails } from '@/types/admin';
 
 interface AllianceColumnProps {
   alliance: 'red' | 'blue';
   teamNumbers: (number | null | undefined)[];
   teams: Record<number, Team>;
+  scoutingData?: Record<number, ScoutingEntryWithDetails[]>;
 }
 
-export function AllianceColumn({ alliance, teamNumbers, teams }: AllianceColumnProps) {
+export function AllianceColumn({ alliance, teamNumbers, teams, scoutingData }: AllianceColumnProps) {
   const isRed = alliance === 'red';
   const bgColor = isRed
     ? 'bg-red-50 dark:bg-red-950/20'
@@ -36,6 +38,33 @@ export function AllianceColumn({ alliance, teamNumbers, teams }: AllianceColumnP
         {teamNumbers.map((teamNumber, index) => {
           const team = teamNumber ? teams[teamNumber] : null;
           const position = index + 1;
+
+          // Get scouting data for this team
+          const teamScoutingEntries = teamNumber && scoutingData ? scoutingData[teamNumber] : undefined;
+
+          // Calculate metrics from scouting data
+          let metrics: { auto: number; teleop: number; endgame: number; isAverage: boolean; matchCount: number } | null = null;
+
+          if (teamScoutingEntries && teamScoutingEntries.length > 0) {
+            // Check if this is average data (from the API for upcoming matches)
+            const isAverageData = teamScoutingEntries[0].auto_performance?.is_average === true;
+            const matchCount = isAverageData ? (teamScoutingEntries[0].auto_performance?.match_count || 0) : teamScoutingEntries.length;
+
+            if (matchCount > 0) {
+              // Calculate average metrics
+              const totalAuto = teamScoutingEntries.reduce((sum, e) => sum + e.preview_metrics.auto_points, 0);
+              const totalTeleop = teamScoutingEntries.reduce((sum, e) => sum + e.preview_metrics.teleop_points, 0);
+              const totalEndgame = teamScoutingEntries.reduce((sum, e) => sum + e.preview_metrics.endgame_points, 0);
+
+              metrics = {
+                auto: totalAuto / teamScoutingEntries.length,
+                teleop: totalTeleop / teamScoutingEntries.length,
+                endgame: totalEndgame / teamScoutingEntries.length,
+                isAverage: isAverageData,
+                matchCount: matchCount,
+              };
+            }
+          }
 
           return (
             <Card
@@ -75,21 +104,63 @@ export function AllianceColumn({ alliance, teamNumbers, teams }: AllianceColumnP
                       )}
                     </div>
 
-                    {/* Quick Stats Placeholder */}
+                    {/* Scouting Metrics or Placeholder */}
                     <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                      <div className="text-center">
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Avg Score</p>
-                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">-</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-xs text-gray-500 dark:text-gray-400">W-L-T</p>
-                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">-</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Rank</p>
-                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">-</p>
-                      </div>
+                      {metrics ? (
+                        <>
+                          <div className="text-center">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {metrics.isAverage ? 'Avg Auto' : 'Auto'}
+                            </p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              {metrics.auto.toFixed(1)}
+                            </p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {metrics.isAverage ? 'Avg Teleop' : 'Teleop'}
+                            </p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              {metrics.teleop.toFixed(1)}
+                            </p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {metrics.isAverage ? 'Avg Endgame' : 'Endgame'}
+                            </p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              {metrics.endgame.toFixed(1)}
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-center">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Auto</p>
+                            <p className="text-sm font-semibold text-gray-400 dark:text-gray-500">-</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Teleop</p>
+                            <p className="text-sm font-semibold text-gray-400 dark:text-gray-500">-</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Endgame</p>
+                            <p className="text-sm font-semibold text-gray-400 dark:text-gray-500">-</p>
+                          </div>
+                        </>
+                      )}
                     </div>
+
+                    {/* Show match count for averages */}
+                    {metrics && metrics.isAverage && (
+                      <div className="text-center mt-1">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                          {metrics.matchCount === 0
+                            ? 'No prior matches'
+                            : `From ${metrics.matchCount} ${metrics.matchCount === 1 ? 'match' : 'matches'}`}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="flex items-center justify-center h-20">
