@@ -458,33 +458,45 @@ export class ImportService implements IImportService {
   }
 
   /**
-   * Update match results (scores) only
+   * Update match results (scores, score_breakdown, videos) only
    */
   private async updateMatchResults(job: ImportJob): Promise<number> {
     this.log(`Updating match results for event ${job.event_key}`);
 
     // Fetch matches from TBA
     const tbaMatches = await this.tbaApi.getEventMatches(job.event_key);
-    let updatedCount = 0;
+    const matches: Partial<MatchSchedule>[] = [];
 
     for (const tbaMatch of tbaMatches) {
       try {
-        // Only update if match has scores
+        // Only process if match has scores
         if (tbaMatch.alliances?.red?.score != null && tbaMatch.alliances?.blue?.score != null) {
-          const redScore = tbaMatch.alliances.red.score;
-          const blueScore = tbaMatch.alliances.blue.score;
+          // Convert full TBA match to our format (includes score_breakdown and videos)
+          const match = this.convertTBAMatch(tbaMatch, job.event_key);
 
-          await this.matchRepo.updateScores(tbaMatch.key, redScore, blueScore);
-          updatedCount++;
+          // Get existing match to merge with
+          const existing = await this.matchRepo.findByMatchKey(match.match_key);
+
+          // Merge using strategy
+          const mergeResult = existing ? this.matchMergeStrategy.merge(existing, tbaMatch) : match;
+          const merged = { ...match, ...mergeResult };
+
+          matches.push(merged);
         }
       } catch (error) {
-        this.log(`Failed to update results for match ${tbaMatch.key}`, error);
+        this.log(`Failed to process match ${tbaMatch.key}`, error);
         // Continue processing other matches
       }
     }
 
-    this.log(`Updated results for ${updatedCount} matches`);
-    return updatedCount;
+    // Bulk upsert all matches (includes score_breakdown and videos)
+    if (matches.length > 0) {
+      const upserted = await this.matchRepo.bulkUpsert(matches);
+      this.log(`Updated results for ${upserted.length} matches (with score breakdown)`);
+      return upserted.length;
+    }
+
+    return 0;
   }
 
   /**
