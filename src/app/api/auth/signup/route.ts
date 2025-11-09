@@ -5,9 +5,9 @@
 
 import { NextRequest } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
-import { signUp, getCurrentUser } from '@/lib/supabase/auth';
+import { signUp, getCurrentUser, getPermissionsForRole } from '@/lib/supabase/auth';
 import { successResponse, errorResponse } from '@/lib/api/auth-middleware';
-import type { SignupFormData } from '@/types/auth';
+import type { SignupFormData, AuthenticatedUser } from '@/types/auth';
 
 /**
  * POST /api/auth/signup
@@ -43,58 +43,65 @@ export async function POST(request: NextRequest) {
       team_number: body.team_number,
     };
 
-    const supabase = await createClient();
+    // Use service role client for admin operations
+    const serviceClient = createServiceClient();
 
-    // Sign up with Supabase Auth
-    // Note: User metadata (full_name, team_number) is stored in auth.users.raw_user_meta_data
-    // The user_profiles table should be automatically populated via database trigger
-    const { user: authUser, error: signUpError, isDuplicateEmail } = await signUp(supabase, formData);
+    // Try using admin.createUser instead of signUp to bypass potential issues
+    try {
+      const { data: authData, error: authError } = await serviceClient.auth.admin.createUser({
+        email: formData.email,
+        password: formData.password,
+        email_confirm: true, // Auto-confirm email for now
+        user_metadata: {
+          full_name: formData.full_name,
+          team_number: formData.team_number,
+          role: 'scouter', // Default role
+        }
+      });
 
-    console.log('Supabase signUp result:', {
-      success: !!authUser,
-      error: signUpError?.message,
-      errorDetails: signUpError,
-      userId: authUser?.id,
-      isDuplicateEmail
-    });
+      if (authError) {
+        console.error('Admin createUser error:', authError);
 
-    if (signUpError || !authUser) {
-      console.error('Signup failed:', signUpError);
+        // Check for duplicate email
+        // Type guard for error objects with code property
+        const hasCode = (err: unknown): err is { code: string } => {
+          return typeof err === 'object' && err !== null && 'code' in err;
+        };
 
-      // Check for duplicate email error (409 Conflict)
-      if (isDuplicateEmail) {
-        return errorResponse('An account with this email already exists', 409);
+        const isDuplicateEmail =
+          authError.message?.toLowerCase().includes('already registered') ||
+          authError.message?.toLowerCase().includes('duplicate') ||
+          (hasCode(authError) && authError.code === '23505');
+
+        if (isDuplicateEmail) {
+          return errorResponse('An account with this email already exists', 409);
+        }
+
+        return errorResponse(authError.message || 'Failed to create account', 500);
       }
 
-      // Check for password validation errors (400 Bad Request)
-      if (signUpError?.message?.includes('password')) {
-        return errorResponse('Password does not meet requirements', 400);
+      const authUser = authData?.user;
+      if (!authUser) {
+        return errorResponse('Failed to create account - no user returned', 500);
       }
 
-      // Check for email validation errors (400 Bad Request)
-      if (signUpError?.message?.includes('email') || signUpError?.message?.includes('invalid')) {
-        return errorResponse('Invalid email format', 400);
-      }
+      console.log('User created via admin API:', {
+        userId: authUser.id,
+        email: authUser.email
+      });
 
-      // Generic fallback - 500 Internal Server Error for unexpected auth errors
-      return errorResponse('An error occurred during signup. Please try again.', 500);
-    }
+      // Check if profile was created by the trigger
+      // Wait a moment for trigger to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
 
-    // Check if profile was created by the trigger
-    // Wait a moment for trigger to complete
-    await new Promise(resolve => setTimeout(resolve, 100));
+      const { data: existingProfile } = await serviceClient
+        .from('user_profiles')
+        .select('*')
+        .eq('id', authUser.id)
+        .single();
 
-    const { data: existingProfile } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('id', authUser.id)
-      .single();
-
-    if (!existingProfile) {
-      console.log('Profile not created by trigger, creating manually with service role client');
-
-      // Use service role client to bypass RLS policies
-      const serviceClient = createServiceClient();
+      if (!existingProfile) {
+        console.log('Profile not created by trigger, creating manually with service role client');
 
       const { error: profileError } = await serviceClient
         .from('user_profiles')
@@ -155,31 +162,61 @@ export async function POST(request: NextRequest) {
       console.log('Profile already exists from trigger');
     }
 
-    // Get full user object with profile and permissions
-    const currentUser = await getCurrentUser(supabase);
+      // Get full user object with profile and permissions using regular client
+      const supabase = await createClient();
+      const currentUser = await getCurrentUser(supabase);
 
-    console.log('User profile lookup:', {
-      profileFound: !!currentUser,
-      userId: authUser.id
-    });
+      console.log('User profile lookup:', {
+        profileFound: !!currentUser,
+        userId: authUser.id
+      });
 
-    if (!currentUser) {
-      // Profile should exist now, this shouldn't happen
-      console.error('Profile still not found after manual creation');
-      return errorResponse(
-        'Account created but profile setup incomplete. Please contact support.',
-        500
+      if (!currentUser) {
+        // Try to get the profile directly with service client
+        const { data: profile } = await serviceClient
+          .from('user_profiles')
+          .select('*')
+          .eq('id', authUser.id)
+          .single();
+
+        if (profile) {
+          // Profile exists, construct the user object manually
+          const permissions = getPermissionsForRole(profile.role);
+          const authenticatedUser: AuthenticatedUser = {
+            auth: authUser,
+            profile,
+            permissions
+          };
+
+          return successResponse(
+            {
+              user: authenticatedUser,
+              session: null // No session until email is verified
+            },
+            201
+          );
+        }
+
+        // Profile still doesn't exist
+        console.error('Profile still not found after manual creation');
+        return errorResponse(
+          'Account created but profile setup incomplete. Please contact support.',
+          500
+        );
+      }
+
+      // Return the properly structured response with user and session
+      return successResponse(
+        {
+          user: currentUser,
+          session: null // No session until email is verified
+        },
+        201
       );
+    } catch (error) {
+      console.error('Error in signup process:', error);
+      return errorResponse('An error occurred during signup. Please try again.', 500);
     }
-
-    // Return the properly structured response with user and session
-    return successResponse(
-      {
-        user: currentUser,
-        session: null // No session until email is verified
-      },
-      201
-    );
   } catch (error) {
     console.error('Error in POST /api/auth/signup:', error);
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack');

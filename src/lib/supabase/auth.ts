@@ -217,12 +217,30 @@ export async function signUp(
 
   if (error) {
     // Check if this is a duplicate email error
-    // Supabase returns "Database error saving new user" for duplicate emails
+    // Supabase returns specific error codes for duplicate emails
+
+    // Type guards for error objects with code/status properties
+    const hasCode = (err: unknown): err is { code: string } => {
+      return typeof err === 'object' && err !== null && 'code' in err;
+    };
+
+    const hasStatus = (err: unknown): err is { status: number } => {
+      return typeof err === 'object' && err !== null && 'status' in err;
+    };
+
     const isDuplicateEmail =
-      error.message?.includes('Database error saving new user') ||
-      error.message?.includes('already registered') ||
-      error.message?.includes('duplicate') ||
-      error.message?.includes('User already registered');
+      error.message?.toLowerCase().includes('already registered') ||
+      error.message?.toLowerCase().includes('duplicate') ||
+      error.message?.toLowerCase().includes('user already registered') ||
+      (hasCode(error) && error.code === '23505') || // PostgreSQL unique violation
+      (hasStatus(error) && error.status === 422); // Unprocessable entity
+
+    console.log('SignUp error analysis:', {
+      message: error.message,
+      code: hasCode(error) ? error.code : undefined,
+      status: hasStatus(error) ? error.status : undefined,
+      isDuplicateEmail
+    });
 
     return { user: null, error, isDuplicateEmail };
   }
