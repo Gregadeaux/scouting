@@ -437,6 +437,7 @@ export default function TeamDetailClient({ team, events, scouters }: TeamDetailC
               {eventsByYear.map(event => (
                 <TabsContent key={event.event_key} value={event.event_key}>
                   <TeamScoutingHistory
+                    key={`${team.team_number}-${event.event_key}`}
                     teamNumber={team.team_number}
                     eventKey={event.event_key}
                     showAggregates={true}

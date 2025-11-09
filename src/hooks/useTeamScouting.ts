@@ -124,8 +124,6 @@ export function useTeamScouting({
       });
 
       const url = `/api/teams/${teamNumber}/scouting?${params}`;
-      console.log('[useTeamScouting] Fetching:', url);
-
       const response = await fetch(url);
 
       if (!response.ok) {
