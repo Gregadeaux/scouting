@@ -115,11 +115,12 @@ CREATE POLICY "Mentors can view team scouters"
     EXISTS (
       SELECT 1
       FROM user_profiles up
-      JOIN user_teams ut ON ut.user_id = up.id
+      JOIN team_members tm ON tm.user_id = up.id
       WHERE up.id = auth.uid()
         AND up.role IN ('admin', 'mentor')
         AND up.is_active = true
-        AND ut.team_number = scouters.team_number
+        AND tm.team_number = scouters.team_number
+        AND tm.is_active = true
     )
   );
 
