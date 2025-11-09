@@ -137,6 +137,22 @@ export interface IScoutingDataRepository {
   // Pit scouting queries
   findPitScoutingByTeamAndEvent(teamNumber: number, eventKey: string): Promise<PitScouting | null>;
   getPitScoutingById(id: string): Promise<PitScouting | null>;
+
+  // Team event averages for upcoming matches (SCOUT-55)
+  getTeamEventAverages(
+    teamNumber: number,
+    eventKey: string,
+    excludeMatchKey?: string
+  ): Promise<{
+    team_number: number;
+    team_name?: string;
+    match_count: number;
+    avg_auto_points: number;
+    avg_teleop_points: number;
+    avg_endgame_points: number;
+    avg_total_points: number;
+    is_average: true;
+  } | null>;
 }
 
 /**
@@ -1046,6 +1062,118 @@ export class ScoutingDataRepository implements IScoutingDataRepository {
         throw error;
       }
       throw new DatabaseOperationError('delete match scouting', error);
+    }
+  }
+
+  /**
+   * Get team's average performance metrics for all matches at an event
+   * Used to show predicted performance for upcoming matches (SCOUT-55)
+   * @param teamNumber - Team number
+   * @param eventKey - Event key
+   * @param excludeMatchKey - Optional match key to exclude from averages (for updating a played match)
+   * @returns Average metrics or null if no data
+   */
+  async getTeamEventAverages(
+    teamNumber: number,
+    eventKey: string,
+    excludeMatchKey?: string
+  ): Promise<{
+    team_number: number;
+    team_name?: string;
+    match_count: number;
+    avg_auto_points: number;
+    avg_teleop_points: number;
+    avg_endgame_points: number;
+    avg_total_points: number;
+    is_average: true;
+  } | null> {
+    try {
+      // Build query for scouting entries
+      let query = this.client
+        .from('match_scouting')
+        .select(`
+          *,
+          teams!match_scouting_team_number_fkey(team_name),
+          match_schedule!match_scouting_match_key_fkey!inner(
+            event_key
+          )
+        `)
+        .eq('team_number', teamNumber)
+        .eq('match_schedule.event_key', eventKey);
+
+      // Exclude specific match if provided
+      if (excludeMatchKey) {
+        query = query.neq('match_key', excludeMatchKey);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw new DatabaseOperationError('get team event averages', error);
+      }
+
+      if (!data || data.length === 0) {
+        return null;
+      }
+
+      // Calculate averages from all entries
+      const entries = data as MatchScoutingEntry[];
+      let totalAutoPoints = 0;
+      let totalTeleopPoints = 0;
+      let totalEndgamePoints = 0;
+      let validEntries = 0;
+
+      entries.forEach(entry => {
+        try {
+          // Calculate points for this entry
+          const autoPoints = entry.auto_performance && typeof entry.auto_performance === 'object'
+            ? calculateAutoPoints(entry.auto_performance as unknown as AutoPerformance2025)
+            : 0;
+          const teleopPoints = entry.teleop_performance && typeof entry.teleop_performance === 'object'
+            ? calculateTeleopPoints(entry.teleop_performance as unknown as TeleopPerformance2025)
+            : 0;
+          const endgamePoints = entry.endgame_performance && typeof entry.endgame_performance === 'object'
+            ? calculateEndgamePoints(entry.endgame_performance as unknown as EndgamePerformance2025)
+            : 0;
+
+          // Only include entries with at least some data
+          if (autoPoints > 0 || teleopPoints > 0 || endgamePoints > 0) {
+            totalAutoPoints += autoPoints;
+            totalTeleopPoints += teleopPoints;
+            totalEndgamePoints += endgamePoints;
+            validEntries++;
+          }
+        } catch (error) {
+          console.error(`Error calculating points for entry ${entry.id}:`, error);
+        }
+      });
+
+      // Return null if no valid entries
+      if (validEntries === 0) {
+        return null;
+      }
+
+      // Calculate averages
+      const avgAutoPoints = totalAutoPoints / validEntries;
+      const avgTeleopPoints = totalTeleopPoints / validEntries;
+      const avgEndgamePoints = totalEndgamePoints / validEntries;
+      const avgTotalPoints = avgAutoPoints + avgTeleopPoints + avgEndgamePoints;
+
+      return {
+        team_number: teamNumber,
+        team_name: entries[0]?.teams?.team_name,
+        match_count: validEntries,
+        avg_auto_points: Math.round(avgAutoPoints * 10) / 10, // Round to 1 decimal
+        avg_teleop_points: Math.round(avgTeleopPoints * 10) / 10,
+        avg_endgame_points: Math.round(avgEndgamePoints * 10) / 10,
+        avg_total_points: Math.round(avgTotalPoints * 10) / 10,
+        is_average: true,
+      };
+    } catch (error) {
+      if (error instanceof RepositoryError) {
+        throw error;
+      }
+      throw new DatabaseOperationError('get team event averages', error);
     }
   }
 }
