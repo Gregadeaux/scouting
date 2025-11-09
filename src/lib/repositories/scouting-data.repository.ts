@@ -888,7 +888,7 @@ export class ScoutingDataRepository implements IScoutingDataRepository {
         .select(`
           *,
           teams!match_scouting_team_number_fkey(team_name),
-          match_schedule!match_scouting_match_key_fkey(
+          match_schedule!inner(
             event_key,
             comp_level,
             match_number,
