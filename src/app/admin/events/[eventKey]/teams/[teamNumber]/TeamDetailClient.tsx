@@ -49,6 +49,7 @@ export default function TeamDetailClient({ teamDetail, eventKey }: TeamDetailCli
 
           {/* Team Scouting History */}
           <TeamScoutingHistory
+            key={`${team.team_number}-${eventKey}`}
             teamNumber={team.team_number}
             eventKey={eventKey}
             showAggregates={true}
