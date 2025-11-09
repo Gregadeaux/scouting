@@ -1,0 +1,55 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - heading "Join FRC Scouting" [level=1] [ref=e5]
+      - paragraph [ref=e6]: Create an account to start scouting
+    - generic [ref=e7]:
+      - heading "Create Your Account" [level=2] [ref=e8]
+      - button "Continue with Google" [ref=e9] [cursor=pointer]:
+        - img [ref=e10]
+        - text: Continue with Google
+      - generic [ref=e19]: Or sign up with email
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - generic [ref=e22]: Full Name
+          - textbox "Full Name" [ref=e23]:
+            - /placeholder: John Doe
+            - text: Test User
+          - paragraph [ref=e24]: Your name as you'd like it to appear
+        - generic [ref=e25]:
+          - generic [ref=e26]: Email
+          - textbox "Email" [active] [ref=e27]:
+            - /placeholder: your.email@example.com
+        - generic [ref=e28]:
+          - generic [ref=e29]: Password
+          - textbox "Password" [ref=e30]:
+            - /placeholder: Create a strong password
+            - text: weak
+          - paragraph [ref=e31]: At least 8 characters with uppercase, lowercase, and numbers
+        - generic [ref=e32]:
+          - generic [ref=e33]: Confirm Password
+          - textbox "Confirm Password" [ref=e34]:
+            - /placeholder: Re-enter your password
+            - text: weak
+        - generic [ref=e35]:
+          - generic [ref=e36]: Team Number (Optional)
+          - spinbutton "Team Number (Optional)" [ref=e37]: "930"
+          - paragraph [ref=e38]: Your FRC team number
+        - button "Sign Up" [ref=e40] [cursor=pointer]
+        - paragraph [ref=e41]: By signing up, you agree to our terms of service and privacy policy.
+      - paragraph [ref=e43]:
+        - text: Already have an account?
+        - button "Sign in" [ref=e44] [cursor=pointer]
+    - generic [ref=e45]:
+      - paragraph [ref=e46]: By creating an account, you agree to follow your team's code of conduct and FRC gracious professionalism values.
+      - paragraph [ref=e47]:
+        - text: Need help?
+        - link "Contact your mentor" [ref=e48]:
+          - /url: mailto:support@example.com
+  - button "Open Next.js Dev Tools" [ref=e54] [cursor=pointer]:
+    - img [ref=e55]
+  - alert [ref=e60]
+```

@@ -11,18 +11,20 @@ export const metadata: Metadata = {
   description: 'FIRST Robotics Competition scouting and analytics platform',
   keywords: ['FRC', 'FIRST Robotics', 'Scouting', 'Competition'],
   manifest: '/manifest.json',
-  themeColor: '#3b82f6',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'FRC Scout',
   },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
+};
+
+// Viewport configuration moved to separate export per Next.js 15 requirements
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#3b82f6',
 };
 
 export default function RootLayout({

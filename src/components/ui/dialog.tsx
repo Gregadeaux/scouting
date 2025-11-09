@@ -96,9 +96,12 @@ interface DialogContentProps {
 }
 
 export function DialogContent({ children, className = '' }: DialogContentProps) {
-  // If custom className is provided, use it entirely; otherwise use defaults
-  const defaultClasses = 'bg-white dark:bg-gray-900 rounded-lg shadow-lg max-w-md w-full mx-4';
-  const finalClassName = className ? className : defaultClasses;
+  // Always include background, rounding, and shadow. Custom className extends these defaults.
+  const baseClasses = 'bg-white dark:bg-gray-900 rounded-lg shadow-lg';
+  const defaultSizeClasses = 'max-w-md w-full mx-4';
+  const finalClassName = className
+    ? `${baseClasses} ${className}`
+    : `${baseClasses} ${defaultSizeClasses}`;
 
   return (
     <div className={finalClassName}>

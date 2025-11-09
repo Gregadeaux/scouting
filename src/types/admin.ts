@@ -261,3 +261,34 @@ export interface ScoutingListResult {
   data: ScoutingEntryWithDetails[];
   pagination: PaginationInfo;
 }
+
+// ============================================================================
+// MATCH SCOUTING DATA DISPLAY TYPES
+// ============================================================================
+
+export interface MatchScoutingData {
+  match_key: string;
+  red_alliance: ScoutingEntryWithDetails[];
+  blue_alliance: ScoutingEntryWithDetails[];
+  by_team: Record<number, ScoutingEntryWithDetails[]>;
+}
+
+export interface MatchScoutingMetadata {
+  total_entries: number;
+  teams_scouted: number;
+  coverage_percentage: number;
+}
+
+// ============================================================================
+// TEAM SCOUTING DATA DISPLAY TYPES
+// ============================================================================
+
+export interface TeamScoutingAggregates {
+  total_matches: number;
+  avg_auto_points: number;
+  avg_teleop_points: number;
+  avg_endgame_points: number;
+  avg_total_points: number;
+  complete_entries: number;
+  data_quality_distribution: Record<string, number>;
+}

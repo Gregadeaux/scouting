@@ -7,6 +7,7 @@ import { TeamDetailCard } from '@/components/mentor/TeamDetailCard';
 import { PitScoutingViewer } from '@/components/mentor/PitScoutingViewer';
 import { MatchPerformanceSummary } from '@/components/mentor/MatchPerformanceSummary';
 import { TeamPhotosGallery } from '@/components/mentor/TeamPhotosGallery';
+import { TeamScoutingHistory } from '@/components/admin/teams/TeamScoutingHistory';
 import type { TeamDetail } from '@/types/team-detail';
 
 interface TeamDetailClientProps {
@@ -45,6 +46,13 @@ export default function TeamDetailClient({ teamDetail, eventKey }: TeamDetailCli
 
           {/* Team Photos Gallery */}
           <TeamPhotosGallery photos={teamDetail.photos || []} />
+
+          {/* Team Scouting History */}
+          <TeamScoutingHistory
+            teamNumber={team.team_number}
+            eventKey={eventKey}
+            showAggregates={true}
+          />
         </div>
 
         {/* Sidebar - Right Column (1/3 width on large screens, sticky on scroll) */}

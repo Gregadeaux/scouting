@@ -1,0 +1,423 @@
+Team Number	Match Number	Scouter Name	Alliance Color	Leave	Auto Algae Proccessor	Auto Algae Net	Auto Coral L1	Auto Coral L2	Auto Coral L3	Auto Coral L4	Tele Algae Processor	Tele Algae Net	Coral L1	Coral L2	Coral L3	Coral L4	Climb	Driver Confidence	Intake Preference	Disabled?	Defense Rating	Comments
+9401	5	Gavin 5148	Blue	TRUE	0	0	0	0	0	1	1	0	0	1	2	2	Successful Deep Cage	3	Human Player Station	No	0	Removed coral from the reef without scoring it.
+9401	10	dom5148	Blue	TRUE	0	0	0	0	0	2	1	0	0	0	2	2	Attempted Deep Cage	1	Human Player Station	No	0	
+930	6	Luke 930	Red	TRUE	0	0	0	0	0	0	0	0	2	0	0	3	Park	2	Human Player Station	 Ground Pickup	No	Phantom Lakes
+8701	4	Hayden 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	3	4	None	1	Human Player Station	No	0	
+8701	12	Dom5148	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	3	1	None	3	Human Player Station	Yes - But Recovered	0	
+8700	8	Eirian 930	Red	TRUE	0	0	1	0	0	0	0	0	0	0	1	0	None	3	Human Player Station	No	0	
+8700	1	Gavin 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	1	2	0	None	2	Human Player Station	No	0	Slow driver
+7900	5	Adler 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	2	None	No	1	
+7417	8	Adler 5148	Blue	FALSE	0	0	0	0	0	0	0	0	0	0	0	0	None	3	None	No	0	Robot did not show up to the match - was absent
+7417	3	Eirian 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	2	None	No	1	They didn't attempt to score at all
+6947	3	Hayden 6643	Blue	FALSE	0	0	0	0	0	0	0	0	3	0	1	0	Successful Deep Cage	3	Human Player Station	 Ground Pickup	No	Phantom Lakes
+6947	10	Theo 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	1	3	Successful Deep Cage	2	Human Player Station	 Ground Pickup	No	Phantom Lakes
+6643	4	Luke 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	1	None	2	Human Player Station	No	0	
+6643	13	Emilio 5148	Blue	TRUE	0	0	0	0	0	1	1	0	0	0	0	5	Park	1	Human Player Station	No	0	
+6574	9	Gavin 5148	Blue	TRUE	0	0	1	0	0	0	0	0	0	0	0	4	Successful Shallow Cage	2	Ground Pickup	No	0	
+6574	4	Wyatt 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	8	Successful Deep Cage	1	Human Player Station	No	0	
+6421	8	Wyatt 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	6	Successful Deep Cage	1	Human Player Station	No	0	
+6421	3	 	Red	TRUE	0	0	0	0	0	1	0	0	0	0	0	3	Attempted Deep Cage	3	Human Player Station	No	0	Dropped 6 coral trying to score
+6381	9	Eirian 930	Red	TRUE	0	0	0	0	0	1	0	3	0	0	0	0	Park	2	Human Player Station	No	0	Many missed attempts on L4
+6381	1	Ephraim 930	Red	TRUE	0	0	0	0	0	1	0	0	0	0	0	3	Park	1	Human Player Station	No	0	They were fast and scored slowly.
+6318	1	Adler 5148	Blue	TRUE	0	0	0	0	0	1	0	0	1	0	0	6	None	1	Human Player Station	No	0	
+6317	8	Hayden 6643	Blue	TRUE	0	0	1	0	0	0	0	0	0	1	6	0	Successful Deep Cage	2	Human Player Station	No	0	
+6317	1	Zack 930	Red	TRUE	0	0	0	0	0	0	0	0	0	5	3	0	Successful Deep Cage	2	Human Player Station	No	0	
+6223	9	Luke 930	Red	TRUE	0	0	0	0	0	1	0	0	0	1	3	6	Successful Deep Cage	1	Human Player Station	No	0	
+6223	5	Wyatt 930	Red	TRUE	0	0	0	0	0	0	0	0	1	0	3	7	Park	1	Human Player Station	No	0	
+6166	6	Hayden 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	3	Human Player Station	No	2	Looked like they were having problems scoring so they switched to defense.
+6024	6	Gavin 5148	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	2	4	None	2	Human Player Station	No	0	Got stuck on algae
+6024	10	Brady 930	Red	TRUE	0	0	0	0	0	1	0	0	1	0	4	1	None	2	Human Player Station	No	0	
+5993	8	Luke 930	Red	FALSE	0	0	0	0	0	0	0	0	0	0	1	3	Park	2	Human Player Station	No	0	
+5993	4	Gavin 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	2	1	Park	3	Human Player Station	No	0	
+5934	9	Hayden 6643	Blue	TRUE	0	0	2	0	0	0	0	0	5	7	0	0	Successful Deep Cage	1	Ground Pickup	No	0	
+5934	1	Zack 930	Red	TRUE	1	0	1	1	0	0	0	0	2	7	0	0	UNSELECTED	1	Ground Pickup	No	0	
+5148	7	Adler 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	2	1	Park	3	Human Player Station	No	0	They tried scoring algae in the net - unsuccessful
+4786	6	Wyatt 930	Red	TRUE	0	0	0	0	0	0	0	3	0	0	0	3	Successful Deep Cage	3	Ground Pickup	No	1	
+4693	7	Luke 930	Red	TRUE	0	0	0	0	0	0	4	0	0	0	0	0	None	3	None	Yes - But Recovered	0	Disabled for most of match
+4693	1	Silas 6643	Blue	TRUE	0	0	0	0	0	0	5	0	0	0	0	0	None	3	None	No	0	
+4635	5	Hayden 6643	Blue	TRUE	0	0	0	0	0	1	0	1	1	2	2	5	Successful Deep Cage	1	Ground Pickup	No	0	
+4635	10	Kaeden 930	Red	TRUE	0	0	0	0	0	3	0	1	0	3	3	7	Attempted Deep Cage	1	Ground Pickup	No	0	Very fast and little to no mess ups
+4607	3	Gavin 5148	Blue	TRUE	0	0	0	0	0	3	1	0	0	5	0	2	Attempted Deep Cage	2	Human Player Station	No	0	Good Auto
+3692	7	Hayden 6643	Blue	TRUE	0	0	0	0	0	0	0	0	3	2	0	0	None	2	Human Player Station	No	0	Missed L4 multiple times. Got stuck algae on at the end.
+3354	6	Adler 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	3	7	Park	1	Human Player Station	No	0	They successfully helped another robot on their alliance get an algae unstuck from underneath them
+3184	7	Wyatt 930	Red	TRUE	0	0	0	0	0	0	0	3	0	1	2	0	Park	2	Ground Pickup	No	0	
+2530	2	Silas 6643	Blue	TRUE	0	0	0	0	0	3	0	2	0	4	3	4	Successful Deep Cage	1	Human Player Station	No	0	
+2530	11	Dom 5148	Blue	TRUE	0	0	0	0	0	2	0	1	0	0	7	4	Successful Deep Cage	1	Human Player Station	No	0	
+2290	8	Gavin 5148	Blue	TRUE	0	0	0	0	0	3	0	0	1	0	1	7	Park	1	No	0	Phantom Lakes	
+2290	4	Adler 5148	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	0	2	Park	2	Human Player Station	No	0	Got a coral and an algae stuck in their robot
+2202	2	Eirian 930	Red	TRUE	0	0	0	0	0	1	1	0	2	0	1	0	UNSELECTED	3	Ground Pickup	No	0	They had many missed attempts on L4
+2077	9	Wyatt 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Attempted Shallow Cage	3	Human Player Station	No	0	
+2077	4	Eirian 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	1	0	None	2	Human Player Station	No	0	They also took algae out of the reef.
+2062	7	Eirian 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	1	5	None	1	Human Player Station	No	0	They have a pretty consistent L4
+2062	3	Luke 930	Red	TRUE	0	0	1	0	0	0	1	0	0	1	5	0	Park	1	Human Player Station	No	0	
+1792	7	Gavin 5148	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	0	7	Attempted Deep Cage	1	Human Player Station	No	0	
+1792	2	Adler 5148	Blue	TRUE	0	0	0	0	0	1	0	0	0	2	3	3	UNSELECTED	2	Human Player Station	No	0	
+1732	3	Adler 5148	Blue	TRUE	0	0	0	0	0	3	1	0	3	1	4	0	Park	1	Human Player Station	No	0	Dropped lots of coral trying to deposit them onto the reef
+1714	2	Ephraim 930	Red	TRUE	0	0	0	0	0	1	1	0	0	0	0	2	Attempted Shallow Cage	2	Human Player Station	No	0	They were fast but they didn't score a lot of coral.
+1306	6	Eirian 930	Red	FALSE	0	0	0	0	0	0	0	0	1	0	1	3	UNSELECTED	1	Ground Pickup	No	0	They have very fluid movements in pickup and scoring 
+1220	9	Adler 5148	Blue	TRUE	0	0	1	0	0	0	0	0	5	0	0	0	Attempted Deep Cage	3	Ground Pickup	No	0	Did nothing for the first quarter of the match
+1220	1	Eirian 930	Red	TRUE	0	0	0	0	0	0	0	0	7	0	1	0	Successful Deep Cage	3	Ground Pickup	No	0	They had a little trouble with making sure the coral stayed in L1
+1091	5	Luke 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	1	Park	2	None	No	1	
+1091	10	Boden A 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Successful Deep Cage	3	None	No	2	
+10553	2	Gavin 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Successful Deep Cage	3	Human Player Station	No	2	Other drivers very good
+10553	10	Dhakshesh 5148	Blue	TRUE	0	0	0	0	0	0	0	0	1	0	0	0	Successful Deep Cage	3	Human Player Station	No	0	Poor consistency
+10264	5	Eirian 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	2	0	Park	3	No	0	Phantom Lakes	
+930	21	Jack B 930	Red	TRUE	0	0	0	0	0	2	0	0	0	0	1	2	Park	2	Human Player Station	No	0	Robot had problems scoring but auto was really good and every thing else worked well
+930	35	Zack 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	None	3	No	2	Phantom Lakes	
+930	43	Theo 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	None	3	None	No	1	Defence didn't work. Robot got stuck again.
+930	47	Gabe 5148	Blue	FALSE	0	0	0	0	0	0	0	0	0	0	0	0	UNSELECTED	2	Human Player Station	No	0	
+930	48	Gabe 5148	Blue	TRUE	0	0	2	0	0	0	0	0	8	8	0	0	Attempted Deep Cage	3	Ground Pickup	No	0	Can easily score lower and effectly
+930	130	Kai 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	2	None	No	2	They played defense for the duration of the match.
+1091	17	Dom 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	UNSELECTED	3	None	No	2	Defense
+1091	25	Gavin 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	UNSELECTED	2	No	2	Phantom Lakes	
+1091	29	Silas 6644	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Successful Deep Cage	2	Human Player Station	No	2	
+1091	33	Adler 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	2	None	No	2	They have a manipulator
+1091	42	Caden 5148	Blue	TRUE	0	0	0	0	0	0	0	0	1	0	3	0	Park	3	Human Player Station	Yes - But Recovered	0	Missed a lot of coral
+1091	47	Boden A 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	3	None	No	2	
+1220	22	Jack 5148	Blue	TRUE	0	0	1	0	0	0	0	0	3	0	0	0	Park	1	No	0	Phantom Lakes	 but not a lot of scoring
+1220	27	Eirian 930	Red	TRUE	0	0	1	0	0	0	0	0	8	0	0	0	Attempted Deep Cage	2	Ground Pickup	No	0	They had a fast cycle time for L1
+1220	35	Brady 930	Red	TRUE	0	0	1	0	0	0	0	0	11	0	0	0	Successful Deep Cage	1	Ground Pickup	No	0	
+1220	40	Jack 5148	Blue	TRUE	0	0	1	0	0	0	0	0	9	0	0	0	Park	1	Ground Pickup	No	0	Very efficient L1 score
+1220	46	Silas 6643	Blue	TRUE	0	0	1	0	0	0	0	0	6	0	0	0	Successful Deep Cage	1	Human Player Station	 Ground Pickup	No	Phantom Lakes
+1220	53	Boden A 930	Red	TRUE	0	0	0	0	0	0	0	0	6	2	0	0	Attempted Deep Cage	1	Ground Pickup	No	0	
+1306	17	Theo 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	8	Park	1	Human Player Station	No	0	
+1306	23	TrIsten 930	Red	FALSE	0	0	0	0	0	1	0	0	0	0	0	8	None	1	Human Player Station	No	0	Very confedent
+1306	27	Caden D 930	Red	TRUE	0	0	0	0	0	1	0	0	1	0	1	7	Park	1	Human Player Station	No	0	
+1306	38	Luke 930	Red	TRUE	0	0	0	0	0	1	0	0	3	3	1	4	Park	1	Human Player Station	No	0	
+1306	44	Caden 5148	Blue	TRUE	0	0	0	0	0	1	0	0	2	2	2	1	None	2	Human Player Station	 Ground Pickup	No	Phantom Lakes
+1306	48	Silas 6643	Blue	FALSE	0	0	0	0	0	0	0	0	0	0	1	7	None	1	No	0	Phantom Lakes	
+1714	18	Theo 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	5	4	Attempted Deep Cage	1	Human Player Station	No	0	
+1714	26	Gavin 5148	Blue	TRUE	0	0	1	0	0	1	0	0	0	0	0	7	Successful Deep Cage	1	Human Player Station	No	0	
+1714	33	Hayden 6643	Blue	TRUE	0	0	2	0	0	0	0	0	4	0	2	6	Attempted Deep Cage	1	Human Player Station	No	0	
+1714	38	Everett 5148	UNSELECTED	TRUE	0	0	0	0	0	1	0	0	0	1	2	4	Attempted Deep Cage	3	Human Player Station	No	0	
+1714	42	Caden D 930	Red	TRUE	0	0	0	0	0	2	0	0	0	0	1	4	Successful Deep Cage	1	Human Player Station	No	0	Can take algae off the reef but can't shoot it
+1714	51	Gabe 5148	Blue	TRUE	1	0	0	0	0	0	7	0	0	1	2	0	Park	3	Human Player Station	No	1	
+1732	21	Jack 5148	Blue	TRUE	0	0	0	0	0	2	0	1	1	0	1	9	Park	1	Human Player Station	No	0	Very smooth driving
+1732	32	Gavin 5148	Blue	TRUE	0	0	0	0	0	3	0	0	0	0	5	6	Successful Deep Cage	1	Human Player Station	No	0	
+1732	39	Luke 930	Red	TRUE	0	0	0	0	0	3	0	1	2	3	5	2	Park	2	Human Player Station	 Ground Pickup	No	Phantom Lakes
+1732	44	Liam930	Red	TRUE	0	0	0	0	0	2	0	0	0	0	0	8	Successful Deep Cage	1	Human Player Station	No	0	
+1732	48	Jack B 930	Red	TRUE	0	0	0	0	0	2	0	0	0	0	1	8	Attempted Deep Cage	1	Human Player Station	No	0	Very good robot and filled L4 by themselves
+1792	23	Theo 6643	Blue	TRUE	0	0	0	0	0	1	0	0	3	0	0	5	Park	1	Human Player Station	No	0	
+1792	28	Gavin 5148	Blue	TRUE	0	0	0	0	0	1	0	0	3	2	1	3	None	2	No	0	Phantom Lakes	
+1792	38	Brady 930	Red	TRUE	0	0	1	0	0	0	0	0	1	0	1	3	UNSELECTED	3	Human Player Station	No	0	Tipped over
+1792	45	Wyatt 930	Red	TRUE	0	0	0	0	0	1	0	0	1	0	3	3	UNSELECTED	2	Yes - But Recovered	0	Phantom Lakes	
+1792	52	Gabe 5148	Blue	TRUE	0	0	1	0	0	1	0	0	0	0	0	8	Park	1	Human Player Station	No	0	Can score l4 very good!
+2062	21	Theo 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	5	0	Park	2	Human Player Station	No	0	Weren't able to pick up algae. 
+2062	28	Silas 6644	Blue	TRUE	0	0	0	0	0	0	0	0	0	4	1	0	Park	3	Human Player Station	No	0	
+2062	37	Luke 930	Red	TRUE	0	0	1	0	0	0	0	0	1	0	0	4	None	2	Human Player Station	No	0	
+2062	42	Jack 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	7	Park	1	Human Player Station	No	0	Very efficient L4 scoring
+2062	50	Michael 5148	Blue	FALSE	0	0	0	0	0	0	0	2	0	0	3	0	Park	3	Human Player Station	No	0	Slow on lineup at coral and missed once
+2077	19	Theo 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	3	None	No	1	Robot had problems. Had to switch to defense.
+2077	36	Brady 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	None	3	No	1	Phantom Lakes	
+2077	42	Theo 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	None	2	None	No	1	Not great defence. Not good auto.
+2077	47	Jack B 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	3	None	No	0	Played only defense and got a lot of fowls
+2077	126	Kai 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	None	3	None	No	1	They didn't seem to score any points whatsoever. They just kinda ran across the field and sabotaged whenever the blue alliance to play defense.
+2202	17	 	UNSELECTED	FALSE	0	0	0	0	0	0	0	0	0	0	0	0	UNSELECTED	1	No	0	Phantom Lakes	 very smooth transitions between intake and scoring processes
+2202	22	Kaeden 930	Red	TRUE	0	0	1	0	0	0	0	0	1	5	0	0	None	2	Human Player Station	No	0	Slower
+2202	35	Everett 5148	Blue	TRUE	0	0	0	0	0	1	0	0	2	0	3	1	None	2	Human Player Station	No	0	Drive team kept missing L4
+2202	40	Caden D 930	Red	TRUE	0	0	0	0	0	1	1	0	0	0	2	1	None	2	Human Player Station	 Ground Pickup	No	Phantom Lakes
+2202	47	Silas 6643	Blue	TRUE	0	0	0	0	0	1	0	0	0	1	0	2	None	3	Human Player Station	No	0	
+2202	129	Kai 930	Red	TRUE	0	0	1	0	0	0	0	0	4	0	3	0	None	3	Human Player Station	No	0	
+2290	22	Tristen 930	Red	FALSE	0	0	0	0	0	1	0	0	0	0	2	4	Park	1	Human Player Station	No	0	Average
+2290	32	Hayden 6643	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	4	3	Park	2	Human Player Station	No	0	
+2290	36	Hayden 6643	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	3	9	Park	1	Human Player Station	No	0	
+2290	41	Caden 5148	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	0	6	Park	1	Human Player Station	No	0	Very fast cycle time (3-4secs max)
+2290	48	Michael 5148	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	0	0	Park	2	Human Player Station	No	1	The intake stopped working after auto
+2530	1	Nathan 5148	UNSELECTED	FALSE	0	0	0	0	0	2	0	0	0	4	4	0	Successful Deep Cage	2	No	0	Phantom Lakes	
+2530	32	 	UNSELECTED	TRUE	0	0	0	0	0	3	0	0	0	0	3	9	Successful Deep Cage	1	Human Player Station	No	0	
+2530	39	Zack 930	Red	TRUE	0	0	0	0	0	1	1	2	5	1	1	1	Successful Deep Cage	3	Human Player Station	No	0	Only reason its a 3 is because other partners were real good
+2530	44	Jack 5148	Blue	TRUE	0	0	0	0	0	1	0	1	0	1	3	5	Successful Deep Cage	1	Human Player Station	No	0	Extremely efficient L4 and very good all around
+2530	51	Michael 5148	Blue	TRUE	0	0	0	0	0	2	0	2	0	4	4	2	Park	1	Human Player Station	No	0	Saved a robot when it got stuck on a ball
+2530	125	Kai 930	Red	TRUE	0	0	0	0	0	3	0	3	0	0	7	4	Successful Deep Cage	1	Human Player Station	No	1	
+3184	17	Jack b 930	Red	TRUE	0	0	0	0	0	0	3	0	0	0	0	0	Successful Deep Cage	2	None	No	0	Can only do alter and part of there robot seems to break a lot
+3184	22	Jack b 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	1	0	Attempted Deep Cage	3	None	No	0	Have up after they could not do anything with algea
+3184	34	Everett 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	2	4	None	3	Human Player Station	No	0	
+3184	39	Caden 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	5	Successful Deep Cage	1	Human Player Station	No	0	Missed one coral
+3184	43	Liam930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	1	5	Attempted Deep Cage	2	Human Player Station	No	0	
+3184	49	Gabe 5148	UNSELECTED	TRUE	0	0	0	0	0	0	0	0	0	4	0	0	None	2	Human Player Station	Yes - Rest Of Match	0	
+3354	24	Jack B 930	Red	TRUE	0	0	0	0	0	2	0	0	0	0	0	3	Park	2	Human Player Station	No	0	Had a hard time scoring but there auto was really good
+3354	29	Caden D 930	Red	TRUE	0	0	0	0	0	1	0	0	2	0	0	5	Park	1	Human Player Station	No	0	
+3354	36	Zack 930	Red	TRUE	0	0	0	0	0	1	0	0	0	0	0	11	None	2	Human Player Station	No	1	
+3354	43	Jack 5148	Blue	TRUE	0	0	0	0	0	2	0	0	1	0	1	8	None	1	Human Player Station	No	0	Very very efficient scoring
+3354	49	Silas 6644	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	0	7	Park	1	Human Player Station	No	0	
+3692	19	Tristen 930	Red	FALSE	0	0	0	0	0	0	0	0	0	0	0	0	UNSELECTED	3	No	0	Phantom Lakes	
+3692	23	Kaeden 930	Red	TRUE	0	0	0	0	0	0	0	0	1	4	3	0	None	2	Human Player Station	No	0	Much better this time
+3692	33	Brady 930	Red	TRUE	0	0	1	0	0	0	0	0	0	0	2	0	None	3	Human Player Station	Yes - Rest Of Match	0	
+3692	43	Wyatt 930	Red	TRUE	0	0	0	0	0	0	0	0	1	5	0	2	UNSELECTED	1	Human Player Station	No	0	
+3692	47	Michael 5148	Blue	TRUE	0	0	0	0	0	0	1	0	0	4	2	0	Park	1	Human Player Station	No	0	
+3692	53	Ephraim 930	Red	TRUE	0	0	0	0	0	0	3	0	0	1	1	0	Park	2	Human Player Station	No	0	They were good at scoring and picking up algae.
+4607	20	Jack b 930	Red	TRUE	0	0	0	0	0	0	3	1	0	0	3	8	Successful Deep Cage	1	Human Player Station	No	0	Were very confident and filled L4
+4607	33	Zack 930	Red	FALSE	0	0	0	0	0	1	0	5	0	0	0	5	UNSELECTED	1	Human Player Station	No	0	
+4607	37	Zack 930	Red	TRUE	0	0	1	0	0	0	0	8	1	0	0	3	Successful Deep Cage	1	Human Player Station	No	0	
+4607	45	Jack 5148	Blue	TRUE	0	0	0	0	0	3	2	5	0	2	2	3	Park	1	Human Player Station	 Ground Pickup	No	Phantom Lakes
+4607	51	Silas 6643	Blue	TRUE	0	0	0	0	0	3	1	0	0	2	5	4	Park	2	Human Player Station	No	0	
+4635	1	Brady 930	Red	TRUE	0	0	0	0	0	1	0	0	0	5	6	3	Successful Deep Cage	1	Ground Pickup	No	0	
+4635	22	Dom5148	Blue	TRUE	0	0	0	0	0	2	0	0	1	0	4	2	None	3	Ground Pickup	No	0	
+4635	45	Caden 5148	Blue	TRUE	0	0	0	0	0	2	0	0	0	4	5	3	Successful Deep Cage	2	Ground Pickup	No	0	Missed a handful of l3 and l4 shots
+4635	49	Michael 5148	Blue	TRUE	0	0	0	0	0	2	0	0	0	2	4	2	Attempted Deep Cage	2	Ground Pickup	No	0	
+4693	18	Nathan 5148	Blue	FALSE	0	0	0	0	0	0	3	4	0	0	0	0	UNSELECTED	2	No	0	Phantom Lakes	
+4693	23	Jack B 930	Red	TRUE	0	0	0	0	0	0	3	2	0	0	0	0	None	3	None	No	0	Only did algae and there auto only moved forward
+4693	32	Luke 930	Red	FALSE	0	0	0	0	0	0	0	1	0	0	2	0	None	2	Human Player Station	No	0	
+4693	36	Everett 5148	Blue	TRUE	0	0	0	0	0	0	0	1	0	0	0	0	Park	3	None	No	0	Robot was moving pretty slow
+4693	40	Caden 5148	Blue	TRUE	0	0	0	0	0	0	0	1	0	0	0	0	None	3	None	Yes - Rest Of Match	0	Tipped over around 1:40 ish
+4693	51	Boden A 930	Red	TRUE	0	0	0	0	0	0	0	2	0	0	0	0	UNSELECTED	3	None	No	0	
+4786	19	Jack 5148	Blue	TRUE	0	0	0	0	0	2	0	1	1	2	2	2	Park	1	Human Player Station	No	0	Very strong and impressive robot and drive team
+4786	24	Gavin 5148	Blue	TRUE	0	0	0	0	0	3	0	0	0	0	0	4	Park	1	Human Player Station	No	0	Did nothing for a bit at the beginning of the match
+4786	31	Caden D 930	Red	TRUE	0	0	0	0	0	1	0	5	0	0	0	1	Successful Deep Cage	1	Human Player Station	No	0	Not bad robot
+4786	46	Ephraim 930	Red	TRUE	0	0	0	0	0	1	0	0	0	0	1	5	None	1	Human Player Station	No	0	They were fast but lost some coral.
+4786	50	Boden A 930	Red	TRUE	0	0	0	0	0	0	0	1	1	0	3	0	None	1	Human Player Station	No	0	
+4786	50	Boden A 930	Red	TRUE	0	0	0	0	0	0	0	1	1	0	3	0	None	1	Human Player Station	No	0	
+5148	18	Jack b 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	1	2	Park	3	Human Player Station	No	0	Got a coral stuck in them at the beginning of the match
+5148	25	Silas 6643	Blue	TRUE	0	0	0	0	0	0	0	1	0	0	0	5	Park	1	Human Player Station	No	0	
+5148	30	Silas 6643	Blue	FALSE	0	0	0	0	0	0	0	0	0	0	0	4	Park	2	Human Player Station	No	0	
+5148	34	Zack 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	4	UNSELECTED	3	Human Player Station	No	1	
+5148	46	Michael 5148	Blue	TRUE	0	0	0	0	0	0	0	0	1	0	0	2	Park	3	Human Player Station	No	0	Spent most of the game trying to attack the defense bot when the other station was open
+5148	50	Ephraim 930	UNSELECTED	FALSE	0	0	0	0	0	0	0	0	0	0	0	2	Park	2	Human Player Station	No	0	Good at scoring L4.
+5934	25	Caden D\n	Red	TRUE	0	0	2	0	0	0	0	0	4	4	0	0	Successful Deep Cage	2	Human Player Station	 Ground Pickup	No	Phantom Lakes
+5934	29	Gavin 5148	Blue	TRUE	0	0	1	0	0	0	0	0	7	6	0	0	Successful Deep Cage	1	Ground Pickup	No	0	L1 and L2 focused robot that can pick up from the ground Really efficient at doing that
+5934	37	Everett 5148	Blue	TRUE	0	0	3	0	0	0	0	0	4	6	0	0	Successful Deep Cage	2	Ground Pickup	No	0	Can only do L1 and L2
+5934	41	Wyatt 930	Red	TRUE	0	0	3	0	0	0	0	0	3	4	0	0	Successful Deep Cage	2	Ground Pickup	No	0	
+5934	53	Silas 6643	Blue	TRUE	0	0	1	0	0	0	0	0	7	9	0	0	Successful Deep Cage	1	Human Player Station	 Ground Pickup	No	Phantom Lakes
+5993	22	Theo 6643	Blue	FALSE	0	0	0	0	0	0	0	0	0	0	0	1	Successful Deep Cage	2	Human Player Station	No	0	2 coral got stuck.
+5993	28	Caden D 930	Red	FALSE	0	0	0	0	0	0	0	0	0	1	2	5	None	1	Human Player Station	No	0	Weird ahh intake
+5993	37	Adler 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	1	UNSELECTED	3	None	No	1	They scored one coral them went to play defence
+5993	43	Caden 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	1	2	0	Park	2	Human Player Station	No	0	Missed all attempts at L4
+5993	51	Ephraim 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	3	Park	2	Human Player Station	No	0	They were good at scoring but were slow.
+6024	21	Dom5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	3	None	No	1	
+6024	27	Silas 6643	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	1	1	None	3	Human Player Station	Yes - Rest Of Match	1	
+6024	34	Luke 930	Red	FALSE	0	0	0	0	0	0	0	0	0	0	1	1	UNSELECTED	2	Human Player Station	No	0	
+6024	35	Luke 930	Red	TRUE	0	0	0	0	0	1	0	0	2	0	1	1	None	2	Human Player Station	No	0	
+6024	41	Liam930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	4	UNSELECTED	1	Human Player Station	No	0	Beary bad auto
+6024	49	Jack B 930	Red	TRUE	0	0	0	0	0	0	0	0	1	0	3	1	Park	2	Human Player Station	No	0	Had a hard time scoring and kept missing but got the pieces really good
+6166	20	Jack 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	3	2	0	None	2	Human Player Station	No	0	It looked like they were Browning out
+6166	26	Caden D	Red	TRUE	0	0	0	0	0	0	0	0	1	1	1	0	Park	2	Human Player Station	No	0	
+6166	30	Eirian 930	Red	TRUE	0	0	0	0	3	0	0	0	0	0	0	0	Park	3	Human Player Station	No	0	
+6166	39	Hayden 6643	Blue	TRUE	0	0	0	0	0	0	0	0	2	1	1	0	Park	3	Human Player Station	No	0	
+6166	46	Dhakshesh 5148	Blue	TRUE	0	0	0	0	0	0	0	0	1	4	0	0	None	2	Human Player Station	No	0	
+6166	52	Jack B 930	Red	TRUE	0	0	1	0	0	0	0	0	1	2	3	0	Park	2	Human Player Station	No	0	Tried to do L4 but could not and they did not move well
+6223	23	Jack 5148	Blue	TRUE	0	0	0	0	0	0	0	0	1	0	2	2	Successful Deep Cage	2	Human Player Station	No	0	Very efficient scoring and very good climb
+6223	30	Caden D 930	Red	TRUE	0	0	0	0	0	0	0	0	1	0	0	4	Successful Deep Cage	1	Human Player Station	No	0	Very interesting
+6223	34	Brady 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	5	Park	1	Human Player Station	No	0	
+6223	42	Wyatt 930	Red	TRUE	0	0	0	0	0	1	0	0	0	2	0	2	Successful Deep Cage	3	Human Player Station	No	0	Dropped slot of coral
+6223	50	Silas 6643	Blue	TRUE	0	0	0	0	0	1	0	0	2	0	4	4	Successful Deep Cage	2	Human Player Station	No	0	
+6317	21	Tristen 930	Red	FALSE	0	0	0	1	0	0	0	0	0	0	0	0	Successful Deep Cage	3	Human Player Station	No	2	When there thingy failed
+6317	30	Gavin 5148	Blue	TRUE	0	0	1	1	0	0	0	0	0	2	4	0	Park	3	Human Player Station	No	0	Freed teammate that was stuck in algae
+6317	34	Hayden 6643	Blue	TRUE	0	0	1	1	0	0	0	0	1	3	5	0	Attempted Deep Cage	1	Human Player Station	No	0	
+6317	45	Liam930	Red	TRUE	0	0	0	0	0	0	0	0	2	4	3	0	Successful Deep Cage	2	Human Player Station	No	0	
+6317	52	Boden A 930	Red	TRUE	0	0	2	0	0	0	0	0	2	3	5	0	Successful Deep Cage	1	Human Player Station	No	0	
+6318	24	Theo 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	2	Park	3	Human Player Station	No	0	Arm didn't work well.
+6318	33	 	Red	TRUE	0	0	0	0	0	1	0	0	1	0	0	2	Park	2	Human Player Station	No	0	Very unsure about how to score with the robot
+6318	41	Theo 6643	Blue	TRUE	0	0	1	0	0	0	0	0	0	0	0	0	None	2	None	No	2	Good defence.
+6318	128	Kai 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	1	7	None	2	Human Player Station	No	0	
+6381	31	Silas 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Successful Deep Cage	2	Human Player Station	No	2	
+6381	36	Adler 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	1	Park	2	Human Player Station	No	1	They switched to defence halfway through the match
+6381	44	Wyatt 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	3	Successful Deep Cage	3	Ground Pickup	No	0	
+6381	47	Ephraim 930	Red	TRUE	0	0	1	0	0	0	0	0	1	0	5	2	None	2	Human Player Station	No	0	They were fast at scoring the coral.
+6381	52	Michael 5148	Blue	TRUE	0	0	0	0	0	0	0	1	0	0	2	1	Successful Deep Cage	2	Human Player Station	No	0	Got stuck but saved by 1792
+6421	17	Tristen.L	UNSELECTED	FALSE	0	0	0	0	0	0	0	0	0	0	0	0	UNSELECTED	3	No	0	Phantom Lakes	
+6421	24	Kaeden 930	Red	TRUE	0	0	0	0	0	1	0	0	1	0	0	6	None	1	Human Player Station	No	0	Missed a lot but did ok
+6421	30	Leonardo 5148	Blue	FALSE	0	0	0	0	0	1	0	0	0	0	1	6	Park	1	Human Player Station	No	0	Missed only a few coral and also fumbled deep cage climb
+6421	35	Adler 5148	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	0	8	None	1	Human Player Station	No	0	They played very well compared to the rest of their team
+6421	44	Theo 6643	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	2	3	Successful Deep Cage	2	Human Player Station	No	0	Very good offense.
+6421	49	Boden A 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	1	8	Successful Deep Cage	1	Human Player Station	No	0	
+6574	21	Kaeden 930	Red	TRUE	0	0	1	0	0	0	0	0	0	2	0	7	Successful Deep Cage	1	Human Player Station	No	0	Can take off algae off reef
+6574	38	Zack 930	Red	TRUE	0	0	1	0	0	0	0	0	0	1	2	5	Park	2	Human Player Station	No	0	Almost tipped over
+6574	45	Theo 6643	Blue	TRUE	0	0	1	0	0	0	0	1	4	2	0	2	Attempted Deep Cage	3	Human Player Station	No	0	Amazing performance.
+6574	51	Jack B 930	Red	TRUE	0	0	1	0	0	0	0	1	0	0	2	4	Successful Deep Cage	1	Human Player Station	No	0	Played very well and could score most of there shots. They also climb very high
+6643	18	Jack 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	2	1	1	Park	3	Human Player Station	No	0	Very shaky drive train 
+6643	23	Dom5148\n	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	4	UNSELECTED	3	Human Player Station	No	0	
+6643	35	Hayden 6643	UNSELECTED	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	3	Human Player Station	No	0	Appeared to have issues with serve drive.
+6643	41	Jack 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	1	0	5	None	3	Human Player Station	No	0	Very efficient L4 scoring
+6643	50	Jack B 930	Red	FALSE	0	0	0	0	0	0	0	0	0	0	0	0	Park	3	None	No	1	Seemed broken and went to play defense after that
+6643	127	Kai 930	Red	TRUE	0	0	0	0	0	0	0	0	1	1	1	0	Park	3	Human Player Station	No	0	
+6947	20	Theo 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	5	Successful Deep Cage	1	Human Player Station	 Ground Pickup	No	Phantom Lakes
+6947	27	Gavin 5148	Blue	TRUE	0	0	0	0	0	1	0	0	0	1	2	3	Park	1	Human Player Station	No	0	
+6947	40	Liam930	Red	TRUE	0	0	0	0	0	2	0	0	0	0	0	3	None	2	Human Player Station	Yes - Rest Of Match	0	
+6947	48	Boden A 930	Red	TRUE	0	0	0	0	0	0	0	0	1	0	3	8	None	1	Human Player Station	No	0	
+7417	26	Silas 6643	Blue	TRUE	0	0	0	0	0	0	2	1	0	0	0	0	Park	3	None	No	0	
+7417	36	Luke 930	Red	TRUE	0	0	0	0	0	0	2	1	0	0	0	0	Park	1	Human Player Station	Yes - Rest Of Match	0	Disabled right before the end
+7417	40	Wyatt 930	Red	TRUE	0	0	0	0	0	0	2	0	0	0	0	0	Park	3	None	No	0	
+7417	46	Caden D 930	Red	FALSE	0	0	0	0	0	0	4	0	0	0	0	0	Park	2	Ground Pickup	No	0	
+7417	53	Jack B 930	Red	TRUE	0	0	0	0	0	0	3	0	0	0	0	0	Park	3	None	No	0	Only did processor and took algae off the reef
+7900	32	Brady 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	3	None	No	1	
+7900	38	 	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	UNSELECTED	2	None	No	2	Made it much more difficult for the other team to score points on
+7900	44	Caden D 930	Red	FALSE	0	0	0	0	0	0	0	0	0	0	0	0	None	1	None	No	1	Defemse
+7900	49	Ephraim 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	3	None	No	1	The defense was good but they need to work on it.
+7900	53	Michael 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	2	None	No	2	Defense good at it
+8700	20	Michael 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	3	None	No	0	Didn't really do much
+8700	29	Eirian 930	Red	TRUE	0	0	1	0	0	0	0	0	3	0	0	0	Park	2	Human Player Station	 None	No	Phantom Lakes
+8700	37	Brady 930	Red	TRUE	0	0	1	0	0	0	0	0	1	0	0	0	None	3	Human Player Station	No	0	
+8700	42	Liam930	Red	TRUE	0	0	1	0	0	0	0	0	2	0	0	0	Park	3	Human Player Station	No	0	
+8700	52	Silas 6643	Blue	TRUE	0	0	1	0	0	0	0	0	2	0	2	0	UNSELECTED	3	Human Player Station	No	0	Slow
+8701	20	Tristen 930	UNSELECTED	FALSE	0	0	0	0	0	0	0	0	1	0	0	4	Park	2	No	0	Phantom Lakes	
+8701	25	Eirian 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	4	Park	3	Human Player Station	No	0	
+8701	39	Jack 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	2	0	3	Park	2	Human Player Station	No	0	Very smooth driving
+8701	45	Caden D 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	1	4	Attempted Deep Cage	3	Human Player Station	No	0	Beary slow
+8701	50	Gabe 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	1	5	Park	1	Human Player Station	No	0	A little slow but a good bot
+8701	131	Kai 930	Red	FALSE	0	0	0	0	0	0	0	0	0	0	0	5	Successful Deep Cage	2	Human Player Station	No	0	
+9401	18	tristen.L 	UNSELECTED	FALSE	0	0	0	0	0	3	0	1	2	1	2	1	Successful Deep Cage	2	Human Player Station	No	1	Very confident
+9401	26	Eirian 930	Red	TRUE	0	0	0	0	0	2	2	0	0	4	3	3	Attempted Deep Cage	1	Ground Pickup	No	0	
+9401	31	Gavin 5148	Blue	TRUE	0	0	1	0	0	2	1	0	0	0	4	3	Park	1	Human Player Station	No	0	
+9401	37	Hayden 6643	Blue	TRUE	0	0	0	0	0	2	0	0	1	0	5	4	Successful Deep Cage	1	Ground Pickup	No	0	
+9401	43	Caden D 930	Red	TRUE	0	0	0	0	0	2	0	1	0	1	5	0	UNSELECTED	1	No	0	Phantom Lakes	
+9401	49	Boden A 930	Red	TRUE	0	0	0	0	0	0	0	1	2	0	6	0	Successful Deep Cage	2	Ground Pickup	No	0	
+10264	24	Tristen 930	Red	FALSE	0	0	0	0	0	0	0	0	0	0	0	0	UNSELECTED	3	None	No	1	Broken but could move
+10264	28	Eirian 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	UNSELECTED	3	None	No	1	They were able to take algae out of the reef.
+10264	34	Adler 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	None	3	None	No	1	Their robot's shoulder looked limp - possibly not working
+10264	40	Theo 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	UNSELECTED	2	None	No	2	Robot hit with algae.
+10264	48	Ephraim 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	None	3	None	No	1	They were defending the coral away from the other team.
+10264	53	Gabe 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	3	Human Player Station	No	0	Did not do very much in the game
+10553	19	Jack B 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	1	Park	1	Human Player Station	No	0	Had a hard time scoring and there auto only moves out of the starting area
+10553	31	Eirian 930	Red	TRUE	0	0	0	0	0	0	0	0	0	3	0	0	Attempted Deep Cage	1	Human Player Station	No	0	
+10553	36	Everett 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	2	Park	2	None	No	0	
+10553	52	Ephraim 930	Red	TRUE	0	0	1	0	0	0	0	0	0	0	0	2	None	3	Human Player Station	No	0	They were good at scoring but not fast enough.
+930	64	Leonardo 5148	Blue	TRUE	0	0	0	0	0	2	0	0	0	0	3	1	None	2	Human Player Station	No	0	Dropped many coral
+930	68	Boden A 930	Red	TRUE	0	0	0	0	0	2	0	0	0	0	3	7	Park	1	Human Player Station	No	0	
+930	75	Eirian 930	Red	TRUE	0	0	0	0	0	1	0	0	0	0	0	0	Park	2	Human Player Station	No	0	
+930	158	Nathan 5148	Blue	TRUE	0	0	0	0	0	2	0	1	0	0	0	6	Park	1	Human Player Station	No	0	
+1091	59	Silas 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	UNSELECTED	3	Human Player Station	Yes - Rest Of Match	2	Only did defensive this match.
+1091	64	Boden A 930	Red	FALSE	0	0	0	0	0	0	0	0	0	0	0	0	Park	3	None	No	2	
+1091	69	Kaeden 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Attempted Deep Cage	2	None	No	2	Climber may have broken
+1091	76	Liam930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	UNSELECTED	2	None	No	1	
+1220	65	Emilio 5148	Blue	TRUE	0	0	1	0	0	0	0	0	2	0	0	0	Park	2	Ground Pickup	No	1	
+1220	71	Eirian 930	Red	TRUE	0	0	1	0	0	0	0	0	0	0	0	0	Successful Deep Cage	3	None	No	1	
+1220	78	Adler 5148	Blue	TRUE	0	0	1	0	0	0	0	0	2	0	0	0	Successful Deep Cage	3	Ground Pickup	No	1	They got a few L1 coral then played defence
+1306	1	Emilio 5148	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	1	7	None	1	Ground Pickup	No	0	
+1306	57	Emilio 5148	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	0	7	Attempted Deep Cage	1	Human Player Station	No	0	
+1306	61	Silas 6643	Blue	TRUE	0	0	0	0	0	1	0	0	2	0	0	8	Attempted Deep Cage	1	Human Player Station	No	0	
+1306	73	Eirian 930	Red	TRUE	0	0	0	0	0	1	0	0	0	0	0	10	UNSELECTED	1	Human Player Station	No	0	
+1714	57	Luke 930	Red	TRUE	0	0	0	0	0	1	0	0	1	0	1	6	Successful Deep Cage	2	Human Player Station	No	0	
+1714	61	Wyatt 930	Red	TRUE	0	0	0	0	0	1	0	0	1	0	2	3	Successful Deep Cage	2	No	0	Phantom Lakes	
+1714	71	Jack 5148	UNSELECTED	TRUE	0	0	0	0	0	2	0	0	0	0	6	2	Successful Deep Cage	2	Human Player Station	No	0	Very efficient L3 and 4
+1714	75	Kaeden 930	Red	TRUE	0	0	0	0	0	2	0	0	0	1	5	3	Successful Deep Cage	3	Human Player Station	No	0	Getting coral was a bit rough
+1732	54	Theo 6643	Blue	TRUE	0	0	0	0	0	2	0	0	0	3	2	4	Successful Deep Cage	1	Human Player Station	No	0	Very fast and efficient. 
+1732	59	Everett 5148	Blue	TRUE	0	0	0	0	0	1	1	0	1	0	3	4	Attempted Deep Cage	1	Human Player Station	No	0	Missed two L4 coral during auto
+1732	71	Zack 939	Red	TRUE	0	0	1	0	0	3	0	1	0	0	8	5	Attempted Deep Cage	1	Human Player Station	No	0	
+1732	75	Zack 930	Red	TRUE	0	0	0	0	0	1	0	0	0	0	4	5	Successful Deep Cage	1	Human Player Station	No	0	
+1792	59	Luke 930	Red	TRUE	0	0	0	0	0	1	0	0	0	0	2	4	Park	1	Human Player Station	No	0	
+1792	63	Silas 6643	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	0	4	Successful Deep Cage	2	Human Player Station	No	0	
+1792	71	Kaeden 930	Red	TRUE	0	0	0	0	0	1	0	0	0	0	0	3	None	2	Human Player Station	Yes - Rest Of Match	0	Fell over while getting coral from human player
+1792	76	Boden A 930	Red	TRUE	0	0	0	0	0	0	0	0	0	1	2	0	Successful Deep Cage	3	Human Player Station	No	0	
+2062	56	Luke 930	Red	TRUE	0	0	0	0	0	0	0	2	0	0	2	1	Park	1	Human Player Station	No	0	
+2062	64	Silas 6643	Blue	FALSE	0	0	0	0	0	0	0	0	0	0	0	0	None	3	Yes - Rest Of Match	0	Phantom Lakes	
+2062	70	Dom5148	Blue	TRUE	0	0	0	1	0	0	0	1	0	4	0	0	Park	3	No	0	Phantom Lakes	
+2062	78	Boden A 930	Red	TRUE	0	0	0	0	0	1	0	1	1	0	2	1	Park	2	Human Player Station	No	0	
+2077	57	Wyatt 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	UNSELECTED	3	No	1	Phantom Lakes	
+2077	63	Ryan M 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	2	None	No	1	
+2077	69	Caden 5148	UNSELECTED	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	UNSELECTED	3	None	No	1	Started on defense
+2077	74	Michael 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	2	None	No	1	Played defense and just sat not guarding anything for around 30 seconds
+2202	56	Nathan 5148	Blue	TRUE	0	0	0	0	0	1	0	0	1	2	0	3	Park	2	Human Player Station	No	0	
+2202	60	Wyatt 930	Red	FALSE	0	0	0	0	0	1	0	0	1	0	1	4	UNSELECTED	2	Human Player Station	No	0	
+2202	68	Emilio 5148	Blue	TRUE	0	0	1	0	0	0	0	0	0	0	3	3	Park	3	Human Player Station	No	0	
+2202	73	Theo 6643	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	5	1	Park	2	Human Player Station	No	0	
+2290	54	Mady930	Red	TRUE	0	0	0	0	0	1	0	0	1	4	5	4	None	1	Human Player Station	No	0	
+2290	64	Jackson 5148	Blue	TRUE	0	0	0	0	0	2	0	0	1	5	1	3	None	1	Human Player Station	No	0	
+2290	70	Zack 930	Red	TRUE	0	0	0	0	0	1	0	0	5	0	1	2	None	3	Human Player Station	No	0	
+2290	74	Kaeden 930	Red	TRUE	0	0	0	0	0	0	0	0	2	1	5	1	None	3	Human Player Station	No	0	Fairly quick struggled to get coral
+2530	55	Nathan 5148	Blue	TRUE	0	0	0	0	0	1	0	0	0	1	4	3	Successful Deep Cage	2	Human Player Station	No	0	
+2530	60	Mady930	Red	TRUE	0	0	0	0	0	3	0	2	0	1	4	5	Successful Deep Cage	1	Human Player Station	No	0	
+2530	66	 	UNSELECTED	TRUE	0	0	0	0	0	3	0	1	0	0	2	9	Successful Deep Cage	1	Human Player Station	No	0	
+2530	78	Brady 930	Red	TRUE	0	0	0	0	0	2	0	3	0	0	4	5	Successful Deep Cage	1	Human Player Station	No	0	
+3184	54	Gavin 5148	Blue	TRUE	0	0	1	0	0	0	0	0	0	0	3	0	Attempted Deep Cage	2	Human Player Station	No	0	Got algae stuck in robot out successfully.
+3184	65	Ryan M 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	2	6	Park	1	Human Player Station	No	0	
+3184	69	Hayden 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	2	3	2	Attempted Deep Cage	2	Human Player Station	No	0	
+3184	77	Liam930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	6	UNSELECTED	1	Human Player Station	No	0	
+3354	55	Theo 6643	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	0	4	None	3	Human Player Station	No	1	Intake stopped working. Got stuck on coral. Started off consistant.
+3354	61	Mady930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	2	6	None	1	Human Player Station	No	0	
+3354	62	Boden A 939	Red	TRUE	0	0	0	0	0	0	0	0	1	3	2	0	Park	1	Human Player Station	No	0	
+3354	67	Emilio 5148	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	6	6	None	1	Human Player Station	No	0	
+3354	78	Emilio 5148	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	4	7	Park	1	Human Player Station	No	0	
+3692	66	Caden 5148	Blue	TRUE	0	0	0	0	0	0	2	0	1	2	2	0	None	2	Human Player Station	No	0	Missed two low level coral
+3692	74	Anthony 5148	Blue	TRUE	0	0	0	0	0	0	2	0	0	2	0	0	None	3	Human Player Station	Yes - Rest Of Match	0	Good at algae proccessor
+4607	56	Theo 6643	Blue	TRUE	0	0	0	0	0	2	2	0	1	2	4	5	Successful Deep Cage	1	Human Player Station	No	0	Very consistant. Very fast. Great performance.
+4607	60	Silas 6643	Blue	TRUE	0	0	0	0	0	3	3	0	0	3	4	4	Successful Deep Cage	1	Human Player Station	No	0	
+4607	67	Ethan 930	UNSELECTED	TRUE	0	0	0	0	0	2	1	6	1	1	1	5	Park	1	Human Player Station	No	0	
+4607	74	Eirian 930	Red	TRUE	0	0	0	0	0	1	2	0	0	3	3	5	Successful Deep Cage	1	Human Player Station	No	0	
+4635	58	Wyatt 930	Red	TRUE	0	0	0	0	0	2	0	0	1	0	3	4	Successful Deep Cage	2	No	0	Phantom Lakes	
+4635	62	Ryan M 930	Red	TRUE	0	0	0	0	0	3	0	1	0	1	0	2	Successful Deep Cage	2	Ground Pickup	No	0	
+4635	70	Kaeden 930	Red	TRUE	0	0	0	0	0	3	0	1	1	0	4	5	Successful Deep Cage	1	Ground Pickup	No	0	Fast and smooth  but missed a few L4
+4635	75	Michael 5148	Blue	TRUE	0	0	0	0	0	2	0	2	0	0	1	5	Successful Shallow Cage	1	Ground Pickup	No	0	
+4693	58	Mady930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	3	None	No	0	
+4693	64	Ryan M 930	Red	TRUE	0	0	0	0	0	0	0	5	0	0	0	0	Park	1	None	No	0	
+4693	72	Jack 5148	Blue	TRUE	0	0	0	0	0	0	0	4	0	0	0	0	Park	3	Human Player Station	No	0	Missed a few algea shots
+4693	77	Adler 5148	Blue	TRUE	0	0	0	0	0	0	0	1	0	0	0	0	Park	3	None	Yes - Rest Of Match	0	Broke inside of the barge area
+4786	58	Luke 930	Red	TRUE	0	0	0	0	0	2	0	0	0	1	2	4	None	1	Human Player Station	No	0	
+4786	65	Hayden 6643	Blue	TRUE	0	0	0	0	0	3	0	4	0	0	5	0	Successful Deep Cage	3	Human Player Station	No	0	
+4786	70	Blue	Hayden 6643	TRUE	0	0	0	0	0	3	0	0	0	0	0	1	Attempted Deep Cage	2	Human Player Station	No	1	
+4786	74	Zack 930	Red	TRUE	0	0	0	0	0	3	0	1	0	3	3	0	Attempted Deep Cage	2	Human Player Station	No	0	
+5148	54	Wyatt 930	Red	TRUE	0	0	0	0	0	0	0	0	0	1	0	1	Park	3	Human Player Station	No	0	
+5148	62	Silas 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	2	Park	2	Human Player Station	No	0	
+5148	68	Ethan 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	3	Park	2	Human Player Station	No	0	
+5148	73	Michael 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	3	Park	1	Human Player Station	No	0	
+5934	65	Boden A 930	Red	TRUE	0	0	0	0	0	0	0	0	4	5	0	0	Successful Deep Cage	2	Ground Pickup	No	0	
+5934	70	Jack 5148	Blue	TRUE	0	0	2	0	0	0	0	0	4	6	0	0	Successful Deep Cage	1	Ground Pickup	No	0	Very efficient L1 
+5934	77	Theo 6643	Blue	TRUE	0	0	1	0	0	0	0	0	9	8	0	0	Successful Deep Cage	1	Ground Pickup	No	0	Great performance. Won in a 1 v. 3. Very fast.
+5993	59	Wyatt 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	1	2	Attempted Deep Cage	2	Human Player Station	No	0	
+5993	63	Boden A 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	6	Successful Deep Cage	1	Human Player Station	No	0	
+5993	67	Ryan M 930	Red	TRUE	0	0	0	0	0	0	0	0	0	1	2	4	Park	2	Human Player Station	No	0	
+5993	73	Anthony 5148	Blue	TRUE	0	0	0	0	0	0	0	0	1	0	0	5	Park	3	Human Player Station	No	0	Good L4
+6024	57	Gavin 5148	Blue	TRUE	0	0	0	0	0	0	0	0	1	0	4	0	None	3	Human Player Station	No	0	Got teammate off of algae
+6024	63	Ethan 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	4	2	None	3	Human Player Station	No	0	They don't have a consistent lineup for coral
+6024	71	Hayden 6643	UNSELECTED	FALSE	0	0	0	0	0	1	0	0	0	0	0	0	UNSELECTED	3	Human Player Station	Yes - Rest Of Match	0	
+6024	77	Ellerey W 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	4	2	Park	2	Human Player Station	No	0	Top heavy and takes a while to line up (no auto align)
+6166	56	Gavin 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	4	1	0	None	3	Human Player Station	No	0	Inaccurate when putting coral onto the reef.
+6166	63	Leonardo 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	2	1	2	Park	1	Human Player Station	No	0	Only moves out in auto
+6166	70	Eirian 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	UNSELECTED	3	None	No	1	
+6166	78	Liam930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	1	0	UNSELECTED	3	Human Player Station	No	1	
+6223	54	Nathan 5148	Blue	TRUE	0	0	0	0	0	1	0	0	0	2	4	3	Park	3	Human Player Station	No	0	
+6223	60	Everett 5148	Blue	TRUE	0	0	0	0	0	1	0	0	0	3	4	3	Successful Deep Cage	2	Human Player Station	No	0	
+6223	67	Hayden 6643	Blue	TRUE	0	0	0	0	0	2	0	0	2	3	2	3	Successful Deep Cage	2	Human Player Station	No	0	
+6223	72	Dom5148	Blue	TRUE	0	0	0	0	0	2	0	0	0	0	3	6	Successful Deep Cage	1	Human Player Station	No	0	Very fast and efficient
+6317	57	Theo 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	5	0	0	Successful Deep Cage	2	Human Player Station	No	0	Got stuck on cage. 
+6317	65	Ethan 930	Red	TRUE	0	0	0	0	1	0	0	0	1	1	4	0	Park	3	Human Player Station	No	0	
+6317	69	Eirian 930	Red	TRUE	0	0	0	1	1	0	0	0	0	2	7	0	Successful Deep Cage	1	Human Player Station	No	0	Have a really quick algae remover
+6317	74	Theo 6643	Blue	TRUE	0	0	0	0	0	0	0	0	3	3	3	0	Successful Deep Cage	1	Human Player Station	No	0	Lost both teammates. Well executed.
+6318	55	Wyatt 930	Red	TRUE	0	0	0	0	0	1	0	0	0	0	4	1	None	2	Ground Pickup	No	0	
+6318	63	Jackson 5148	Blue	TRUE	0	0	1	0	0	0	0	0	2	0	0	3	Park	2	Human Player Station	No	0	
+6318	72	Eirian 930	Red	TRUE	0	0	0	0	0	0	3	0	0	0	2	1	Park	3	No	0	Phantom Lakes	
+6318	78	Theo 6643	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	3	1	Park	2	Human Player Station	No	0	Missed a lot. Helped get a teammate unstuck. 
+6381	56	Mady930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	1	6	Park	2	Human Player Station	No	0	Helped push broken partner into zone for a park
+6381	61	Luke 930	Red	TRUE	0	0	0	0	0	0	0	0	1	0	2	1	Park	3	Human Player Station	No	0	Seemed to have broken autoalign
+6381	68	 	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	1	4	Successful Deep Cage	2	Human Player Station	No	0	Take a little bit long to line up with reef
+6381	76	Anthony 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Successful Deep Cage	3	None	No	1	Tried to do defense but didn't really do anything
+6421	55	Mady930	Red	TRUE	0	0	0	0	0	1	0	0	0	1	0	7	None	3	Human Player Station	No	0	Struggled to line up their scores
+6421	59	Adler 5148	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	0	5	None	2	Human Player Station	No	0	They missed a coral during autonomous
+6421	66	Hayden 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	1	5	Successful Deep Cage	3	Human Player Station	No	0	
+6421	76	Theo 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	1	4	Park	2	Human Player Station	No	0	Pushed defence out of the way.
+6574	55	Gavin 5148	Blue	TRUE	0	0	1	0	0	0	0	1	0	2	3	2	Park	1	Human Player Station	No	0	
+6574	62	Leonardo 5148	Blue	FALSE	0	0	1	0	0	0	0	1	0	0	0	6	UNSELECTED	1	None	No	0	Dropped a few coral at the beginning but overall very efficient and fast
+6574	68	Hayden 6643	Blue	TRUE	0	0	1	0	0	0	0	0	0	0	0	6	Successful Deep Cage	1	Human Player Station	No	0	
+6574	72	Zack 930	Red	TRUE	0	0	1	0	0	0	0	0	0	0	2	4	Successful Deep Cage	1	Human Player Station	No	0	
+6643	56	Wyatt 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	1	UNSELECTED	3	No	0	Phantom Lakes	
+6643	60	Luke 930	Red	FALSE	0	0	0	0	0	0	0	0	0	0	0	0	None	3	None	Yes - Rest Of Match	1	Drive base robot
+6643	75	Anthony 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	2	3	Park	2	Human Player Station	No	0	Needs work on aligning
+6643	6643	Zack 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	5	Park	3	Human Player Station	No	0	
+6947	54	Luke 930	Red	TRUE	0	0	0	0	0	2	0	0	2	0	0	3	None	2	Human Player Station	Yes - Rest Of Match	0	Caught coral end effector on reef w/ lifted swerve off the ground; disabled for rest of match
+6947	61	Adler 5148	Blue	TRUE	0	0	0	0	0	2	0	0	0	0	0	0	Park	2	Human Player Station	Yes - Rest Of Match	0	Their manipulator fell off their robot after autonomous
+6947	66	Emilio 5148	Blue	TRUE	0	0	0	0	0	2	0	0	0	1	2	5	Successful Deep Cage	1	Human Player Station	No	0	
+6947	72	Theo 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	2	None	No	1	
+7417	60	Adler 5148	Blue	TRUE	0	0	0	0	0	0	1	0	0	0	0	0	Park	3	None	No	1	Played defence after scoring an algae in the processor
+7417	68	Ryan M 930	Red	TRUE	0	0	0	0	0	0	1	0	0	0	0	0	Park	3	None	No	1	
+7417	77	Emilio 5148	Blue	TRUE	0	0	0	0	0	0	1	0	0	0	0	0	None	2	None	Yes - Rest Of Match	0	
+7900	59	Mady930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Attempted Deep Cage	3	No	2	Phantom Lakes	
+7900	67	 	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	3	None	No	2	Slow manipulator
+7900	73	Zack 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	2	None	No	1	Weird clicking and random movements
+8700	58	Theo 6643	Blue	TRUE	0	0	0	0	0	0	0	0	1	0	0	0	None	3	Human Player Station	No	0	Did nothing.
+8700	62	Ethan 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	None	3	None	No	1	
+8700	66	Ryan M 930	Red	TRUE	0	0	0	0	0	0	0	0	1	1	0	0	None	3	Human Player Station	No	0	
+8700	77	Boden A 930	Red	FALSE	0	0	0	0	0	0	0	0	0	0	0	0	UNSELECTED	1	Human Player Station	No	2	
+8701	57	Mady930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	6	4	Park	1	Human Player Station	No	0	
+8701	64	 	Red	TRUE	0	0	0	0	0	1	0	0	0	0	0	7	Successful Deep Cage	2	Human Player Station	No	0	
+8701	72	Kaeden 930	Red	FALSE	0	0	0	0	0	1	0	0	1	0	0	5	Attempted Deep Cage	2	No	0	Phantom Lakes	
+8701	76	Michael 5148	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	3	5	Park	1	Human Player Station	No	0	
+9401	55	Luke 930	Red	TRUE	0	0	0	0	0	1	0	0	0	0	7	2	None	1	Human Player Station	 Ground Pickup	Yes - Rest Of Match	Phantom Lakes
+9401	65	Jackson 5148\n	Blue	TRUE	0	0	0	0	0	2	0	0	0	0	1	7	Successful Deep Cage	1	Ground Pickup	No	0	
+9401	71	Dom5148	Blue	TRUE	0	0	0	0	0	1	0	0	0	0	4	5	Attempted Deep Cage	1	Human Player Station	 Ground Pickup	No	Phantom Lakes
+9401	75	Ellerey W 930	Red	TRUE	0	0	1	0	0	0	0	0	0	0	0	9	Successful Deep Cage	1	Ground Pickup	No	0	Drive train was a bit studdery.
+10264	61	Everett 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	3	None	No	1	
+10264	66	Ethan 930	Red	TRUE	0	0	0	0	0	0	0	0	0	1	0	0	None	2	None	No	1	
+10264	75	Theo 6643	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Park	3	None	No	1	Got pushed around. 
+10553	58	Gavin 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Successful Deep Cage	2	None	No	2	
+10553	62	Jackson 5148	Blue	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	None	3	Human Player Station	Yes - Rest Of Match	0	
+10553	67	boden A 930	Red	TRUE	0	0	0	0	0	0	0	0	0	0	0	0	Attempted Deep Cage	3	None	No	1	
+10553	73	Kaeden 930	Red	TRUE	0	0	0	1	0	0	0	0	0	0	0	0	Attempted Deep Cage	3	Human Player Station	No	0	Took too long to get a coral gave up 

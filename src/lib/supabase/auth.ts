@@ -200,7 +200,7 @@ export async function getAllUserProfiles(
 export async function signUp(
   supabase: SupabaseClient,
   formData: SignupFormData
-): Promise<{ user: User | null; error: Error | null }> {
+): Promise<{ user: User | null; error: Error | null; isDuplicateEmail?: boolean }> {
   const { data, error } = await supabase.auth.signUp({
     email: formData.email,
     password: formData.password,
@@ -216,7 +216,15 @@ export async function signUp(
   });
 
   if (error) {
-    return { user: null, error };
+    // Check if this is a duplicate email error
+    // Supabase returns "Database error saving new user" for duplicate emails
+    const isDuplicateEmail =
+      error.message?.includes('Database error saving new user') ||
+      error.message?.includes('already registered') ||
+      error.message?.includes('duplicate') ||
+      error.message?.includes('User already registered');
+
+    return { user: null, error, isDuplicateEmail };
   }
 
   return { user: data.user, error: null };

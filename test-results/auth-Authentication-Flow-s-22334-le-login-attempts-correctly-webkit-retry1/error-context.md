@@ -1,0 +1,166 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e7] [cursor=pointer]:
+    - img [ref=e8]
+  - alert [ref=e13]
+  - generic [ref=e14]:
+    - complementary [ref=e15]:
+      - generic [ref=e16]:
+        - heading "FRC Scouting Admin" [level=1] [ref=e18]
+        - navigation [ref=e19]:
+          - link "Dashboard" [ref=e20]:
+            - /url: /admin
+            - img [ref=e21]
+            - text: Dashboard
+          - link "Events" [ref=e23]:
+            - /url: /admin/events
+            - img [ref=e24]
+            - text: Events
+          - link "Teams" [ref=e26]:
+            - /url: /admin/teams
+            - img [ref=e27]
+            - text: Teams
+          - link "Matches" [ref=e29]:
+            - /url: /admin/matches
+            - img [ref=e30]
+            - text: Matches
+          - link "Users" [ref=e32]:
+            - /url: /admin/users
+            - img [ref=e33]
+            - text: Users
+          - link "Scouters" [ref=e35]:
+            - /url: /admin/scouters
+            - img [ref=e36]
+            - text: Scouters
+          - link "Scouting Data" [ref=e38]:
+            - /url: /admin/scouting
+            - img [ref=e39]
+            - text: Scouting Data
+          - link "Seasons" [ref=e41]:
+            - /url: /admin/seasons
+            - img [ref=e42]
+            - text: Seasons
+        - paragraph [ref=e46]: FRC Scouting System v1.0
+    - generic [ref=e47]:
+      - banner [ref=e48]:
+        - generic [ref=e49]:
+          - heading "Data Portal" [level=2] [ref=e51]
+          - button [ref=e53] [cursor=pointer]:
+            - img [ref=e54]
+      - main [ref=e56]:
+        - generic [ref=e58]:
+          - generic [ref=e59]:
+            - heading "Dashboard Overview" [level=1] [ref=e60]
+            - paragraph [ref=e61]: Welcome to the FRC Scouting System admin dashboard
+          - generic [ref=e62]:
+            - link "Total Teams 102" [ref=e63]:
+              - /url: /admin/teams
+              - generic [ref=e65]:
+                - img [ref=e68]
+                - generic [ref=e70]:
+                  - paragraph [ref=e71]: Total Teams
+                  - paragraph [ref=e72]: "102"
+            - link "Total Events 5" [ref=e73]:
+              - /url: /admin/events
+              - generic [ref=e75]:
+                - img [ref=e78]
+                - generic [ref=e80]:
+                  - paragraph [ref=e81]: Total Events
+                  - paragraph [ref=e82]: "5"
+            - link "Total Matches 96" [ref=e83]:
+              - /url: /admin/matches
+              - generic [ref=e85]:
+                - img [ref=e88]
+                - generic [ref=e90]:
+                  - paragraph [ref=e91]: Total Matches
+                  - paragraph [ref=e92]: "96"
+            - link "Active Scouters 0" [ref=e93]:
+              - /url: /admin/scouters
+              - generic [ref=e95]:
+                - img [ref=e98]
+                - generic [ref=e100]:
+                  - paragraph [ref=e101]: Active Scouters
+                  - paragraph [ref=e102]: "0"
+          - generic [ref=e103]:
+            - heading "Quick Actions" [level=2] [ref=e104]
+            - generic [ref=e105]:
+              - link "Create Event Add a new FRC event to the system" [ref=e106]:
+                - /url: /admin/events/new
+                - generic [ref=e108]:
+                  - img [ref=e110]
+                  - heading "Create Event" [level=3] [ref=e112]
+                  - paragraph [ref=e113]: Add a new FRC event to the system
+              - link "Add Team Register a new team in the database" [ref=e114]:
+                - /url: /admin/teams/new
+                - generic [ref=e116]:
+                  - img [ref=e118]
+                  - heading "Add Team" [level=3] [ref=e120]
+                  - paragraph [ref=e121]: Register a new team in the database
+              - link "Add Scouter Register a new scout user" [ref=e122]:
+                - /url: /admin/scouters/new
+                - generic [ref=e124]:
+                  - img [ref=e126]
+                  - heading "Add Scouter" [level=3] [ref=e128]
+                  - paragraph [ref=e129]: Register a new scout user
+              - link "View Scouting Data Browse and manage scouting entries" [ref=e130]:
+                - /url: /admin/scouting
+                - generic [ref=e132]:
+                  - img [ref=e134]
+                  - heading "View Scouting Data" [level=3] [ref=e136]
+                  - paragraph [ref=e137]: Browse and manage scouting entries
+          - generic [ref=e138]:
+            - heading "Recent Activity" [level=3] [ref=e140]
+            - generic [ref=e142]:
+              - generic [ref=e143]:
+                - img [ref=e146]
+                - generic [ref=e148]:
+                  - paragraph [ref=e149]: "Match #1 scheduled for 2026wimuk"
+                  - paragraph [ref=e150]: 10/30/2025, 8:59:46 AM
+              - generic [ref=e151]:
+                - img [ref=e154]
+                - generic [ref=e156]:
+                  - paragraph [ref=e157]: "Match #2 scheduled for 2026wimuk"
+                  - paragraph [ref=e158]: 10/30/2025, 8:59:46 AM
+              - generic [ref=e159]:
+                - img [ref=e162]
+                - generic [ref=e164]:
+                  - paragraph [ref=e165]: "Match #3 scheduled for 2026wimuk"
+                  - paragraph [ref=e166]: 10/30/2025, 8:59:46 AM
+              - generic [ref=e167]:
+                - img [ref=e170]
+                - generic [ref=e172]:
+                  - paragraph [ref=e173]: Team 600 (Team 600) was added
+                  - paragraph [ref=e174]: 10/30/2025, 8:59:38 AM
+              - generic [ref=e175]:
+                - img [ref=e178]
+                - generic [ref=e180]:
+                  - paragraph [ref=e181]: Team 900 (Team 900) was added
+                  - paragraph [ref=e182]: 10/30/2025, 8:59:38 AM
+              - generic [ref=e183]:
+                - img [ref=e186]
+                - generic [ref=e188]:
+                  - paragraph [ref=e189]: Team 300 (Team 300) was added
+                  - paragraph [ref=e190]: 10/30/2025, 8:59:38 AM
+              - generic [ref=e191]:
+                - img [ref=e194]
+                - generic [ref=e196]:
+                  - paragraph [ref=e197]: Team 500 (Team 500) was added
+                  - paragraph [ref=e198]: 10/30/2025, 8:59:38 AM
+              - generic [ref=e199]:
+                - img [ref=e202]
+                - generic [ref=e204]:
+                  - paragraph [ref=e205]: Team 700 (Team 700) was added
+                  - paragraph [ref=e206]: 10/30/2025, 8:59:38 AM
+              - generic [ref=e207]:
+                - img [ref=e210]
+                - generic [ref=e212]:
+                  - paragraph [ref=e213]: Team 800 (Team 800) was added
+                  - paragraph [ref=e214]: 10/30/2025, 8:59:38 AM
+              - generic [ref=e215]:
+                - img [ref=e218]
+                - generic [ref=e220]:
+                  - paragraph [ref=e221]: Team 100 (Team 100) was added
+                  - paragraph [ref=e222]: 10/30/2025, 8:59:38 AM
+```

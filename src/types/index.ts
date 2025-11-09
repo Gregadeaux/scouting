@@ -579,3 +579,4 @@ export interface ScoutingSubmission {
 export type * from './season-2025';
 export type * from './auth';
 export type * from './team-detail';
+export type * from './scouter';

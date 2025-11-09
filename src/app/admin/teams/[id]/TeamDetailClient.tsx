@@ -1,9 +1,13 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { StatusBadge } from '@/components/admin/StatusBadge';
-import { ArrowLeft, Calendar, Users, Shield, CheckCircle } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Select } from '@/components/ui/Select';
+import { TeamScoutingHistory } from '@/components/admin/teams/TeamScoutingHistory';
+import { ArrowLeft, Calendar, Users, Shield, CheckCircle, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 import type { Team } from '@/types';
 
@@ -55,6 +59,25 @@ interface TeamDetailClientProps {
 }
 
 export default function TeamDetailClient({ team, events, scouters }: TeamDetailClientProps) {
+  // Extract unique years from events and sort them (most recent first)
+  const years = [...new Set(events.map(e => new Date(e.start_date).getFullYear()))].sort().reverse();
+
+  // State for year and event selection
+  const [selectedYear, setSelectedYear] = useState<number | undefined>(years[0]);
+  const [selectedEventKey, setSelectedEventKey] = useState<string | undefined>();
+
+  // Filter events by selected year
+  const eventsByYear = events.filter(e =>
+    selectedYear ? new Date(e.start_date).getFullYear() === selectedYear : false
+  ).sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
+
+  // Set initial event when year changes or on mount
+  useEffect(() => {
+    if (eventsByYear.length > 0 && !eventsByYear.find(e => e.event_key === selectedEventKey)) {
+      setSelectedEventKey(eventsByYear[0].event_key);
+    }
+  }, [selectedYear, eventsByYear, selectedEventKey]);
+
   // Format date for display
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -363,6 +386,64 @@ export default function TeamDetailClient({ team, events, scouters }: TeamDetailC
                 </tbody>
               </table>
             </div>
+          )}
+        </div>
+      </Card>
+
+      {/* Scouting Data Section */}
+      <Card>
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center">
+              <BarChart3 className="h-5 w-5 text-gray-500 dark:text-gray-400 mr-2" />
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                Scouting Data
+              </h2>
+            </div>
+            {years.length > 0 && (
+              <Select
+                value={selectedYear?.toString()}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                options={years.map(year => ({
+                  value: year,
+                  label: year.toString()
+                }))}
+                placeholder="Select Year"
+                size="sm"
+                className="w-32"
+              />
+            )}
+          </div>
+
+          {years.length === 0 ? (
+            <p className="text-gray-500 dark:text-gray-400">No events found for this team.</p>
+          ) : eventsByYear.length === 0 ? (
+            <p className="text-gray-500 dark:text-gray-400">
+              No events found for {selectedYear}
+            </p>
+          ) : (
+            <Tabs
+              value={selectedEventKey || eventsByYear[0]?.event_key || ''}
+              onValueChange={setSelectedEventKey}
+            >
+              <TabsList className="mb-4 flex-wrap">
+                {eventsByYear.map(event => (
+                  <TabsTrigger key={event.event_key} value={event.event_key}>
+                    {event.event_name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+
+              {eventsByYear.map(event => (
+                <TabsContent key={event.event_key} value={event.event_key}>
+                  <TeamScoutingHistory
+                    teamNumber={team.team_number}
+                    eventKey={event.event_key}
+                    showAggregates={true}
+                  />
+                </TabsContent>
+              ))}
+            </Tabs>
           )}
         </div>
       </Card>

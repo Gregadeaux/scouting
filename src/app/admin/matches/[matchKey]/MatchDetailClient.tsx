@@ -7,6 +7,7 @@ import { AllianceColumn } from '@/components/admin/matches/AllianceColumn';
 import { ScoreBreakdownCard } from '@/components/admin/matches/ScoreBreakdownCard';
 import { VideoLinksCard } from '@/components/admin/matches/VideoLinksCard';
 import { TeamRecentTable } from '@/components/admin/matches/TeamRecentTable';
+import { MatchScoutingSection } from '@/components/admin/matches/MatchScoutingSection';
 import { Button } from '@/components/ui/Button';
 import { ArrowLeft } from 'lucide-react';
 import type { MatchSchedule, Team, TBAVideo } from '@/types';
@@ -88,6 +89,14 @@ export default function MatchDetailClient({
         <div>
           <AllianceColumn alliance="blue" teamNumbers={blueTeams} teams={teams} />
         </div>
+      </div>
+
+      {/* Match Scouting Data Section */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+          Match Scouting Data
+        </h2>
+        <MatchScoutingSection matchKey={match.match_key} eventKey={match.event_key} />
       </div>
 
       {/* Recent Matches for Each Team (Below the fold) */}

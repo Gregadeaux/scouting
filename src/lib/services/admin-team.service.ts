@@ -119,17 +119,17 @@ export class AdminTeamService implements IAdminTeamService {
         )
       `)
       .eq('team_number', teamNumber)
-      .order('events(start_date)', { ascending: false });
+      .order('events(start_date)', { ascending: false }) as { data: EventTeamItem[] | null; error: unknown };
 
     interface EventTeamItem {
       event_key: string;
       created_at: string;
-      events: Omit<TeamEvent, 'team_registered_at'>[] | null;
+      events: Omit<TeamEvent, 'team_registered_at'> | null;
     }
 
     // Transform events data
     const events: TeamEvent[] = eventTeamsData?.map((item: EventTeamItem) => {
-      const eventData = item.events?.[0];
+      const eventData = item.events;
       if (!eventData) return null;
       return {
         ...eventData,
@@ -165,7 +165,7 @@ export class AdminTeamService implements IAdminTeamService {
         )
       `)
       .eq('team_number', teamNumber)
-      .order('joined_at', { ascending: false });
+      .order('joined_at', { ascending: false }) as { data: TeamMemberItem[] | null; error: unknown };
 
     interface TeamMemberItem {
       id: string;
@@ -176,12 +176,12 @@ export class AdminTeamService implements IAdminTeamService {
       is_active: boolean;
       joined_at: string;
       left_at: string | null;
-      user_profiles: TeamScouter['user'][] | null;
+      user_profiles: TeamScouter['user'] | null;
     }
 
     // Transform scouters data
     const scouters: TeamScouter[] = teamMembersData?.map((item: TeamMemberItem) => {
-      const userProfile = item.user_profiles?.[0];
+      const userProfile = item.user_profiles;
       if (!userProfile) return null;
       return {
         membership_id: item.id,

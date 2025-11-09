@@ -24,6 +24,8 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     // Check if we have a valid recovery token
+    // Note: getSession() is appropriate here as we're checking for a recovery session,
+    // not authenticating a user. Recovery sessions are created when clicking the reset link.
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         setValidToken(true);

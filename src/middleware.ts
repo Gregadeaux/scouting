@@ -41,19 +41,20 @@ export async function middleware(req: NextRequest) {
     }
   );
 
-  // Get the current session
+  // Get authenticated user (secure - validates with Supabase Auth server)
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
 
-  const isAuthenticated = !!session;
+  const isAuthenticated = !!user && !authError;
   let userRole: UserRole | undefined;
 
   // If user is authenticated, get their role
-  if (session) {
+  if (user) {
     // PERFORMANCE OPTIMIZATION: Try to get role from JWT first (fast path, ~5-10ms)
     // This avoids a database query on every request for users with role in JWT
-    userRole = (session.user.user_metadata?.role || session.user.app_metadata?.role) as UserRole | undefined;
+    userRole = (user.user_metadata?.role || user.app_metadata?.role) as UserRole | undefined;
 
     if (!userRole) {
       // Fallback: Query database for existing users without role in JWT (~50-100ms)
@@ -61,7 +62,7 @@ export async function middleware(req: NextRequest) {
       const { data: profile } = await supabase
         .from('user_profiles')
         .select('role')
-        .eq('id', session.user.id)
+        .eq('id', user.id)
         .single();
 
       userRole = profile?.role as UserRole | undefined;
@@ -107,8 +108,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - manifest.json (PWA manifest)
      * - public folder
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|manifest.json|public).*)',
   ],
 };
