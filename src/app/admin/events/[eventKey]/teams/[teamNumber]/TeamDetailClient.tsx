@@ -23,7 +23,7 @@ export default function TeamDetailClient({ teamDetail, eventKey }: TeamDetailCli
       {/* Back Button */}
       <div className="mb-6">
         <Link
-          href={`/admin/events/${eventKey}/teams`}
+          href={`/admin/events/${eventKey}`}
           className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
