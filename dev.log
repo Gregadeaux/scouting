@@ -1,0 +1,145 @@
+
+> frc-scouting-system@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.6
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.208:3000
+   - Environments: .env.local
+   - Experiments (use with caution):
+     · optimizePackageImports
+
+ ✓ Starting...
+ ○ (pwa) PWA support is disabled.
+<w> [webpack.cache.PackFileCacheStrategy] Restoring pack from /Users/gregbilletdeaux/Developer/930/scouting/.next/cache/webpack/server-development.pack.gz failed: TypeError: Cannot read properties of undefined (reading 'hasStartTime')
+ ✓ Ready in 1531ms
+ ○ Compiling /api/auth/signup ...
+ ✓ Compiled /api/auth/signup in 660ms (393 modules)
+Signup request received: {
+  email: 'testuser1762723797@example.com',
+  hasPassword: true,
+  hasFullName: true,
+  teamNumber: 930
+}
+SignUp error analysis: {
+  message: 'Database error saving new user',
+  code: 'unexpected_failure',
+  status: 500,
+  isDuplicateEmail: false
+}
+Supabase signUp result: {
+  success: false,
+  error: 'Database error saving new user',
+  errorDetails: Error [AuthApiError]: Database error saving new user
+      at async signUp (src/lib/supabase/auth.ts:204:27)
+      at async POST (src/app/api/auth/signup/route.ts:51:70)
+    202 |   formData: SignupFormData
+    203 | ): Promise<{ user: User | null; error: Error | null; isDuplicateEmail?: boolean }> {
+  > 204 |   const { data, error } = await supabase.auth.signUp({
+        |                           ^
+    205 |     email: formData.email,
+    206 |     password: formData.password,
+    207 |     options: { {
+    __isAuthError: true,
+    status: 500,
+    code: 'unexpected_failure'
+  },
+  errorCode: 'unexpected_failure',
+  errorStatus: 500,
+  userId: undefined,
+  isDuplicateEmail: false
+}
+Signup failed: Error [AuthApiError]: Database error saving new user
+    at async signUp (src/lib/supabase/auth.ts:204:27)
+    at async POST (src/app/api/auth/signup/route.ts:51:70)
+  202 |   formData: SignupFormData
+  203 | ): Promise<{ user: User | null; error: Error | null; isDuplicateEmail?: boolean }> {
+> 204 |   const { data, error } = await supabase.auth.signUp({
+      |                           ^
+  205 |     email: formData.email,
+  206 |     password: formData.password,
+  207 |     options: { {
+  __isAuthError: true,
+  status: 500,
+  code: 'unexpected_failure'
+}
+ POST /api/auth/signup 500 in 1186ms
+ ✓ Compiled in 103ms (199 modules)
+ ✓ Compiled in 51ms (199 modules)
+Signup request received: {
+  email: 'newuser1762723833@example.com',
+  hasPassword: true,
+  hasFullName: true,
+  teamNumber: 930
+}
+SignUp error analysis: {
+  message: 'Database error saving new user',
+  code: 'unexpected_failure',
+  status: 500,
+  isDuplicateEmail: false
+}
+Supabase signUp result: {
+  success: false,
+  error: 'Database error saving new user',
+  errorDetails: Error [AuthApiError]: Database error saving new user
+      at async signUp (src/lib/supabase/auth.ts:204:27)
+      at async POST (src/app/api/auth/signup/route.ts:53:70)
+    202 |   formData: SignupFormData
+    203 | ): Promise<{ user: User | null; error: Error | null; isDuplicateEmail?: boolean }> {
+  > 204 |   const { data, error } = await supabase.auth.signUp({
+        |                           ^
+    205 |     email: formData.email,
+    206 |     password: formData.password,
+    207 |     options: { {
+    __isAuthError: true,
+    status: 500,
+    code: 'unexpected_failure'
+  },
+  errorCode: 'unexpected_failure',
+  errorStatus: 500,
+  userId: undefined,
+  isDuplicateEmail: false
+}
+Signup failed: Error [AuthApiError]: Database error saving new user
+    at async signUp (src/lib/supabase/auth.ts:204:27)
+    at async POST (src/app/api/auth/signup/route.ts:53:70)
+  202 |   formData: SignupFormData
+  203 | ): Promise<{ user: User | null; error: Error | null; isDuplicateEmail?: boolean }> {
+> 204 |   const { data, error } = await supabase.auth.signUp({
+      |                           ^
+  205 |     email: formData.email,
+  206 |     password: formData.password,
+  207 |     options: { {
+  __isAuthError: true,
+  status: 500,
+  code: 'unexpected_failure'
+}
+ POST /api/auth/signup 500 in 562ms
+ ✓ Compiled in 19ms
+ ✓ Compiled /api/auth/signup in 69ms (199 modules)
+Signup request received: {
+  email: 'adminuser1762724013@example.com',
+  hasPassword: true,
+  hasFullName: true,
+  teamNumber: 930
+}
+Admin createUser error: Error [AuthApiError]: Database error creating new user
+    at async POST (src/app/api/auth/signup/route.ts:51:52)
+  49 |     // Try using admin.createUser instead of signUp to bypass potential issues
+  50 |     try {
+> 51 |       const { data: authData, error: authError } = await serviceClient.auth.admin.createUser({
+     |                                                    ^
+  52 |         email: formData.email,
+  53 |         password: formData.password,
+  54 |         email_confirm: true, // Auto-confirm email for now {
+  __isAuthError: true,
+  status: 500,
+  code: 'unexpected_failure'
+}
+ POST /api/auth/signup 500 in 595ms
+ ✓ Compiled /api/auth/oauth/url in 158ms (393 modules)
+ POST /api/auth/oauth/url 200 in 209ms
+ ✓ Compiled in 14ms
+ ✓ Compiled /api/admin/scouters in 282ms (404 modules)
+ GET /api/admin/scouters?limit=5 401 in 366ms
+[?25h
