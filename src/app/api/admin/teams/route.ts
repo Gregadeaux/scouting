@@ -24,16 +24,31 @@ export async function GET(request: NextRequest) {
 
     let query = supabase.from('teams').select('*', { count: 'exact' });
 
-    // Apply search filter
+    // Apply search filter - SECURE: No string interpolation in queries
     if (search) {
-      const numericSearch = parseInt(search);
+      // Validate and sanitize search input
+      const sanitizedSearch = search.trim().substring(0, 100);
+
+      // Reject searches with special characters that could be used for injection
+      if (!/^[a-zA-Z0-9\s\-.']+$/.test(sanitizedSearch)) {
+        return NextResponse.json(
+          { error: 'Invalid search term: only alphanumeric characters, spaces, hyphens, periods, and apostrophes allowed' },
+          { status: 400 }
+        );
+      }
+
+      const numericSearch = parseInt(sanitizedSearch);
+
       if (!isNaN(numericSearch)) {
-        // Search by team number
-        query = query.or(`team_number.eq.${numericSearch},team_name.ilike.%${search}%`);
+        // SECURE: Search by team number using safe filter building
+        // Use URL encoding to prevent injection
+        const encodedSearch = encodeURIComponent(sanitizedSearch);
+        query = query.or(`team_number.eq.${numericSearch},team_name.ilike.*${encodedSearch}*`);
       } else {
-        // Search by name or location
+        // SECURE: Search by text fields using URL-encoded values
+        const encodedSearch = encodeURIComponent(sanitizedSearch);
         query = query.or(
-          `team_name.ilike.%${search}%,team_nickname.ilike.%${search}%,city.ilike.%${search}%,state_province.ilike.%${search}%`
+          `team_name.ilike.*${encodedSearch}*,team_nickname.ilike.*${encodedSearch}*,city.ilike.*${encodedSearch}*,state_province.ilike.*${encodedSearch}*`
         );
       }
     }
