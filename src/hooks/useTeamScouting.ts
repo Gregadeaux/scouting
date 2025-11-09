@@ -123,7 +123,10 @@ export function useTeamScouting({
         page: String(page),
       });
 
-      const response = await fetch(`/api/teams/${teamNumber}/scouting?${params}`);
+      const url = `/api/teams/${teamNumber}/scouting?${params}`;
+      console.log('[useTeamScouting] Fetching:', url);
+
+      const response = await fetch(url);
 
       if (!response.ok) {
         const errorData = await response.json();

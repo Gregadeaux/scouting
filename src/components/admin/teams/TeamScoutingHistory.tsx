@@ -98,6 +98,9 @@ export function TeamScoutingHistory({
   showAggregates = true,
   compact = false,
 }: TeamScoutingHistoryProps) {
+  // Debug logging
+  console.log('[TeamScoutingHistory] Rendering with:', { teamNumber, eventKey });
+
   const [sortBy, setSortBy] = useState<'match_number' | 'created_at' | 'total_points'>('match_number');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState(1);
@@ -118,6 +121,12 @@ export function TeamScoutingHistory({
     sortOrder,
     limit: compact ? 10 : 50,
     page: currentPage,
+  });
+
+  // Debug: log what data we got
+  console.log('[TeamScoutingHistory] Received data:', {
+    matchCount: data?.length,
+    eventKeys: [...new Set(data?.map(d => d.match_schedule?.event_key))],
   });
 
   const handleSort = (field: string) => {
