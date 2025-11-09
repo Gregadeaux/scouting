@@ -14,68 +14,65 @@ import {
 } from './base.repository';
 
 /**
- * Experience level for scouters
+ * Experience level for scouters (matches database schema)
  */
-export type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert';
+export type ExperienceLevel = 'rookie' | 'intermediate' | 'veteran';
+
+/**
+ * Preferred role for scouters
+ */
+export type PreferredRole = 'match_scouting' | 'pit_scouting' | 'both';
 
 /**
  * Extended Scouter type with additional fields
  */
 export interface ExtendedScouter extends Scouter {
-  user_id?: string; // Link to user_profiles
-  experience_level?: ExperienceLevel;
-  certifications?: string[]; // Array of certification types (stored as JSONB)
-  matches_scouted?: number;
-  reliability_score?: number; // 0-100
-  preferred_position?: 'red1' | 'red2' | 'red3' | 'blue1' | 'blue2' | 'blue3';
-  notes?: string;
+  user_id: string; // Link to user_profiles (required)
+  experience_level: ExperienceLevel;
+  preferred_role?: PreferredRole;
+  certifications: string[]; // Array of certification types (stored as JSONB)
+  total_matches_scouted: number;
+  total_events_attended: number;
+  availability_notes?: string;
+  user_profiles?: {
+    email?: string;
+    full_name?: string;
+    display_name?: string;
+  } | null;
 }
 
 /**
  * Scouter creation input
  */
 export interface CreateScouterInput {
-  user_id?: string;
-  scout_name: string;
-  team_affiliation?: number;
-  role?: 'lead' | 'scout' | 'admin';
-  email?: string;
-  phone?: string;
-  experience_level?: ExperienceLevel;
+  user_id: string; // Required - reference to auth.users
+  team_number?: number; // Optional - primary team affiliation
+  experience_level?: ExperienceLevel; // Defaults to 'rookie'
+  preferred_role?: PreferredRole;
   certifications?: string[];
-  preferred_position?: string;
-  notes?: string;
-  active?: boolean;
+  availability_notes?: string;
 }
 
 /**
  * Scouter update input
  */
 export interface UpdateScouterInput {
-  scout_name?: string;
-  team_affiliation?: number;
-  role?: 'lead' | 'scout' | 'admin';
-  email?: string;
-  phone?: string;
+  team_number?: number | null;
   experience_level?: ExperienceLevel;
+  preferred_role?: PreferredRole | null;
   certifications?: string[];
-  preferred_position?: string;
-  notes?: string;
-  active?: boolean;
-  matches_scouted?: number;
-  reliability_score?: number;
+  availability_notes?: string;
 }
 
 /**
  * Query options specific to scouters
  */
 export interface ScouterQueryOptions extends QueryOptions {
-  search?: string; // Search by name, email
+  search?: string; // Search by user email or full_name
   experience_level?: ExperienceLevel;
   team_number?: number;
   certification?: string;
-  role?: 'lead' | 'scout' | 'admin';
-  active?: boolean;
+  preferred_role?: PreferredRole;
 }
 
 /**
@@ -92,7 +89,6 @@ export interface IScouterRepository {
   delete(id: string): Promise<void>;
   count(options?: Omit<ScouterQueryOptions, 'limit' | 'offset'>): Promise<number>;
   incrementMatchesCount(id: string): Promise<void>;
-  updateReliabilityScore(id: string, score: number): Promise<void>;
 }
 
 /**
@@ -168,7 +164,7 @@ export class ScouterRepository implements IScouterRepository {
     try {
       let query = this.client.from('scouters').select(`
         *,
-        user_profiles!left (
+        user_profiles!inner (
           email,
           full_name,
           display_name
@@ -181,15 +177,11 @@ export class ScouterRepository implements IScouterRepository {
       }
 
       if (options?.team_number) {
-        query = query.eq('team_affiliation', options.team_number);
+        query = query.eq('team_number', options.team_number);
       }
 
-      if (options?.role) {
-        query = query.eq('role', options.role);
-      }
-
-      if (options?.active !== undefined) {
-        query = query.eq('active', options.active);
+      if (options?.preferred_role) {
+        query = query.eq('preferred_role', options.preferred_role);
       }
 
       // Certification filter (JSONB array contains)
@@ -197,11 +189,12 @@ export class ScouterRepository implements IScouterRepository {
         query = query.contains('certifications', [options.certification]);
       }
 
-      // Search by scout name or email (via join)
+      // Search by user email or full_name (via join)
       if (options?.search) {
-        // Note: This requires a more complex query with OR conditions
-        // For now, we'll search by scout_name only
-        query = query.ilike('scout_name', `%${options.search}%`);
+        // Search in the joined user_profiles table
+        query = query.or(
+          `user_profiles.email.ilike.%${options.search}%,user_profiles.full_name.ilike.%${options.search}%`
+        );
       }
 
       // Sorting
@@ -210,8 +203,8 @@ export class ScouterRepository implements IScouterRepository {
           ascending: options.orderDirection === 'asc',
         });
       } else {
-        // Default order by scout_name
-        query = query.order('scout_name', { ascending: true });
+        // Default order by full_name from user_profiles
+        query = query.order('user_profiles(full_name)', { ascending: true });
       }
 
       // Pagination
@@ -248,9 +241,16 @@ export class ScouterRepository implements IScouterRepository {
     try {
       const { data, error } = await this.client
         .from('scouters')
-        .select('*')
-        .eq('team_affiliation', teamNumber)
-        .order('scout_name', { ascending: true });
+        .select(`
+          *,
+          user_profiles!inner (
+            email,
+            full_name,
+            display_name
+          )
+        `)
+        .eq('team_number', teamNumber)
+        .order('user_profiles(full_name)', { ascending: true });
 
       if (error) {
         throw new DatabaseOperationError('find scouters by team', error);
@@ -272,9 +272,16 @@ export class ScouterRepository implements IScouterRepository {
     try {
       const { data, error } = await this.client
         .from('scouters')
-        .select('*')
+        .select(`
+          *,
+          user_profiles!inner (
+            email,
+            full_name,
+            display_name
+          )
+        `)
         .eq('experience_level', level)
-        .order('reliability_score', { ascending: false });
+        .order('total_matches_scouted', { ascending: false });
 
       if (error) {
         throw new DatabaseOperationError('find scouters by experience level', error);
@@ -294,21 +301,30 @@ export class ScouterRepository implements IScouterRepository {
    */
   async create(data: CreateScouterInput): Promise<ExtendedScouter> {
     try {
-      if (!data.scout_name) {
-        throw new RepositoryError('scout_name is required for create');
+      if (!data.user_id) {
+        throw new RepositoryError('user_id is required for create');
       }
 
       const scouterData = {
-        ...data,
-        active: data.active !== undefined ? data.active : true,
-        matches_scouted: 0,
-        reliability_score: 50, // Start with neutral score
+        user_id: data.user_id,
+        team_number: data.team_number ?? null,
+        experience_level: data.experience_level ?? 'rookie',
+        preferred_role: data.preferred_role ?? null,
+        certifications: data.certifications ?? [],
+        availability_notes: data.availability_notes ?? null,
       };
 
       const { data: created, error } = await this.client
         .from('scouters')
         .insert(scouterData)
-        .select()
+        .select(`
+          *,
+          user_profiles!inner (
+            email,
+            full_name,
+            display_name
+          )
+        `)
         .single();
 
       if (error) {
@@ -342,11 +358,22 @@ export class ScouterRepository implements IScouterRepository {
       const { data: updated, error } = await this.client
         .from('scouters')
         .update({
-          ...data,
+          team_number: data.team_number ?? undefined,
+          experience_level: data.experience_level ?? undefined,
+          preferred_role: data.preferred_role ?? undefined,
+          certifications: data.certifications ?? undefined,
+          availability_notes: data.availability_notes ?? undefined,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id)
-        .select()
+        .select(`
+          *,
+          user_profiles!inner (
+            email,
+            full_name,
+            display_name
+          )
+        `)
         .single();
 
       if (error) {
@@ -398,7 +425,9 @@ export class ScouterRepository implements IScouterRepository {
    */
   async count(options?: Omit<ScouterQueryOptions, 'limit' | 'offset'>): Promise<number> {
     try {
-      let query = this.client.from('scouters').select('*', { count: 'exact', head: true });
+      let query = this.client
+        .from('scouters')
+        .select('id', { count: 'exact', head: true });
 
       // Apply same filters as findAll
       if (options?.experience_level) {
@@ -406,15 +435,11 @@ export class ScouterRepository implements IScouterRepository {
       }
 
       if (options?.team_number) {
-        query = query.eq('team_affiliation', options.team_number);
+        query = query.eq('team_number', options.team_number);
       }
 
-      if (options?.role) {
-        query = query.eq('role', options.role);
-      }
-
-      if (options?.active !== undefined) {
-        query = query.eq('active', options.active);
+      if (options?.preferred_role) {
+        query = query.eq('preferred_role', options.preferred_role);
       }
 
       if (options?.certification) {
@@ -422,7 +447,9 @@ export class ScouterRepository implements IScouterRepository {
       }
 
       if (options?.search) {
-        query = query.ilike('scout_name', `%${options.search}%`);
+        query = query.or(
+          `user_profiles.email.ilike.%${options.search}%,user_profiles.full_name.ilike.%${options.search}%`
+        );
       }
 
       const { count, error } = await query;
@@ -453,7 +480,7 @@ export class ScouterRepository implements IScouterRepository {
       const { error } = await this.client
         .from('scouters')
         .update({
-          matches_scouted: (existing.matches_scouted || 0) + 1,
+          total_matches_scouted: (existing.total_matches_scouted || 0) + 1,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id);
@@ -466,39 +493,6 @@ export class ScouterRepository implements IScouterRepository {
         throw error;
       }
       throw new DatabaseOperationError('increment matches count', error);
-    }
-  }
-
-  /**
-   * Update reliability score (0-100)
-   */
-  async updateReliabilityScore(id: string, score: number): Promise<void> {
-    try {
-      if (score < 0 || score > 100) {
-        throw new RepositoryError('Reliability score must be between 0 and 100');
-      }
-
-      const existing = await this.findById(id);
-      if (!existing) {
-        throw new EntityNotFoundError('Scouter', id);
-      }
-
-      const { error } = await this.client
-        .from('scouters')
-        .update({
-          reliability_score: score,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id);
-
-      if (error) {
-        throw new DatabaseOperationError('update reliability score', error);
-      }
-    } catch (error) {
-      if (error instanceof RepositoryError) {
-        throw error;
-      }
-      throw new DatabaseOperationError('update reliability score', error);
     }
   }
 }

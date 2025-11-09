@@ -59,55 +59,51 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
-    // Build update input - only include provided fields
+    // Build update input matching repository interface - only include provided fields
     const updateInput: UpdateScouterInput = {};
 
-    if (body.scout_name !== undefined) {
-      updateInput.scout_name = body.scout_name;
-    }
-
-    if (body.team_affiliation !== undefined) {
-      updateInput.team_affiliation = body.team_affiliation ? parseInt(body.team_affiliation) : undefined;
-    }
-
-    if (body.role !== undefined) {
-      updateInput.role = body.role;
-    }
-
-    if (body.email !== undefined) {
-      updateInput.email = body.email;
-    }
-
-    if (body.phone !== undefined) {
-      updateInput.phone = body.phone;
+    // Handle team_number with validation
+    if (body.team_number !== undefined) {
+      if (body.team_number === null) {
+        updateInput.team_number = null;
+      } else {
+        const parsed = parseInt(body.team_number);
+        if (isNaN(parsed) || parsed < 0) {
+          return errorResponse('team_number must be a positive integer or null', 400);
+        }
+        updateInput.team_number = parsed;
+      }
     }
 
     if (body.experience_level !== undefined) {
+      const validExperienceLevels = ['rookie', 'intermediate', 'veteran'];
+      if (!validExperienceLevels.includes(body.experience_level)) {
+        return errorResponse(`experience_level must be one of: ${validExperienceLevels.join(', ')}`, 400);
+      }
       updateInput.experience_level = body.experience_level;
     }
 
+    if (body.preferred_role !== undefined) {
+      if (body.preferred_role === null) {
+        updateInput.preferred_role = null;
+      } else {
+        const validRoles = ['match_scouting', 'pit_scouting', 'both'];
+        if (!validRoles.includes(body.preferred_role)) {
+          return errorResponse(`preferred_role must be one of: ${validRoles.join(', ')}`, 400);
+        }
+        updateInput.preferred_role = body.preferred_role;
+      }
+    }
+
     if (body.certifications !== undefined) {
+      if (!Array.isArray(body.certifications)) {
+        return errorResponse('certifications must be an array', 400);
+      }
       updateInput.certifications = body.certifications;
     }
 
-    if (body.preferred_position !== undefined) {
-      updateInput.preferred_position = body.preferred_position;
-    }
-
-    if (body.notes !== undefined) {
-      updateInput.notes = body.notes;
-    }
-
-    if (body.active !== undefined) {
-      updateInput.active = body.active;
-    }
-
-    if (body.matches_scouted !== undefined) {
-      updateInput.matches_scouted = parseInt(body.matches_scouted);
-    }
-
-    if (body.reliability_score !== undefined) {
-      updateInput.reliability_score = parseFloat(body.reliability_score);
+    if (body.availability_notes !== undefined) {
+      updateInput.availability_notes = body.availability_notes;
     }
 
     // Check if there's anything to update
