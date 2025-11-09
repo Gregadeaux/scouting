@@ -27,7 +27,7 @@ export default function TeamDetailClient({ teamDetail, eventKey }: TeamDetailCli
           className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Teams
+          Back to Event
         </Link>
       </div>
 
