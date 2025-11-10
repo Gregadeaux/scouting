@@ -1,6 +1,8 @@
 /**
  * Auth API: Login
  * POST /api/auth/login - Sign in with email and password
+ *
+ * SECURITY: Rate limited to 5 attempts per minute per IP
  */
 
 import { NextRequest } from 'next/server';
@@ -8,6 +10,7 @@ import { createClient } from '@/lib/supabase/server';
 import { signIn, getCurrentUser } from '@/lib/supabase/auth';
 import { successResponse, errorResponse } from '@/lib/api/auth-middleware';
 import type { LoginFormData } from '@/types/auth';
+import { applyRateLimit, loginRateLimit } from '@/lib/middleware/rate-limit';
 
 /**
  * POST /api/auth/login
@@ -15,6 +18,10 @@ import type { LoginFormData } from '@/types/auth';
  * Returns: { success: true, data: { user: AuthenticatedUser } }
  */
 export async function POST(request: NextRequest) {
+  // SECURITY: Apply rate limiting (5 attempts per minute per IP)
+  const rateLimitResult = await applyRateLimit(request, loginRateLimit);
+  if (rateLimitResult) return rateLimitResult;
+
   try {
     const body = await request.json();
 
