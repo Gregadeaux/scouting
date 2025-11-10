@@ -1,6 +1,8 @@
 /**
  * Auth API: Signup
  * POST /api/auth/signup - Register new user
+ *
+ * SECURITY: Rate limited to 3 attempts per hour per IP
  */
 
 import { NextRequest } from 'next/server';
@@ -8,6 +10,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { signUp, getCurrentUser } from '@/lib/supabase/auth';
 import { successResponse, errorResponse } from '@/lib/api/auth-middleware';
 import type { SignupFormData } from '@/types/auth';
+import { applyRateLimit, signupRateLimit } from '@/lib/middleware/rate-limit';
 
 /**
  * POST /api/auth/signup
@@ -21,6 +24,10 @@ import type { SignupFormData } from '@/types/auth';
  * - 500 Internal Server Error: Unexpected server errors
  */
 export async function POST(request: NextRequest) {
+  // SECURITY: Apply rate limiting (3 attempts per hour per IP)
+  const rateLimitResult = await applyRateLimit(request, signupRateLimit);
+  if (rateLimitResult) return rateLimitResult;
+
   try {
     const body = await request.json();
 
