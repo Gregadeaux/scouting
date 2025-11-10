@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse } from '@/lib/api/response';
 import { requireAdmin } from '@/lib/api/auth-middleware';
+import { buildSearchFilter } from '@/lib/utils/input-sanitization';
 
 export async function GET(request: NextRequest) {
   // Require admin authentication
@@ -57,10 +58,18 @@ export async function GET(request: NextRequest) {
       query = query.eq('primary_team_number', parseInt(teamNumber));
     }
 
+    // SECURE: Apply search filter using input sanitization utility
     if (search) {
-      query = query.or(
-        `email.ilike.%${search}%,full_name.ilike.%${search}%,display_name.ilike.%${search}%`
-      );
+      try {
+        const textFilter = buildSearchFilter(['email', 'full_name', 'display_name'], search);
+        if (textFilter) {
+          query = query.or(textFilter);
+        }
+      } catch (error) {
+        // Sanitization failed - return error to user
+        const errorMsg = error instanceof Error ? error.message : 'Invalid search input';
+        return errorResponse(errorMsg, 400);
+      }
     }
 
     // Apply pagination and ordering

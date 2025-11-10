@@ -28,6 +28,7 @@ import type { IScoutingDataRepository } from '@/lib/repositories/scouting-data.r
 import type { IImportJobRepository } from '@/lib/repositories/import-job.repository';
 import type { EventMergeStrategy } from '@/lib/strategies/merge-strategies';
 import { mapTBAEventType } from '@/lib/utils/tba';
+import { buildSearchFilter } from '@/lib/utils/input-sanitization';
 
 /**
  * Event list options for filtering, sorting, and pagination
@@ -140,11 +141,21 @@ export class EventService implements IEventService {
       query = query.eq('year', year);
     }
 
-    // Apply search filter
+    // SECURE: Apply search filter using input sanitization utility
     if (search) {
-      query = query.or(
-        `event_name.ilike.%${search}%,event_key.ilike.%${search}%,city.ilike.%${search}%,state_province.ilike.%${search}%`
-      );
+      try {
+        const textFilter = buildSearchFilter(
+          ['event_name', 'event_key', 'city', 'state_province'],
+          search
+        );
+        if (textFilter) {
+          query = query.or(textFilter);
+        }
+      } catch (error) {
+        // Sanitization failed - throw error to caller
+        const errorMsg = error instanceof Error ? error.message : 'Invalid search input';
+        throw new Error(`Invalid search parameter: ${errorMsg}`);
+      }
     }
 
     // Apply sorting

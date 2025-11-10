@@ -12,6 +12,7 @@ import {
   EntityNotFoundError,
   DatabaseOperationError,
 } from './base.repository';
+import { buildSearchFilter } from '@/lib/utils/input-sanitization';
 
 /**
  * Experience level for scouters (matches database schema)
@@ -189,12 +190,24 @@ export class ScouterRepository implements IScouterRepository {
         query = query.contains('certifications', [options.certification]);
       }
 
-      // Search by user email or full_name (via join)
+      // SECURE: Search by user email or full_name (via join) using input sanitization
       if (options?.search) {
-        // Search in the joined user_profiles table
-        query = query.or(
-          `user_profiles.email.ilike.%${options.search}%,user_profiles.full_name.ilike.%${options.search}%`
-        );
+        try {
+          // Search in the joined user_profiles table
+          const textFilter = buildSearchFilter(
+            ['user_profiles.email', 'user_profiles.full_name'],
+            options.search
+          );
+          if (textFilter) {
+            query = query.or(textFilter);
+          }
+        } catch (error) {
+          // Sanitization failed - throw error to caller
+          throw new DatabaseOperationError(
+            'find all scouters',
+            error instanceof Error ? error : new Error('Invalid search input')
+          );
+        }
       }
 
       // Sorting
@@ -446,10 +459,23 @@ export class ScouterRepository implements IScouterRepository {
         query = query.contains('certifications', [options.certification]);
       }
 
+      // SECURE: Apply search filter using input sanitization utility
       if (options?.search) {
-        query = query.or(
-          `user_profiles.email.ilike.%${options.search}%,user_profiles.full_name.ilike.%${options.search}%`
-        );
+        try {
+          const textFilter = buildSearchFilter(
+            ['user_profiles.email', 'user_profiles.full_name'],
+            options.search
+          );
+          if (textFilter) {
+            query = query.or(textFilter);
+          }
+        } catch (error) {
+          // Sanitization failed - throw error to caller
+          throw new DatabaseOperationError(
+            'count scouters',
+            error instanceof Error ? error : new Error('Invalid search input')
+          );
+        }
       }
 
       const { count, error } = await query;

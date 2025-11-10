@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { requireAdmin } from '@/lib/api/auth-middleware';
+import { buildSearchFilter, sanitizeNumericSearch } from '@/lib/utils/input-sanitization';
 
 // GET /api/admin/teams - List teams with pagination, filtering, and sorting
 export async function GET(request: NextRequest) {
@@ -24,32 +25,29 @@ export async function GET(request: NextRequest) {
 
     let query = supabase.from('teams').select('*', { count: 'exact' });
 
-    // Apply search filter - SECURE: No string interpolation in queries
+    // Apply search filter - SECURE: Uses input sanitization utility
     if (search) {
-      // Validate and sanitize search input
-      const sanitizedSearch = search.trim().substring(0, 100);
+      try {
+        const numericSearch = sanitizeNumericSearch(search);
 
-      // Reject searches with special characters that could be used for injection
-      if (!/^[a-zA-Z0-9\s\-.']+$/.test(sanitizedSearch)) {
-        return NextResponse.json(
-          { error: 'Invalid search term: only alphanumeric characters, spaces, hyphens, periods, and apostrophes allowed' },
-          { status: 400 }
-        );
-      }
-
-      const numericSearch = parseInt(sanitizedSearch);
-
-      if (!isNaN(numericSearch)) {
-        // SECURE: Search by team number using safe filter building
-        // Use URL encoding to prevent injection
-        const encodedSearch = encodeURIComponent(sanitizedSearch);
-        query = query.or(`team_number.eq.${numericSearch},team_name.ilike.*${encodedSearch}*`);
-      } else {
-        // SECURE: Search by text fields using URL-encoded values
-        const encodedSearch = encodeURIComponent(sanitizedSearch);
-        query = query.or(
-          `team_name.ilike.*${encodedSearch}*,team_nickname.ilike.*${encodedSearch}*,city.ilike.*${encodedSearch}*,state_province.ilike.*${encodedSearch}*`
-        );
+        if (numericSearch !== null) {
+          // SECURE: Search by team number (numeric) and text fields
+          const textFilter = buildSearchFilter(['team_name'], search);
+          query = query.or(`team_number.eq.${numericSearch},${textFilter}`);
+        } else {
+          // SECURE: Search by text fields only using sanitized input
+          const textFilter = buildSearchFilter(
+            ['team_name', 'team_nickname', 'city', 'state_province'],
+            search
+          );
+          if (textFilter) {
+            query = query.or(textFilter);
+          }
+        }
+      } catch (error) {
+        // Sanitization failed - return error to user
+        const errorMsg = error instanceof Error ? error.message : 'Invalid search input';
+        return NextResponse.json({ error: errorMsg }, { status: 400 });
       }
     }
 
