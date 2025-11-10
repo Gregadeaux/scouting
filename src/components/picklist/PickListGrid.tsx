@@ -23,6 +23,7 @@ interface PickListGridProps {
   isPicked: (teamNumber: number) => boolean;
   onTogglePicked: (teamNumber: number) => void;
   onRemoveColumn: (columnId: string) => void;
+  onColumnSortChange: (columnId: string, metric: SortMetric, direction: SortDirection) => void;
 }
 
 export function PickListGrid({
@@ -31,6 +32,7 @@ export function PickListGrid({
   isPicked,
   onTogglePicked,
   onRemoveColumn,
+  onColumnSortChange,
 }: PickListGridProps) {
   if (columns.length === 0) {
     return (
@@ -57,8 +59,9 @@ export function PickListGrid({
           isPicked={isPicked}
           onTogglePicked={onTogglePicked}
           onRemoveColumn={() => onRemoveColumn(column.id)}
-          initialSortMetric={column.sortMetric}
-          initialSortDirection={column.sortDirection}
+          sortMetric={column.sortMetric}
+          sortDirection={column.sortDirection}
+          onSortChange={(metric, direction) => onColumnSortChange(column.id, metric, direction)}
           columnIndex={index}
         />
       ))}

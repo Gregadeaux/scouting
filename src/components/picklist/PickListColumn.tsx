@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { TeamCard } from './TeamCard';
 import { SortSelector, type SortMetric, type SortDirection } from './SortSelector';
@@ -18,8 +18,9 @@ interface PickListColumnProps {
   isPicked: (teamNumber: number) => boolean;
   onTogglePicked: (teamNumber: number) => void;
   onRemoveColumn: () => void;
-  initialSortMetric?: SortMetric;
-  initialSortDirection?: SortDirection;
+  sortMetric: SortMetric;
+  sortDirection: SortDirection;
+  onSortChange: (metric: SortMetric, direction: SortDirection) => void;
   columnIndex: number;
 }
 
@@ -28,13 +29,11 @@ export function PickListColumn({
   isPicked,
   onTogglePicked,
   onRemoveColumn,
-  initialSortMetric = 'compositeScore',
-  initialSortDirection = 'desc',
+  sortMetric,
+  sortDirection,
+  onSortChange,
   columnIndex,
 }: PickListColumnProps) {
-  const [sortMetric, setSortMetric] = useState<SortMetric>(initialSortMetric);
-  const [sortDirection, setSortDirection] = useState<SortDirection>(initialSortDirection);
-
   // Sort teams by selected metric
   const sortedTeams = useMemo(() => {
     const sorted = [...teams].sort((a, b) => {
@@ -103,11 +102,6 @@ export function PickListColumn({
     return sorted;
   }, [teams, sortMetric, sortDirection]);
 
-  const handleSortChange = (metric: SortMetric, direction: SortDirection) => {
-    setSortMetric(metric);
-    setSortDirection(direction);
-  };
-
   // Get metric display name
   const getMetricLabel = () => {
     const option = [
@@ -148,7 +142,7 @@ export function PickListColumn({
         <SortSelector
           sortMetric={sortMetric}
           sortDirection={sortDirection}
-          onSortChange={handleSortChange}
+          onSortChange={onSortChange}
         />
       </div>
 
