@@ -128,7 +128,5 @@ export default defineConfig({
     },
     // Retry configuration for flaky server starts
     retries: 2,
-    // Additional error handling
-    ignoreHTTPSErrors: true,
   },
 });
