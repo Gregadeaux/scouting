@@ -66,18 +66,11 @@ export const passwordResetRateLimit = redis
   : null;
 
 /**
- * Rate limit result type
- */
-export interface RateLimitResult {
-  success: boolean;
-  limit: number;
-  remaining: number;
-  reset: number;
-}
-
-/**
  * Extract IP address from request
  * Prioritizes x-forwarded-for header (Vercel/proxy) over request IP
+ *
+ * SECURITY: We trust x-forwarded-for because Vercel sets it and all traffic
+ * goes through Vercel's edge network. If deploying elsewhere, validate this.
  */
 function getClientIp(request: NextRequest): string {
   // Try x-forwarded-for header (Vercel, proxies)
@@ -94,6 +87,10 @@ function getClientIp(request: NextRequest): string {
   }
 
   // Fallback to generic identifier
+  // Log in production to investigate why IP extraction failed
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('Failed to extract client IP, using fallback identifier');
+  }
   return 'unknown';
 }
 
@@ -134,17 +131,20 @@ export async function applyRateLimit(
 
     if (!success) {
       // Rate limit exceeded - return 429 with retry information
+      // Guard against negative values due to clock skew
+      const retryAfterSeconds = Math.max(0, Math.ceil((reset - Date.now()) / 1000));
+
       return new NextResponse(
         JSON.stringify({
           success: false,
           error: 'Too many requests. Please try again later.',
-          retryAfter: Math.ceil((reset - Date.now()) / 1000), // seconds
+          retryAfter: retryAfterSeconds,
         }),
         {
           status: 429,
           headers: {
             'Content-Type': 'application/json',
-            'Retry-After': String(Math.ceil((reset - Date.now()) / 1000)),
+            'Retry-After': String(retryAfterSeconds),
             'X-RateLimit-Limit': String(limit),
             'X-RateLimit-Remaining': String(remaining),
             'X-RateLimit-Reset': String(reset),
@@ -161,22 +161,4 @@ export async function applyRateLimit(
     console.error('Rate limiting error:', error);
     return null;
   }
-}
-
-/**
- * Get user-friendly rate limit message
- */
-export function getRateLimitMessage(reset: number): string {
-  const secondsUntilReset = Math.ceil((reset - Date.now()) / 1000);
-  const minutesUntilReset = Math.ceil(secondsUntilReset / 60);
-
-  if (minutesUntilReset < 1) {
-    return `Too many attempts. Please try again in ${secondsUntilReset} seconds.`;
-  }
-
-  if (minutesUntilReset === 1) {
-    return 'Too many attempts. Please try again in 1 minute.';
-  }
-
-  return `Too many attempts. Please try again in ${minutesUntilReset} minutes.`;
 }
