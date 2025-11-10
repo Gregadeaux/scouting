@@ -10,8 +10,8 @@ test.describe('JSONB Data Display Component', () => {
   test.beforeEach(async ({ page }) => {
     // Login as admin
     await page.goto('http://localhost:3000/auth/login');
-    await page.fill('input[type="email"]', 'gregadeaux@gmail.com');
-    await page.fill('input[type="password"]', 'Gerg2010');
+    await page.fill('input[type="email"]', process.env.TEST_USER_EMAIL || 'test@example.com');
+    await page.fill('input[type="password"]', process.env.TEST_USER_PASSWORD || 'TestPassword123!');
     await page.click('button[type="submit"]');
 
     // Wait for redirect to admin dashboard

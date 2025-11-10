@@ -12,18 +12,24 @@ import { Page } from '@playwright/test';
 
 /**
  * Default admin credentials for testing
+ * Loaded from environment variables (.env.test)
+ *
+ * Setup: Copy .env.test.example to .env.test and update with actual credentials
  */
 export const ADMIN_CREDENTIALS = {
-  email: 'gregadeaux@gmail.com',
-  password: 'Gerg2010',
+  email: process.env.TEST_ADMIN_EMAIL || process.env.TEST_USER_EMAIL || 'test@example.com',
+  password: process.env.TEST_ADMIN_PASSWORD || process.env.TEST_USER_PASSWORD || 'TestPassword123!',
 } as const;
 
 /**
  * Default test scouter credentials
+ * Loaded from environment variables (.env.test)
+ *
+ * Falls back to admin credentials if scouter credentials not set
  */
 export const SCOUTER_CREDENTIALS = {
-  email: 'test-scouter@example.com',
-  password: 'TestScouter123!',
+  email: process.env.TEST_SCOUTER_EMAIL || process.env.TEST_USER_EMAIL || 'test-scouter@example.com',
+  password: process.env.TEST_SCOUTER_PASSWORD || process.env.TEST_USER_PASSWORD || 'TestScouter123!',
 } as const;
 
 /**

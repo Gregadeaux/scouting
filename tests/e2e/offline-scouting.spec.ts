@@ -1,11 +1,17 @@
 import { test, expect } from '@playwright/test';
 
+// Test credentials loaded from environment variables
+const testCredentials = {
+  email: process.env.TEST_USER_EMAIL || 'test@example.com',
+  password: process.env.TEST_USER_PASSWORD || 'TestPassword123!',
+};
+
 test.describe('Offline Match Scouting', () => {
   test('should queue submission when offline and sync when reconnected', async ({ page, context }) => {
     // Login first
     await page.goto('/auth/login');
-    await page.fill('input[name="email"]', 'gregadeaux@gmail.com');
-    await page.fill('input[name="password"]', 'Gerg2010');
+    await page.fill('input[name="email"]', testCredentials.email);
+    await page.fill('input[name="password"]', testCredentials.password);
     await page.click('button[type="submit"]');
 
     // Wait for redirect to admin
@@ -90,8 +96,8 @@ test.describe('Offline Match Scouting', () => {
   test('should show offline banner and allow manual sync', async ({ page, context }) => {
     // Login
     await page.goto('/auth/login');
-    await page.fill('input[name="email"]', 'gregadeaux@gmail.com');
-    await page.fill('input[name="password"]', 'Gerg2010');
+    await page.fill('input[name="email"]', testCredentials.email);
+    await page.fill('input[name="password"]', testCredentials.password);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/admin');
 
@@ -121,8 +127,8 @@ test.describe('Offline Match Scouting', () => {
   test('should cache match schedules for offline use', async ({ page, context }) => {
     // Login
     await page.goto('/auth/login');
-    await page.fill('input[name="email"]', 'gregadeaux@gmail.com');
-    await page.fill('input[name="password"]', 'Gerg2010');
+    await page.fill('input[name="email"]', testCredentials.email);
+    await page.fill('input[name="password"]', testCredentials.password);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/admin');
 
