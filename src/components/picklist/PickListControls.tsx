@@ -5,12 +5,17 @@
  * - Event selector
  * - Add Picklist button
  * - Clear All Picked button
+ * - Save/Load/Manage configurations
  * - Summary stats
+ *
+ * Related: SCOUT-58
  */
 
 'use client';
 
-import { Plus, Trash2, Download } from 'lucide-react';
+import { Plus, Trash2, Download, Save, Settings } from 'lucide-react';
+import { ConfigurationSelector } from './ConfigurationSelector';
+import type { PickListConfiguration } from '@/types/picklist';
 
 interface Event {
   event_key: string;
@@ -28,6 +33,11 @@ interface PickListControlsProps {
   pickedCount: number;
   totalTeams: number;
   isLoading: boolean;
+  // Configuration management (SCOUT-58)
+  configurations?: PickListConfiguration[];
+  onSaveConfig?: () => void;
+  onLoadConfig?: (config: PickListConfiguration) => void;
+  onManageConfigs?: () => void;
 }
 
 export function PickListControls({
@@ -40,6 +50,10 @@ export function PickListControls({
   pickedCount,
   totalTeams,
   isLoading,
+  configurations = [],
+  onSaveConfig,
+  onLoadConfig,
+  onManageConfigs,
 }: PickListControlsProps) {
   const handleClearClick = () => {
     if (pickedCount === 0) return;
@@ -104,7 +118,40 @@ export function PickListControls({
 
         {/* Right side: Action buttons */}
         {selectedEventKey && (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* Configuration buttons (SCOUT-58) */}
+            {onLoadConfig && configurations.length > 0 && (
+              <ConfigurationSelector
+                configurations={configurations}
+                onLoad={onLoadConfig}
+                disabled={isLoading}
+              />
+            )}
+
+            {onSaveConfig && (
+              <button
+                onClick={onSaveConfig}
+                disabled={isLoading}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors disabled:opacity-50"
+                title="Save current view configuration"
+              >
+                <Save className="w-4 h-4" />
+                <span>Save View</span>
+              </button>
+            )}
+
+            {onManageConfigs && (
+              <button
+                onClick={onManageConfigs}
+                disabled={isLoading}
+                className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors disabled:opacity-50"
+                title="Manage saved configurations"
+              >
+                <Settings className="w-4 h-4" />
+                <span>Manage</span>
+              </button>
+            )}
+
             <button
               onClick={onAddPicklist}
               disabled={isLoading}
