@@ -355,42 +355,79 @@ export class ImportService implements IImportService {
       }
     }
 
-    // Bulk upsert all teams
+    // Bulk upsert all teams using atomic transaction function
+    // This ensures teams and event_teams associations are created atomically
     if (teams.length > 0) {
-      const upserted = await this.teamRepo.bulkUpsert(teams);
-      this.log(`Imported ${upserted.length} teams for event ${job.event_key}`);
-
-      // Also populate event_teams junction table (links teams to events)
-      // This allows teams to be visible before match schedule is published
       try {
-        const eventTeamsData = upserted.map(team => ({
-          event_key: job.event_key,
+        // Convert teams array to JSONB format for PostgreSQL function
+        // The function expects specific fields, so we map them
+        const teamsJson = teams.map(team => ({
           team_number: team.team_number,
+          team_name: team.team_name || null,
+          team_nickname: team.team_nickname || null,
+          city: team.city || null,
+          state_province: team.state_province || null,
+          country: team.country || null,
+          postal_code: team.postal_code || null,
+          rookie_year: team.rookie_year || null,
+          website: team.website || null,
         }));
 
-        // Use direct Supabase client for event_teams junction table
-        // Note: We don't have a dedicated repository for this junction table
+        // Use direct Supabase client to call the atomic function
         const { createServiceClient } = await import('@/lib/supabase/server');
         const supabase = createServiceClient();
-        const { error } = await supabase
-          .from('event_teams')
-          .upsert(eventTeamsData, {
-            onConflict: 'event_key,team_number',
-            ignoreDuplicates: false,
-          });
 
-        if (error) {
-          this.log(`Warning: Failed to populate event_teams junction table: ${error.message}`);
-          // Don't fail the import, just log the warning
-        } else {
-          this.log(`Populated event_teams for ${eventTeamsData.length} teams`);
+        // Call the atomic upsert function
+        const { data: results, error: rpcError } = await supabase.rpc(
+          'upsert_teams_with_event_atomic',
+          {
+            p_teams: teamsJson,
+            p_event_key: job.event_key,
+          }
+        );
+
+        if (rpcError) {
+          this.log(`Failed to import teams atomically: ${rpcError.message}`);
+          throw new Error(`Atomic team import failed: ${rpcError.message}`);
         }
-      } catch (error) {
-        this.log(`Warning: Failed to populate event_teams junction table`, error);
-        // Don't fail the import
-      }
 
-      return upserted.length;
+        // Process results - some teams may have succeeded, others may have failed
+        const successCount = results?.filter((r: { success: boolean }) => r.success).length || 0;
+        const failureCount = results?.filter((r: { success: boolean }) => !r.success).length || 0;
+
+        this.log(`Imported ${successCount} teams successfully for event ${job.event_key}`);
+
+        if (failureCount > 0) {
+          this.log(`Warning: ${failureCount} teams failed to import`);
+          // Log individual failures
+          results
+            ?.filter((r: { success: boolean }) => !r.success)
+            .forEach((r: { team_number: number; error_message: string }) => {
+              this.log(`  Team ${r.team_number}: ${r.error_message}`);
+            });
+        }
+
+        return successCount;
+      } catch (error) {
+        this.log(`Error during atomic team import`, error);
+
+        // Attempt cleanup of partial import
+        try {
+          const { createServiceClient } = await import('@/lib/supabase/server');
+          const supabase = createServiceClient();
+          await supabase.rpc('cleanup_partial_import', {
+            p_job_id: job.job_id,
+            p_event_key: job.event_key,
+            p_cleanup_teams: false, // Don't delete teams, just event_teams
+            p_cleanup_matches: false,
+          });
+          this.log(`Cleaned up partial import for event ${job.event_key}`);
+        } catch (cleanupError) {
+          this.log(`Failed to cleanup partial import`, cleanupError);
+        }
+
+        throw error;
+      }
     }
 
     return 0;

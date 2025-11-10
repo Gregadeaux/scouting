@@ -98,33 +98,53 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (!existingProfile) {
-      console.log('Profile not created by trigger, creating manually with service role client');
+      console.log('Profile not created by trigger, creating atomically with service role client');
 
-      // Use service role client to bypass RLS policies
+      // Use service role client to bypass RLS policies and call atomic function
       const serviceClient = createServiceClient();
 
-      const { error: profileError } = await serviceClient
-        .from('user_profiles')
-        .insert({
-          id: authUser.id,
-          email: authUser.email!,
-          full_name: formData.full_name || null,
-          display_name: formData.full_name || authUser.email!.split('@')[0],
-          role: 'scouter',
-          primary_team_number: formData.team_number || null,
-          is_active: true,
-          email_verified: false,
-          onboarding_completed: false,
-          preferred_scout_name: formData.full_name || authUser.email!.split('@')[0]
-        });
+      try {
+        // Call atomic profile creation function
+        // This ensures profile and team_members are created together or not at all
+        const { data: result, error: rpcError } = await serviceClient.rpc(
+          'create_user_profile_atomic',
+          {
+            p_user_id: authUser.id,
+            p_email: authUser.email!,
+            p_full_name: formData.full_name || null,
+            p_display_name: formData.full_name || authUser.email!.split('@')[0],
+            p_team_number: formData.team_number || null,
+            p_team_role: 'scouter',
+          }
+        );
 
-      if (profileError) {
-        console.error('Failed to create user profile:', profileError);
+        if (rpcError || !result?.success) {
+          const errorMessage = rpcError?.message || 'Unknown error during profile creation';
+          console.error('Failed to create user profile atomically:', errorMessage);
 
-        // This is a critical error - rollback the auth user
+          // This is a critical error - rollback the auth user
+          // Note: This is a compensating transaction since Auth and DB are separate services
+          try {
+            await serviceClient.auth.admin.deleteUser(authUser.id);
+            console.log('Rolled back auth user due to atomic profile creation failure');
+          } catch (rollbackError) {
+            console.error('Failed to rollback auth user:', rollbackError);
+          }
+
+          return errorResponse(
+            'Failed to create user profile. Please try again or contact support.',
+            500
+          );
+        }
+
+        console.log('User profile and team membership created atomically');
+      } catch (error) {
+        console.error('Exception during atomic profile creation:', error);
+
+        // Rollback auth user on any exception
         try {
           await serviceClient.auth.admin.deleteUser(authUser.id);
-          console.log('Rolled back auth user due to profile creation failure');
+          console.log('Rolled back auth user due to exception during profile creation');
         } catch (rollbackError) {
           console.error('Failed to rollback auth user:', rollbackError);
         }
@@ -133,30 +153,6 @@ export async function POST(request: NextRequest) {
           'Failed to create user profile. Please try again or contact support.',
           500
         );
-      }
-
-      console.log('User profile created manually via service role client');
-
-      // Also create team_members entry if team_number provided
-      if (formData.team_number) {
-        const { error: teamMemberError } = await serviceClient
-          .from('team_members')
-          .insert({
-            user_id: authUser.id,
-            team_number: formData.team_number,
-            team_role: 'scouter',
-            can_submit_data: true,
-            can_view_analytics: false,
-            can_manage_team: false,
-            is_active: true
-          });
-
-        if (teamMemberError) {
-          console.error('Failed to create team_members entry:', teamMemberError);
-          // Don't fail the signup for this, can be added later
-        } else {
-          console.log('Team member entry created');
-        }
       }
     } else {
       console.log('Profile already exists from trigger');
