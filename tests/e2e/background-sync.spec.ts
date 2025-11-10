@@ -5,10 +5,10 @@ import { test, expect } from '@playwright/test';
  * Tests the integration of Background Sync API with offline submissions
  */
 
-// Test credentials
+// Test credentials loaded from environment variables
 const testCredentials = {
-  email: 'gregadeaux@gmail.com',
-  password: 'Gerg2010',
+  email: process.env.TEST_USER_EMAIL || 'test@example.com',
+  password: process.env.TEST_USER_PASSWORD || 'TestPassword123!',
 };
 
 test.describe('Background Sync Integration', () => {

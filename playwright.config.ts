@@ -1,4 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Load test environment variables from .env.test
+// This makes test credentials available to all tests via process.env
+dotenv.config({ path: path.resolve(__dirname, '.env.test') });
 
 /**
  * Enhanced Playwright Configuration for E2E Testing
@@ -10,6 +16,7 @@ import { defineConfig, devices } from '@playwright/test';
  * - JSON reporter for CI
  * - Trace collection on retry
  * - Parallel execution optimization
+ * - Test credentials from .env.test
  *
  * See https://playwright.dev/docs/test-configuration.
  */

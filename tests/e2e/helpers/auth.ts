@@ -9,11 +9,13 @@ import { Page, expect } from '@playwright/test';
 
 /**
  * Test credentials for admin user
- * These credentials are used across all E2E tests
+ * Loaded from environment variables (.env.test)
+ *
+ * Setup: Copy .env.test.example to .env.test and update with actual credentials
  */
 export const TEST_CREDENTIALS = {
-  email: 'gregadeaux@gmail.com',
-  password: 'Gerg2010',
+  email: process.env.TEST_USER_EMAIL || 'test@example.com',
+  password: process.env.TEST_USER_PASSWORD || 'TestPassword123!',
 } as const;
 
 /**

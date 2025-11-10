@@ -72,6 +72,66 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000)
 
+## 🧪 Testing
+
+### E2E Test Setup
+
+The project uses Playwright for end-to-end testing. Test credentials are managed via environment variables for security.
+
+1. **Configure test credentials**:
+```bash
+cp .env.test.example .env.test
+```
+
+Edit `.env.test` with valid test user credentials:
+```env
+# Test User Credentials (regular scouter)
+TEST_USER_EMAIL=your-test-user@example.com
+TEST_USER_PASSWORD=YourTestPassword123!
+
+# Test Admin Credentials (admin user)
+TEST_ADMIN_EMAIL=your-admin@example.com
+TEST_ADMIN_PASSWORD=YourAdminPassword123!
+```
+
+**Important**:
+- `.env.test` is gitignored and should NEVER be committed to version control
+- These should be actual credentials for a test user in your Supabase project
+- Create dedicated test accounts - do not use production credentials
+
+2. **Run tests**:
+```bash
+# Run all E2E tests
+npm run test:e2e
+
+# Run tests with PWA/service worker enabled
+npm run test:e2e:pwa
+
+# Run unit tests
+npm test
+
+# Run unit tests with coverage
+npm run test:coverage
+```
+
+3. **Create test users in Supabase**:
+   - Go to Authentication > Users in your Supabase dashboard
+   - Create a test user with the email from your `.env.test`
+   - Assign appropriate role in the `users` table
+   - Add team membership in `user_teams` table if needed
+
+### Test Structure
+
+```
+tests/
+├── e2e/                      # Playwright E2E tests
+│   ├── auth/                # Authentication tests
+│   ├── helpers/             # Test utilities
+│   └── *.spec.ts           # Test files
+├── helpers/                 # Shared test helpers
+└── *.spec.ts               # Additional test files
+```
+
 ## 📁 Project Structure
 
 ```

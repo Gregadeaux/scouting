@@ -5,9 +5,10 @@
 
 import { test, expect, Page } from '@playwright/test';
 
-// Test credentials from requirements
-const VALID_EMAIL = 'gregadeaux@gmail.com';
-const VALID_PASSWORD = 'Gerg2010';
+// Test credentials loaded from environment variables
+// Setup: Copy .env.test.example to .env.test and update with actual credentials
+const VALID_EMAIL = process.env.TEST_USER_EMAIL || 'test@example.com';
+const VALID_PASSWORD = process.env.TEST_USER_PASSWORD || 'TestPassword123!';
 
 // Helper to fill login form
 async function fillLoginForm(
