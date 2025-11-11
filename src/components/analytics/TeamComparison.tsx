@@ -27,6 +27,7 @@ interface TeamComparisonProps {
   eventKey: string;
   teamNumbers: number[];
   teamStats: TeamStatistics[];
+  allEventStats: TeamStatistics[];
 }
 
 const TEAM_COLORS = [
@@ -36,16 +37,15 @@ const TEAM_COLORS = [
   '#ef4444', // red
 ];
 
-export function TeamComparison({ eventKey, teamNumbers, teamStats }: TeamComparisonProps) {
+export function TeamComparison({ eventKey, teamNumbers, teamStats, allEventStats }: TeamComparisonProps) {
   if (teamNumbers.length === 0) return null;
 
-  // Find max values for normalization
-  const allStats = teamStats;
-  const maxOPR = Math.max(...allStats.map(s => s.opr || 0));
-  const maxCCWM = Math.max(...allStats.map(s => s.ccwm || 0));
-  const maxAuto = Math.max(...allStats.map(s => s.avg_auto_score || 0));
-  const maxTeleop = Math.max(...allStats.map(s => s.avg_teleop_score || 0));
-  const maxEndgame = Math.max(...allStats.map(s => s.avg_endgame_score || 0));
+  // Find max values for normalization across ALL teams at the event (not just selected)
+  const maxOPR = Math.max(...allEventStats.map(s => s.opr || 0), 1);
+  const maxCCWM = Math.max(...allEventStats.map(s => s.ccwm || 0), 1);
+  const maxAuto = Math.max(...allEventStats.map(s => s.avg_auto_score || 0), 1);
+  const maxTeleop = Math.max(...allEventStats.map(s => s.avg_teleop_score || 0), 1);
+  const maxEndgame = Math.max(...allEventStats.map(s => s.avg_endgame_score || 0), 1);
   const maxReliability = 100;
 
   // Prepare radar chart data

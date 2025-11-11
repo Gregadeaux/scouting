@@ -230,6 +230,7 @@ export default function AnalyticsPage() {
               eventKey={selectedEventKey}
               teamNumbers={selectedTeams}
               teamStats={teamStats.filter(s => selectedTeams.includes(s.team_number))}
+              allEventStats={teamStats}
             />
           )}
         </>
