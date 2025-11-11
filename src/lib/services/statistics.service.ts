@@ -221,6 +221,7 @@ export class StatisticsService implements IStatisticsService {
 
   /**
    * Calculate aggregate statistics from consolidated match data
+   * Season-aware: uses appropriate calculation functions based on event year or schema version
    */
   private calculateAggregateStats(
     consolidatedMatches: ConsolidatedMatchScouting[],
@@ -229,6 +230,9 @@ export class StatisticsService implements IStatisticsService {
     expectedMatches: number
   ): AggregatedStatistics {
     const matchesPlayed = consolidatedMatches.length;
+
+    // Extract year from event_key if available (format: "2025wimu" -> 2025)
+    const eventYear = eventKey ? parseInt(eventKey.substring(0, 4), 10) : 0;
 
     // Extract point values from each match
     const autoPoints: number[] = [];
@@ -243,11 +247,31 @@ export class StatisticsService implements IStatisticsService {
       const teleop = match.teleop_performance;
       const endgame = match.endgame_performance;
 
-      // Try to calculate points using current season's functions
+      // Determine schema version from JSONB data
+      const schemaVersion = (auto.schema_version as string) ||
+                           (teleop.schema_version as string) ||
+                           (endgame.schema_version as string);
+
+      // Use season-specific calculation functions based on schema version or event year
       try {
-        autoPoints.push(calculateAutoPoints(auto as unknown as AutoPerformance2025));
-        teleopPoints.push(calculateTeleopPoints(teleop as unknown as TeleopPerformance2025));
-        endgamePoints.push(calculateEndgamePoints(endgame as unknown as EndgamePerformance2025));
+        if (schemaVersion === '2025.1' || eventYear === 2025) {
+          // 2025 Reefscape season
+          autoPoints.push(calculateAutoPoints(auto as unknown as AutoPerformance2025));
+          teleopPoints.push(calculateTeleopPoints(teleop as unknown as TeleopPerformance2025));
+          endgamePoints.push(calculateEndgamePoints(endgame as unknown as EndgamePerformance2025));
+        }
+        // Add more seasons here as needed:
+        // else if (schemaVersion === '2026.1' || eventYear === 2026) {
+        //   autoPoints.push(calculateAutoPoints2026(auto as AutoPerformance2026));
+        //   teleopPoints.push(calculateTeleopPoints2026(teleop as TeleopPerformance2026));
+        //   endgamePoints.push(calculateEndgamePoints2026(endgame as EndgamePerformance2026));
+        // }
+        else {
+          // Fallback for unknown seasons
+          autoPoints.push(this.extractPoints(auto, 'auto'));
+          teleopPoints.push(this.extractPoints(teleop, 'teleop'));
+          endgamePoints.push(this.extractPoints(endgame, 'endgame'));
+        }
       } catch {
         // Fallback for generic calculation
         autoPoints.push(this.extractPoints(auto, 'auto'));
