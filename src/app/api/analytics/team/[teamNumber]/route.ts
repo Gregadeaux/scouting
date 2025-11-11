@@ -44,20 +44,22 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return errorResponse('Invalid team number', 400);
     }
 
-    // Build query
+    // Build query - join with match_schedule to get match_number and event_key
     let query = supabase
       .from('match_scouting')
       .select(`
-        match_number,
         auto_performance,
         teleop_performance,
-        endgame_performance
+        endgame_performance,
+        match_schedule!inner (
+          match_number,
+          event_key
+        )
       `)
-      .eq('team_number', teamNum)
-      .order('match_number', { ascending: true });
+      .eq('team_number', teamNum);
 
     if (eventKey) {
-      query = query.eq('event_key', eventKey);
+      query = query.eq('match_schedule.event_key', eventKey);
     }
 
     const { data: matches, error: matchError } = await query;
@@ -77,14 +79,18 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       const teleopScore = typeof teleopData?.points === 'number' ? teleopData.points : 0;
       const endgameScore = typeof endgameData?.points === 'number' ? endgameData.points : 0;
 
+      // Access match_number from the joined match_schedule table
+      const matchSchedule = match.match_schedule as { match_number: number } | null;
+      const matchNumber = matchSchedule?.match_number ?? 0;
+
       return {
-        matchNumber: match.match_number,
+        matchNumber,
         autoScore,
         teleopScore,
         endgameScore,
         totalScore: autoScore + teleopScore + endgameScore,
       };
-    });
+    }).sort((a, b) => a.matchNumber - b.matchNumber);
 
     return successResponse({
       teamNumber: teamNum,
