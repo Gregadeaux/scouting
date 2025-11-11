@@ -126,7 +126,5 @@ export default defineConfig({
     env: {
       ENABLE_PWA_DEV: 'true',
     },
-    // Retry configuration for flaky server starts
-    retries: 2,
   },
 });

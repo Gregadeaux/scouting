@@ -235,7 +235,7 @@ export class ScoutingDataRepository implements IScoutingDataRepository {
     try {
       const { count, error } = await this.client
         .from('match_scouting')
-        .select('*, match_schedule!inner(event_key)', { count: 'exact', head: true })
+        .select('*, match_schedule!match_scouting_match_id_fkey!inner(event_key)', { count: 'exact', head: true })
         .eq('match_schedule.event_key', eventKey);
 
       if (error) {

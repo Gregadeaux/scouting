@@ -105,13 +105,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       if (schemaVersion === '2025.1' || eventYear === 2025) {
         // 2025 Reefscape season
         if (autoData) {
-          autoScore = calculateAutoPoints2025(autoData as AutoPerformance2025);
+          autoScore = calculateAutoPoints2025(autoData as unknown as AutoPerformance2025);
         }
         if (teleopData) {
-          teleopScore = calculateTeleopPoints2025(teleopData as TeleopPerformance2025);
+          teleopScore = calculateTeleopPoints2025(teleopData as unknown as TeleopPerformance2025);
         }
         if (endgameData) {
-          endgameScore = calculateEndgamePoints2025(endgameData as EndgamePerformance2025);
+          endgameScore = calculateEndgamePoints2025(endgameData as unknown as EndgamePerformance2025);
         }
       }
       // Add more seasons here as needed:
