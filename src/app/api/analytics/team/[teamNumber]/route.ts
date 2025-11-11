@@ -80,8 +80,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       const endgameScore = typeof endgameData?.points === 'number' ? endgameData.points : 0;
 
       // Access match_number from the joined match_schedule table
-      const matchSchedule = match.match_schedule as { match_number: number } | null;
-      const matchNumber = matchSchedule?.match_number ?? 0;
+      const matchSchedule = match.match_schedule as { match_number: number; event_key: string } | { match_number: number; event_key: string }[] | null;
+      const matchNumber = Array.isArray(matchSchedule) ? matchSchedule[0]?.match_number ?? 0 : matchSchedule?.match_number ?? 0;
 
       return {
         matchNumber,
