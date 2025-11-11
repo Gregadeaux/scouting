@@ -15,6 +15,7 @@ import { StatisticsService } from '@/lib/services/statistics.service';
 import { StatisticsRepository } from '@/lib/repositories/statistics.repository';
 import { ScoutingDataRepository } from '@/lib/repositories/scouting-data.repository';
 import { MatchRepository } from '@/lib/repositories/match.repository';
+import { OPRService } from '@/lib/services/opr.service';
 
 interface RouteParams {
   params: Promise<{
@@ -66,9 +67,20 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       const scoutingRepo = new ScoutingDataRepository();
       const matchRepo = new MatchRepository();
       const statsService = new StatisticsService(statsRepo, scoutingRepo, matchRepo);
+      const oprService = new OPRService();
 
-      // Calculate statistics for all teams at this event
+      // Calculate statistics for all teams at this event (from scouting data)
       const teamStatsMap = await statsService.calculateAllTeamStatistics(eventKey);
+      console.log(`[Analytics API] Calculated scouting statistics for ${teamStatsMap.size} teams`);
+
+      // Calculate OPR/DPR/CCWM for all teams (from official match results)
+      try {
+        await oprService.calculateOPRMetrics(eventKey);
+        console.log(`[Analytics API] Calculated OPR/DPR/CCWM for event ${eventKey}`);
+      } catch (oprError) {
+        console.error(`[Analytics API] Failed to calculate OPR:`, oprError);
+        // Continue anyway - OPR is supplementary data
+      }
 
       // Fetch the newly calculated stats from database
       const { data: newStats, error: newStatsError } = await supabase
@@ -81,7 +93,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         throw new Error(`Failed to fetch calculated statistics: ${newStatsError.message}`);
       }
 
-      console.log(`[Analytics API] Calculated statistics for ${teamStatsMap.size} teams`);
+      console.log(`[Analytics API] Completed all calculations for ${teamStatsMap.size} teams`);
       return successResponse(newStats || []);
     }
 
