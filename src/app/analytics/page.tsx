@@ -20,6 +20,7 @@ import { EventOverview } from '@/components/analytics/EventOverview';
 import { OPRLeaderboard } from '@/components/analytics/OPRLeaderboard';
 import { PerformanceTrends } from '@/components/analytics/PerformanceTrends';
 import { TeamComparison } from '@/components/analytics/TeamComparison';
+import { GamePieceBoxplot } from '@/components/analytics/GamePieceBoxplot';
 import type { TeamStatistics } from '@/types';
 
 interface Event {
@@ -233,6 +234,9 @@ export default function AnalyticsPage() {
               allEventStats={teamStats}
             />
           )}
+
+          {/* Game Piece Distribution */}
+          <GamePieceBoxplot eventKey={selectedEventKey} />
         </>
       )}
 
