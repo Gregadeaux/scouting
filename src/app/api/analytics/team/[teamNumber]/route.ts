@@ -45,13 +45,14 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     // Build query - join with match_schedule to get match_number and event_key
+    // Specify foreign key constraint to disambiguate (two FK relationships exist)
     let query = supabase
       .from('match_scouting')
       .select(`
         auto_performance,
         teleop_performance,
         endgame_performance,
-        match_schedule!inner (
+        match_schedule!match_scouting_match_id_fkey!inner (
           match_number,
           event_key
         )
