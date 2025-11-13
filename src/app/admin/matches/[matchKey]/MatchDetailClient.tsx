@@ -10,7 +10,9 @@ import { TeamRecentTable } from '@/components/admin/matches/TeamRecentTable';
 import { MatchScoutingSection } from '@/components/admin/matches/MatchScoutingSection';
 import { Button } from '@/components/ui/Button';
 import { ArrowLeft } from 'lucide-react';
+import { useMatchScouting } from '@/hooks/useMatchScouting';
 import type { MatchSchedule, Team, TBAVideo } from '@/types';
+import type { ScoutingEntryWithDetails } from '@/types/admin';
 
 interface EnrichedRecentMatch {
   match_key: string;
@@ -51,6 +53,29 @@ export default function MatchDetailClient({
   const redTeams = [match.red_1, match.red_2, match.red_3];
   const blueTeams = [match.blue_1, match.blue_2, match.blue_3];
 
+  // Fetch scouting data to pass to AllianceColumn for displaying metrics
+  const { data: scoutingData } = useMatchScouting({
+    matchKey: match.match_key,
+    eventKey: match.event_key,
+  });
+
+  // Organize scouting data by team number for easy lookup
+  const scoutingByTeam = React.useMemo(() => {
+    const byTeam: Record<number, ScoutingEntryWithDetails[]> = {};
+
+    if (scoutingData) {
+      // Process both alliances
+      [...scoutingData.red_alliance, ...scoutingData.blue_alliance].forEach(entry => {
+        if (!byTeam[entry.team_number]) {
+          byTeam[entry.team_number] = [];
+        }
+        byTeam[entry.team_number].push(entry);
+      });
+    }
+
+    return byTeam;
+  }, [scoutingData]);
+
   // Transform TBAVideo[] to VideoLink[] with labels
   const videoLinks: VideoLink[] = videos.map((video, index) => ({
     type: video.type,
@@ -73,7 +98,12 @@ export default function MatchDetailClient({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Column 1: Red Alliance */}
         <div>
-          <AllianceColumn alliance="red" teamNumbers={redTeams} teams={teams} />
+          <AllianceColumn
+            alliance="red"
+            teamNumbers={redTeams}
+            teams={teams}
+            scoutingData={scoutingByTeam}
+          />
         </div>
 
         {/* Column 2: Score Breakdown & Videos */}
@@ -87,7 +117,12 @@ export default function MatchDetailClient({
 
         {/* Column 3: Blue Alliance */}
         <div>
-          <AllianceColumn alliance="blue" teamNumbers={blueTeams} teams={teams} />
+          <AllianceColumn
+            alliance="blue"
+            teamNumbers={blueTeams}
+            teams={teams}
+            scoutingData={scoutingByTeam}
+          />
         </div>
       </div>
 
