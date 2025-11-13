@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { errorResponse, successResponse } from '@/lib/api/response';
+import { errorResponse, successResponse, sanitizedErrorResponse } from '@/lib/api/response';
 
 const ROBOT_PHOTOS_BUCKET = 'robot-photos';
 
@@ -51,8 +51,8 @@ export async function DELETE(request: NextRequest) {
         .remove([filePath]);
 
       if (error) {
-        console.error('Storage delete error:', error);
-        return errorResponse(`Delete failed: ${error.message}`, 500);
+        // SECURITY: Use sanitized error response to prevent storage details from leaking
+        return sanitizedErrorResponse(error, 'delete_robot_photo');
       }
 
       return successResponse({ success: true });
@@ -61,10 +61,7 @@ export async function DELETE(request: NextRequest) {
       return errorResponse('Invalid storage URL format', 400);
     }
   } catch (error) {
-    console.error('Delete API error:', error);
-    return errorResponse(
-      error instanceof Error ? error.message : 'Delete failed',
-      500
-    );
+    // SECURITY: Use sanitized error response to prevent system details from leaking
+    return sanitizedErrorResponse(error, 'delete_photo_api');
   }
 }

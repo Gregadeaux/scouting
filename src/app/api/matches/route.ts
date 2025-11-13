@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { successResponse, errorResponse, serverError } from '@/lib/api/response';
+import { successResponse, sanitizedErrorResponse, errorResponse, serverError } from '@/lib/api/response';
 import { requireAdmin } from '@/lib/api/auth-middleware';
 
 /**
@@ -31,7 +31,8 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query;
 
     if (error) {
-      return errorResponse(error.message, 500);
+      // SECURITY: Use sanitized error response to prevent database details from leaking
+      return sanitizedErrorResponse(error, 'fetch_matches');
     }
 
     return successResponse(data);
