@@ -1,10 +1,14 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse, serverError } from '@/lib/api/response';
+import { requireAdmin } from '@/lib/api/auth-middleware';
 
 /**
  * GET /api/matches
  * Fetch all matches
+ *
+ * SECURITY: Public read access - match schedules are non-sensitive public data
+ * that scouts and viewers need to see. Only POST/PUT/DELETE require admin auth.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -39,12 +43,53 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/matches
- * Create a new match
+ * Create a new match (Admin only)
  */
 export async function POST(request: NextRequest) {
+  // SECURITY: Require admin authentication
+  const authResult = await requireAdmin(request);
+  if (authResult instanceof NextResponse) {
+    return authResult;
+  }
+
   try {
     const supabase = await createClient();
     const body = await request.json();
+
+    // SECURITY: Validate input to prevent malformed data insertion
+    const validationErrors: string[] = [];
+
+    if (!body.event_key || typeof body.event_key !== 'string') {
+      validationErrors.push('event_key is required and must be a string');
+    }
+
+    if (!body.match_key || typeof body.match_key !== 'string') {
+      validationErrors.push('match_key is required and must be a string');
+    }
+
+    if (typeof body.match_number !== 'number' || body.match_number < 1) {
+      validationErrors.push('match_number must be a positive integer');
+    }
+
+    if (!body.comp_level || !['qm', 'ef', 'qf', 'sf', 'f'].includes(body.comp_level)) {
+      validationErrors.push('comp_level must be one of: qm, ef, qf, sf, f');
+    }
+
+    if (typeof body.set_number !== 'number' || body.set_number < 1) {
+      validationErrors.push('set_number must be a positive integer');
+    }
+
+    // Validate team numbers (should have 6 teams: 3 red, 3 blue)
+    const requiredTeamFields = ['red_1', 'red_2', 'red_3', 'blue_1', 'blue_2', 'blue_3'];
+    for (const field of requiredTeamFields) {
+      if (typeof body[field] !== 'number' || body[field] < 1) {
+        validationErrors.push(`${field} must be a positive team number`);
+      }
+    }
+
+    if (validationErrors.length > 0) {
+      return errorResponse(validationErrors.join('; '), 400);
+    }
 
     const { data, error } = await supabase
       .from('match_schedule')
