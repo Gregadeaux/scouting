@@ -21,6 +21,9 @@ export * from './event.repository';
 // Scouting Data Repository
 export * from './scouting-data.repository';
 
+// Scouter Repository
+export * from './scouter.repository';
+
 // Statistics Repository
 export * from './statistics.repository';
 
@@ -54,6 +57,12 @@ export {
   ScoutingDataRepository,
   type IScoutingDataRepository,
 } from './scouting-data.repository';
+
+export {
+  createScouterRepository,
+  ScouterRepository,
+  type IScouterRepository,
+} from './scouter.repository';
 
 export {
   createStatisticsRepository,
