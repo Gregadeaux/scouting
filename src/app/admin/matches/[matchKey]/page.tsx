@@ -16,6 +16,52 @@ interface EnrichedRecentMatch extends MatchSchedule {
   result: 'W' | 'L' | 'T' | '-';
 }
 
+/**
+ * Transform TBA 2025 Reefscape score breakdown to component format
+ * TBA structure has nested objects for reef levels and different naming
+ */
+function transformScoreBreakdown(
+  breakdown: Record<string, unknown> | null
+): Record<string, number | null> | null {
+  if (!breakdown) return null;
+
+  // Extract teleop reef data (nested structure)
+  const teleopReef = breakdown.teleopReef as Record<string, unknown> | undefined;
+  const autoReef = breakdown.autoReef as Record<string, unknown> | undefined;
+
+  // Count cage climbs by type
+  const robots = [
+    breakdown.endGameRobot1 as string,
+    breakdown.endGameRobot2 as string,
+    breakdown.endGameRobot3 as string,
+  ];
+  const shallowCount = robots.filter(r => r === 'ShallowCage').length;
+  const deepCount = robots.filter(r => r === 'DeepCage').length;
+
+  return {
+    // Main scoring categories
+    total_points: (breakdown.totalPoints as number) ?? null,
+    auto_points: (breakdown.autoPoints as number) ?? null,
+    teleop_points: (breakdown.teleopPoints as number) ?? null,
+    endgame_points: (breakdown.endGameBargePoints as number) ?? null,
+
+    // 2025 Reefscape - Coral scoring on reef
+    // L1 = trough (lowest), L2 = bottom row, L3 = middle row, L4 = top row
+    coral_L1: (teleopReef?.trough as number) ?? 0,
+    coral_L2: (teleopReef?.tba_botRowCount as number) ?? 0,
+    coral_L3: (teleopReef?.tba_midRowCount as number) ?? 0,
+    coral_L4: (teleopReef?.tba_topRowCount as number) ?? 0,
+
+    // 2025 Reefscape - Algae scoring (counts, not points)
+    algae_barge: (breakdown.netAlgaeCount as number) ?? 0, // Net = barge algae count
+    algae_processor: (breakdown.wallAlgaeCount as number) ?? 0, // Wall = processor algae count
+
+    // 2025 Reefscape - Cage climb counts
+    cage_shallow: shallowCount,
+    cage_deep: deepCount,
+  };
+}
+
 export default async function MatchDetailPage({ params }: MatchDetailPageProps) {
   const { matchKey } = await params;
 
@@ -107,13 +153,17 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
     // Extract videos from match data (TBA format)
     const videos = matchDetail.videos || [];
 
-    // Extract score breakdown (if available)
+    // Extract and transform score breakdown from TBA (camelCase to snake_case)
     const scoreBreakdown: {
-      red: Record<string, unknown> | null;
-      blue: Record<string, unknown> | null;
+      red: Record<string, number | null> | null;
+      blue: Record<string, number | null> | null;
     } = {
-      red: (matchDetail.score_breakdown?.red as Record<string, unknown>) || null,
-      blue: (matchDetail.score_breakdown?.blue as Record<string, unknown>) || null,
+      red: transformScoreBreakdown(
+        (matchDetail.score_breakdown?.red as Record<string, unknown>) || null
+      ),
+      blue: transformScoreBreakdown(
+        (matchDetail.score_breakdown?.blue as Record<string, unknown>) || null
+      ),
     };
 
     return (

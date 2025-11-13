@@ -825,8 +825,9 @@ export class ScoutingDataRepository implements IScoutingDataRepository {
         byTeam[entry.team_number].push(entry);
       });
 
-      // Calculate metadata
-      const uniqueTeams = new Set(enrichedEntries.map(e => e.team_number));
+      // Calculate metadata from FINAL filtered data (not all enrichedEntries)
+      const filteredEntries = [...finalRedAlliance, ...finalBlueAlliance];
+      const uniqueTeams = new Set(filteredEntries.map(e => e.team_number));
       const totalTeamsInMatch = redTeams.length + blueTeams.length;
       const coverage = totalTeamsInMatch > 0 ? (uniqueTeams.size / totalTeamsInMatch) * 100 : 0;
 
@@ -838,7 +839,7 @@ export class ScoutingDataRepository implements IScoutingDataRepository {
           by_team: byTeam,
         },
         metadata: {
-          total_entries: enrichedEntries.length,
+          total_entries: filteredEntries.length,
           teams_scouted: uniqueTeams.size,
           coverage_percentage: Math.round(coverage * 10) / 10, // Round to 1 decimal place
         },
