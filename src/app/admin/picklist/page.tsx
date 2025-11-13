@@ -152,6 +152,19 @@ export default function PickListPage() {
   };
 
   /**
+   * Handle column sort change
+   */
+  const handleColumnSortChange = (columnId: string, metric: SortMetric, direction: 'asc' | 'desc') => {
+    setColumns(prev =>
+      prev.map(col =>
+        col.id === columnId
+          ? { ...col, sortMetric: metric, sortDirection: direction }
+          : col
+      )
+    );
+  };
+
+  /**
    * Handle event change
    */
   const handleEventChange = (eventKey: string) => {
@@ -285,6 +298,7 @@ export default function PickListPage() {
               isPicked={isPicked}
               onTogglePicked={togglePicked}
               onRemoveColumn={handleRemoveColumn}
+              onColumnSortChange={handleColumnSortChange}
             />
           </div>
         )}
