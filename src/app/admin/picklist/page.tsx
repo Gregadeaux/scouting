@@ -7,6 +7,7 @@
  * - Single shared team list with strikethrough when picked
  * - Multi-column responsive layout
  * - localStorage persistence
+ * - Save/load/manage configurations (SCOUT-58)
  */
 
 'use client';
@@ -14,8 +15,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { PickListControls } from '@/components/picklist/PickListControls';
 import { PickListGrid, type PickListColumnConfig } from '@/components/picklist/PickListGrid';
+import { SaveConfigDialog } from '@/components/picklist/SaveConfigDialog';
+import { ManageConfigurationsDialog } from '@/components/picklist/ManageConfigurationsDialog';
 import { usePickListState } from '@/hooks/usePickListState';
-import type { PickList, PickListTeam } from '@/types/picklist';
+import type { PickList, PickListTeam, PickListConfiguration } from '@/types/picklist';
 import type { SortMetric } from '@/components/picklist/SortSelector';
 
 interface Event {
@@ -36,6 +39,11 @@ export default function PickListPage() {
   const [error, setError] = useState<string | null>(null);
   const [pickListData, setPickListData] = useState<PickList | null>(null);
 
+  // Configuration management (SCOUT-58)
+  const [configurations, setConfigurations] = useState<PickListConfiguration[]>([]);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [showManageDialog, setShowManageDialog] = useState(false);
+
   // Pick list state (global picked teams)
   const {
     isPicked,
@@ -55,8 +63,19 @@ export default function PickListPage() {
     if (selectedEventKey) {
       loadPickList(selectedEventKey);
       loadForEvent(selectedEventKey);
+      fetchConfigurations(selectedEventKey);
     }
   }, [selectedEventKey, loadForEvent]);
+
+  // Auto-load default configuration when configurations load
+  useEffect(() => {
+    if (configurations.length > 0 && columns.length === 0) {
+      const defaultConfig = configurations.find((c) => c.isDefault);
+      if (defaultConfig) {
+        handleLoadConfiguration(defaultConfig);
+      }
+    }
+  }, [configurations]);
 
   /**
    * Fetch available events
@@ -173,6 +192,144 @@ export default function PickListPage() {
   };
 
   /**
+   * Fetch saved configurations for current event (SCOUT-58)
+   */
+  const fetchConfigurations = async (eventKey: string) => {
+    try {
+      const response = await fetch(
+        `/api/admin/picklist/configurations?eventKey=${eventKey}`
+      );
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        setConfigurations(data.data);
+      } else {
+        console.error('[PickList] Failed to fetch configurations:', data.error);
+      }
+    } catch (error) {
+      console.error('[PickList] Error fetching configurations:', error);
+    }
+  };
+
+  /**
+   * Save current configuration (SCOUT-58)
+   */
+  const handleSaveConfiguration = async (name: string, isDefault: boolean) => {
+    if (!selectedEventKey || columns.length === 0) return;
+
+    try {
+      const response = await fetch('/api/admin/picklist/configurations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventKey: selectedEventKey,
+          name,
+          configuration: { columns },
+          isDefault,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        // Refresh configurations list
+        await fetchConfigurations(selectedEventKey);
+      } else {
+        throw new Error(data.error || 'Failed to save configuration');
+      }
+    } catch (error) {
+      console.error('[PickList] Error saving configuration:', error);
+      throw error;
+    }
+  };
+
+  /**
+   * Load a saved configuration (SCOUT-58)
+   */
+  const handleLoadConfiguration = (config: PickListConfiguration) => {
+    setColumns(config.configuration.columns);
+  };
+
+  /**
+   * Rename a configuration (SCOUT-58)
+   */
+  const handleRenameConfiguration = async (id: string, newName: string) => {
+    try {
+      const response = await fetch(`/api/admin/picklist/configurations/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Refresh configurations list
+        if (selectedEventKey) {
+          await fetchConfigurations(selectedEventKey);
+        }
+      } else {
+        throw new Error(data.error || 'Failed to rename configuration');
+      }
+    } catch (error) {
+      console.error('[PickList] Error renaming configuration:', error);
+      throw error;
+    }
+  };
+
+  /**
+   * Set/unset configuration as default (SCOUT-58)
+   */
+  const handleSetDefault = async (id: string, isDefault: boolean) => {
+    try {
+      const response = await fetch(`/api/admin/picklist/configurations/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isDefault }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Refresh configurations list
+        if (selectedEventKey) {
+          await fetchConfigurations(selectedEventKey);
+        }
+      } else {
+        throw new Error(data.error || 'Failed to update default status');
+      }
+    } catch (error) {
+      console.error('[PickList] Error updating default status:', error);
+      throw error;
+    }
+  };
+
+  /**
+   * Delete a configuration (SCOUT-58)
+   */
+  const handleDeleteConfiguration = async (id: string) => {
+    try {
+      const response = await fetch(`/api/admin/picklist/configurations/${id}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Refresh configurations list
+        if (selectedEventKey) {
+          await fetchConfigurations(selectedEventKey);
+        }
+      } else {
+        throw new Error(data.error || 'Failed to delete configuration');
+      }
+    } catch (error) {
+      console.error('[PickList] Error deleting configuration:', error);
+      throw error;
+    }
+  };
+
+  /**
    * Export to CSV
    */
   const handleExportCSV = useCallback(() => {
@@ -270,6 +427,10 @@ export default function PickListPage() {
           pickedCount={pickedCount}
           totalTeams={teams.length}
           isLoading={isLoading}
+          configurations={configurations}
+          onSaveConfig={() => setShowSaveDialog(true)}
+          onLoadConfig={handleLoadConfiguration}
+          onManageConfigs={() => setShowManageDialog(true)}
         />
 
         {/* Error message */}
@@ -322,6 +483,23 @@ export default function PickListPage() {
             </div>
           </div>
         )}
+
+        {/* Configuration Dialogs (SCOUT-58) */}
+        <SaveConfigDialog
+          isOpen={showSaveDialog}
+          onClose={() => setShowSaveDialog(false)}
+          onSave={handleSaveConfiguration}
+          existingNames={configurations.map((c) => c.name)}
+        />
+
+        <ManageConfigurationsDialog
+          isOpen={showManageDialog}
+          onClose={() => setShowManageDialog(false)}
+          configurations={configurations}
+          onRename={handleRenameConfiguration}
+          onSetDefault={handleSetDefault}
+          onDelete={handleDeleteConfiguration}
+        />
       </div>
     </div>
   );

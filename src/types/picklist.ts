@@ -252,3 +252,58 @@ export interface TeamNormalization {
   defenseRating: NormalizedMetric;
   speedRating: NormalizedMetric;
 }
+
+/**
+ * Picklist Configuration Types (SCOUT-58)
+ * For saving/loading picklist view configurations
+ */
+
+import type { SortMetric, SortDirection } from '@/components/picklist/SortSelector';
+
+/**
+ * Column configuration for a picklist view
+ */
+export interface PickListColumnConfig {
+  id: string;
+  sortMetric: SortMetric;
+  sortDirection: SortDirection;
+}
+
+/**
+ * Saved picklist configuration from database
+ */
+export interface PickListConfiguration {
+  id: string;
+  userId: string;
+  eventKey: string;
+  name: string;
+  configuration: {
+    columns: PickListColumnConfig[];
+  };
+  isDefault: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Request body for creating a new picklist configuration
+ */
+export interface SaveConfigurationRequest {
+  eventKey: string;
+  name: string;
+  configuration: {
+    columns: PickListColumnConfig[];
+  };
+  isDefault?: boolean;
+}
+
+/**
+ * Request body for updating an existing picklist configuration
+ */
+export interface UpdateConfigurationRequest {
+  name?: string;
+  configuration?: {
+    columns: PickListColumnConfig[];
+  };
+  isDefault?: boolean;
+}
