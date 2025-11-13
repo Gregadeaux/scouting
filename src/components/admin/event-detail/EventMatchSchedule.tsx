@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, XCircle } from 'lucide-react';
@@ -12,6 +13,7 @@ interface EventMatchScheduleProps {
 
 export function EventMatchSchedule({ matches }: EventMatchScheduleProps) {
   const [compLevel, setCompLevel] = useState<string>('all');
+  const router = useRouter();
 
   const filteredMatches = matches.filter((match) =>
     compLevel === 'all' || match.comp_level === compLevel
@@ -77,8 +79,25 @@ export function EventMatchSchedule({ matches }: EventMatchScheduleProps) {
             <tbody>
               {filteredMatches.map((match) => {
                 const scoutedCount = countScoutedPositions(match.scouting_status);
+                const handleMatchClick = () => {
+                  router.push(`/admin/matches/${match.match_key}`);
+                };
+                const handleKeyDown = (e: React.KeyboardEvent) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleMatchClick();
+                  }
+                };
                 return (
-                  <tr key={match.match_key} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <tr
+                    key={match.match_key}
+                    className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                    onClick={handleMatchClick}
+                    onKeyDown={handleKeyDown}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`View details for ${getCompLevelLabel(match.comp_level)} ${match.match_number}`}
+                  >
                     <td className="p-2">
                       <Badge variant="outline">
                         {getCompLevelLabel(match.comp_level)} {match.match_number}
