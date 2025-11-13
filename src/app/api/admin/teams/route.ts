@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { requireAdmin } from '@/lib/api/auth-middleware';
+import { buildSearchFilter, sanitizeNumericSearch } from '@/lib/utils/input-sanitization';
 
 // GET /api/admin/teams - List teams with pagination, filtering, and sorting
 export async function GET(request: NextRequest) {
@@ -24,17 +25,29 @@ export async function GET(request: NextRequest) {
 
     let query = supabase.from('teams').select('*', { count: 'exact' });
 
-    // Apply search filter
+    // Apply search filter - SECURE: Uses input sanitization utility
     if (search) {
-      const numericSearch = parseInt(search);
-      if (!isNaN(numericSearch)) {
-        // Search by team number
-        query = query.or(`team_number.eq.${numericSearch},team_name.ilike.%${search}%`);
-      } else {
-        // Search by name or location
-        query = query.or(
-          `team_name.ilike.%${search}%,team_nickname.ilike.%${search}%,city.ilike.%${search}%,state_province.ilike.%${search}%`
-        );
+      try {
+        const numericSearch = sanitizeNumericSearch(search);
+
+        if (numericSearch !== null) {
+          // SECURE: Search by team number (numeric) and text fields
+          const textFilter = buildSearchFilter(['team_name'], search);
+          query = query.or(`team_number.eq.${numericSearch},${textFilter}`);
+        } else {
+          // SECURE: Search by text fields only using sanitized input
+          const textFilter = buildSearchFilter(
+            ['team_name', 'team_nickname', 'city', 'state_province'],
+            search
+          );
+          if (textFilter) {
+            query = query.or(textFilter);
+          }
+        }
+      } catch (error) {
+        // Sanitization failed - return error to user
+        const errorMsg = error instanceof Error ? error.message : 'Invalid search input';
+        return NextResponse.json({ error: errorMsg }, { status: 400 });
       }
     }
 
