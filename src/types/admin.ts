@@ -9,12 +9,14 @@
 
 export interface Scouter {
   id: string;
-  scout_name: string;
-  team_affiliation?: number;
-  role?: 'lead' | 'scout' | 'admin';
-  email?: string;
-  phone?: string;
-  active: boolean;
+  user_id: string;
+  team_number?: number;
+  experience_level: 'rookie' | 'intermediate' | 'veteran';
+  preferred_role?: 'match_scouting' | 'pit_scouting' | 'both';
+  total_matches_scouted: number;
+  total_events_attended: number;
+  certifications: string[];
+  availability_notes?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -94,12 +96,12 @@ export interface TeamFormData {
 }
 
 export interface ScouterFormData {
-  scout_name: string;
-  team_affiliation?: number;
-  role?: 'lead' | 'scout' | 'admin';
-  email?: string;
-  phone?: string;
-  active: boolean;
+  user_id: string;
+  team_number?: number;
+  experience_level: 'rookie' | 'intermediate' | 'veteran';
+  preferred_role?: 'match_scouting' | 'pit_scouting' | 'both';
+  certifications?: string[];
+  availability_notes?: string;
 }
 
 export interface MatchFormData {

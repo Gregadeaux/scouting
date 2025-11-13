@@ -27,6 +27,9 @@ export * from './scouter.repository';
 // Statistics Repository
 export * from './statistics.repository';
 
+// Scouter Repository
+export * from './scouter.repository';
+
 // Re-export for convenience
 export {
   createImportJobRepository,
@@ -70,3 +73,9 @@ export {
   StatisticsRepository,
   type IStatisticsRepository,
 } from './statistics.repository';
+
+export {
+  createScouterRepository,
+  ScouterRepository,
+  type IScouterRepository,
+} from './scouter.repository';

@@ -1,30 +1,24 @@
-/**
- * Direct test of Supabase signup
- * Run with: node test-signup.js
- */
-
 const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = 'https://yiqffkixukbyjdbbroue.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpcWZma2l4dWtieWpkYmJyb3VlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5NzUwNzgsImV4cCI6MjA3NjU1MTA3OH0.njfgZ4aBE-RnZxYvOfAd2TmwWpiKZsJHX_cYUawg5vA';
+const supabaseServiceKey = 'sb_secret_wgMPYQWGm-kO1T9LY3hjHA_3NlTqKCY';
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 async function testSignup() {
-  const testEmail = `test-${Date.now()}@example.com`;
-  const testPassword = 'Test123!Pass';
+  const timestamp = Date.now();
+  const email = `testuser${timestamp}@example.com`;
 
-  console.log('Testing signup with:', { email: testEmail });
+  console.log('Testing signup with email:', email);
 
   try {
     const { data, error } = await supabase.auth.signUp({
-      email: testEmail,
-      password: testPassword,
+      email: email,
+      password: 'TestPassword123',
       options: {
         data: {
           full_name: 'Test User',
-          team_number: 930,
-          role: 'scouter'
+          team_number: 930
         }
       }
     });
@@ -33,7 +27,7 @@ async function testSignup() {
       console.error('Signup error:', error);
       console.error('Error details:', JSON.stringify(error, null, 2));
     } else {
-      console.log('Signup success!', data);
+      console.log('Signup success:', data);
     }
   } catch (err) {
     console.error('Caught error:', err);
