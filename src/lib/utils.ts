@@ -113,3 +113,11 @@ export function buildSearchParams(params: Record<string, any>): URLSearchParams 
 
   return searchParams;
 }
+
+/**
+ * Merge class names with Tailwind CSS support
+ * Combines multiple class names and handles conditional classes
+ */
+export function cn(...inputs: (string | undefined | null | false)[]): string {
+  return inputs.filter(Boolean).join(' ');
+}
