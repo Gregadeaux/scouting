@@ -51,7 +51,8 @@ test.describe('SCOUT-19: Profile Creation During Signup', () => {
   });
 
   test('should handle existing email properly', async ({ page }) => {
-    const existingEmail = 'gregadeaux@gmail.com'; // Email from CLAUDE.md
+    // Use test user email from environment variables
+    const existingEmail = process.env.TEST_USER_EMAIL || 'test@example.com';
 
     await page.goto('/auth/signup');
 
