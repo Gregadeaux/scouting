@@ -15,8 +15,8 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "test:watch": "vitest --watch",
-    "test:e2e": "playwright test",
-    "test:e2e:pwa": "ENABLE_PWA_DEV=true playwright test",
+    "test:e2e": "bash scripts/cleanup-port-3000.sh && playwright test",
+    "test:e2e:pwa": "bash scripts/cleanup-port-3000.sh && ENABLE_PWA_DEV=true playwright test",
     "test:db": "tsx scripts/test-supabase-connection.ts",
     "worker:dev": "WORKER_SECRET=dev-worker-secret-change-in-production node scripts/worker-dev.js"
   },
