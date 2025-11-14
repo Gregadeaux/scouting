@@ -269,6 +269,8 @@ export class OPRService implements IOPRService {
 
   /**
    * Store OPR results in the database
+   * IMPORTANT: Uses read-modify-write pattern to preserve existing statistics
+   * calculated by StatisticsService (avg scores, reliability, etc.)
    */
   private async storeOPRResults(
     oprResults: OPRCalculationResult,
@@ -280,18 +282,43 @@ export class OPRService implements IOPRService {
       const dprMap = new Map(dprResults.teams.map(t => [t.teamNumber, t]));
       const ccwmMap = new Map(ccwmResults.teams.map(t => [t.teamNumber, t]));
 
-      // Prepare upsert data
+      // Fetch existing statistics for this event to preserve StatisticsService data
+      const { data: existingStats, error: fetchError } = await this.client
+        .from('team_statistics')
+        .select('*')
+        .eq('event_key', oprResults.eventKey);
+
+      if (fetchError) {
+        console.error('[OPRService] Error fetching existing stats:', fetchError);
+        // Continue anyway - we'll create new rows if they don't exist
+      }
+
+      // Create map of existing stats by team number
+      const existingStatsMap = new Map(
+        (existingStats || []).map(stat => [stat.team_number, stat])
+      );
+
+      // Prepare upsert data - merge with existing stats
       const updates: TeamStatisticsRow[] = oprResults.teams.map(opr => {
         const dpr = dprMap.get(opr.teamNumber);
         const ccwm = ccwmMap.get(opr.teamNumber);
+        const existing = existingStatsMap.get(opr.teamNumber);
 
         return {
           team_number: opr.teamNumber,
           event_key: oprResults.eventKey,
+          // New OPR values
           opr: opr.opr,
           dpr: dpr?.dpr || null,
           ccwm: ccwm?.ccwm || null,
           matches_played_official: opr.matchesPlayed,
+          // Preserve existing StatisticsService values
+          avg_auto_score: existing?.avg_auto_score ?? null,
+          avg_teleop_score: existing?.avg_teleop_score ?? null,
+          avg_endgame_score: existing?.avg_endgame_score ?? null,
+          reliability_score: existing?.reliability_score ?? null,
+          matches_scouted: existing?.matches_scouted ?? null,
+          aggregated_metrics: existing?.aggregated_metrics ?? null,
           updated_at: new Date().toISOString(),
         };
       });
@@ -310,7 +337,7 @@ export class OPRService implements IOPRService {
         }
       }
 
-      console.log(`[OPRService] Stored OPR metrics for ${updates.length} teams`);
+      console.log(`[OPRService] Stored OPR metrics for ${updates.length} teams (preserving existing stats)`);
     } catch (error) {
       console.error('[OPRService] Error storing OPR results:', error);
       throw error;

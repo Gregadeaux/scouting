@@ -112,6 +112,21 @@ export class StatisticsRepository implements IStatisticsRepository {
   ): Promise<TeamStatistics> {
     const supabase = await createClient();
 
+    // Fetch existing statistics to preserve OPRService data (OPR, DPR, CCWM)
+    const { data: existing } = eventKey
+      ? await supabase
+          .from('team_statistics')
+          .select('*')
+          .eq('team_number', teamNumber)
+          .eq('event_key', eventKey)
+          .single()
+      : await supabase
+          .from('team_statistics')
+          .select('*')
+          .eq('team_number', teamNumber)
+          .is('event_key', null)
+          .single();
+
     // Map AggregatedStatistics to TeamStatistics table structure
     const teamStats: Partial<TeamStatistics> = {
       team_number: teamNumber,
@@ -142,6 +157,11 @@ export class StatisticsRepository implements IStatisticsRepository {
       // Calculation metadata
       last_calculated_at: stats.last_calculated,
       calculation_method: 'SPR-weighted consolidation v1.0',
+
+      // Preserve existing OPRService values
+      opr: existing?.opr ?? null,
+      dpr: existing?.dpr ?? null,
+      ccwm: existing?.ccwm ?? null,
     };
 
     const { data, error } = await supabase
