@@ -129,6 +129,7 @@ export interface MatchScouting<
   match_key: string; // FK to match_schedule.match_key (NOT NULL)
   team_number: number;
   scout_name: string;
+  scouter_id?: string; // FK to scouters.id (UUID) - replaces scout_name
   device_id?: string;
 
   // Universal fixed fields
@@ -580,3 +581,4 @@ export type * from './season-2025';
 export type * from './auth';
 export type * from './team-detail';
 export type * from './scouter';
+export type * from './validation';

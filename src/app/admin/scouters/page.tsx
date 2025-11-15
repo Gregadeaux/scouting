@@ -66,9 +66,12 @@ export default function ScoutersPage() {
 
       const response = await fetch(`/api/admin/scouters?${params}`);
       if (response.ok) {
-        const data = await response.json();
-        setScouters(data.data);
-        setPagination((prev) => ({ ...prev, total: data.total }));
+        const result = await response.json();
+        setScouters(result.data.scouters || []);
+        setPagination((prev) => ({
+          ...prev,
+          total: result.data.pagination?.total || 0
+        }));
       } else {
         showToast('error', 'Failed to fetch scouters');
       }

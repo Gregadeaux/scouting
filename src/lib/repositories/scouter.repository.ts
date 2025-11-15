@@ -163,14 +163,9 @@ export class ScouterRepository implements IScouterRepository {
    */
   async findAll(options?: ScouterQueryOptions): Promise<ExtendedScouter[]> {
     try {
-      let query = this.client.from('scouters').select(`
-        *,
-        user_profiles!inner (
-          email,
-          full_name,
-          display_name
-        )
-      `);
+      console.log('findAll called with options:', JSON.stringify(options, null, 2));
+
+      let query = this.client.from('scouters').select('*');
 
       // Apply filters
       if (options?.experience_level) {
@@ -216,8 +211,8 @@ export class ScouterRepository implements IScouterRepository {
           ascending: options.orderDirection === 'asc',
         });
       } else {
-        // Default order by full_name from user_profiles
-        query = query.order('user_profiles(full_name)', { ascending: true });
+        // Default order by created_at (since ordering by joined table fields is not well supported)
+        query = query.order('created_at', { ascending: false });
       }
 
       // Pagination
@@ -232,13 +227,47 @@ export class ScouterRepository implements IScouterRepository {
         );
       }
 
-      const { data, error } = await query;
+      const { data: scouters, error } = await query;
 
       if (error) {
+        console.error('Supabase error details:', JSON.stringify(error, null, 2));
+        console.error('Query options:', JSON.stringify(options, null, 2));
         throw new DatabaseOperationError('find all scouters', error);
       }
 
-      return (data || []) as ExtendedScouter[];
+      if (!scouters || scouters.length === 0) {
+        return [];
+      }
+
+      // Fetch user profiles for all scouters
+      const userIds = scouters.map(s => s.user_id);
+      const { data: profiles, error: profilesError } = await this.client
+        .from('user_profiles')
+        .select('id, email, full_name, display_name')
+        .in('id', userIds);
+
+      if (profilesError) {
+        console.error('Error fetching user profiles:', profilesError);
+        // Return scouters without profile data rather than failing completely
+        return scouters as ExtendedScouter[];
+      }
+
+      // Create a map of profiles by user_id for quick lookup
+      const profileMap = new Map(
+        (profiles || []).map(p => [p.id, p])
+      );
+
+      // Combine scouters with their profiles
+      const result = scouters.map(scouter => ({
+        ...scouter,
+        user_profiles: profileMap.get(scouter.user_id) || {
+          email: '',
+          full_name: '',
+          display_name: null,
+        },
+      }));
+
+      return result as ExtendedScouter[];
     } catch (error) {
       if (error instanceof RepositoryError) {
         throw error;
@@ -252,24 +281,48 @@ export class ScouterRepository implements IScouterRepository {
    */
   async findByTeamNumber(teamNumber: number): Promise<ExtendedScouter[]> {
     try {
-      const { data, error } = await this.client
+      const { data: scouters, error } = await this.client
         .from('scouters')
-        .select(`
-          *,
-          user_profiles!inner (
-            email,
-            full_name,
-            display_name
-          )
-        `)
+        .select('*')
         .eq('team_number', teamNumber)
-        .order('user_profiles(full_name)', { ascending: true });
+        .order('created_at', { ascending: false });
 
       if (error) {
         throw new DatabaseOperationError('find scouters by team', error);
       }
 
-      return (data || []) as ExtendedScouter[];
+      if (!scouters || scouters.length === 0) {
+        return [];
+      }
+
+      // Fetch user profiles for all scouters
+      const userIds = scouters.map(s => s.user_id);
+      const { data: profiles, error: profilesError } = await this.client
+        .from('user_profiles')
+        .select('id, email, full_name, display_name')
+        .in('id', userIds);
+
+      if (profilesError) {
+        console.error('Error fetching user profiles:', profilesError);
+        return scouters as ExtendedScouter[];
+      }
+
+      // Create a map of profiles by user_id for quick lookup
+      const profileMap = new Map(
+        (profiles || []).map(p => [p.id, p])
+      );
+
+      // Combine scouters with their profiles
+      const result = scouters.map(scouter => ({
+        ...scouter,
+        user_profiles: profileMap.get(scouter.user_id) || {
+          email: '',
+          full_name: '',
+          display_name: null,
+        },
+      }));
+
+      return result as ExtendedScouter[];
     } catch (error) {
       if (error instanceof RepositoryError) {
         throw error;

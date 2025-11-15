@@ -29,6 +29,17 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = (page - 1) * limit;
 
+    // Map frontend sort fields to valid scouters table fields
+    // (joined table fields like display_name, full_name, email cannot be sorted directly)
+    const sortByParam = searchParams.get('sortBy');
+    let orderBy: string | undefined;
+
+    if (sortByParam && !['display_name', 'full_name', 'email'].includes(sortByParam)) {
+      // Use the field if it's a valid scouters table field
+      orderBy = sortByParam;
+    }
+    // Otherwise, don't specify orderBy and let repository use its default (created_at)
+
     // Build query options matching repository interface
     const queryOptions: ScouterQueryOptions = {
       limit,
@@ -38,7 +49,7 @@ export async function GET(request: NextRequest) {
       experience_level: searchParams.get('experience') as ScouterQueryOptions['experience_level'],
       preferred_role: searchParams.get('preferred_role') as ScouterQueryOptions['preferred_role'],
       certification: searchParams.get('certification') || undefined,
-      orderBy: searchParams.get('sortBy') || 'user_profiles(full_name)',
+      orderBy,
       orderDirection: (searchParams.get('sortOrder') || 'asc') as 'asc' | 'desc',
     };
 

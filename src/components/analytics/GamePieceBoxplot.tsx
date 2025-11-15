@@ -14,19 +14,20 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import {
-  ScatterChart,
+  ComposedChart,
   Scatter,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Bar,
   Cell,
 } from 'recharts';
 
@@ -59,6 +60,7 @@ interface BoxplotStats {
   q3: number;
   max: number;
   values: number[];
+  average: number;
 }
 
 type MetricType =
@@ -90,6 +92,7 @@ export function GamePieceBoxplot({ eventKey }: GamePieceBoxplotProps) {
   const [currentPage, setCurrentPage] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const chartContainerRef = useRef<HTMLDivElement>(null);
 
   const fetchGamePieceData = useCallback(async () => {
     setIsLoading(true);
@@ -134,6 +137,7 @@ export function GamePieceBoxplot({ eventKey }: GamePieceBoxplotProps) {
         const median = calculateMedian(values);
         const q1 = calculatePercentile(values, 25);
         const q3 = calculatePercentile(values, 75);
+        const average = values.reduce((sum, val) => sum + val, 0) / values.length;
 
         return {
           teamNumber: team.teamNumber,
@@ -143,10 +147,11 @@ export function GamePieceBoxplot({ eventKey }: GamePieceBoxplotProps) {
           q3,
           max,
           values,
+          average,
         };
       })
       .filter((stat): stat is BoxplotStats => stat !== null)
-      .sort((a, b) => b.median - a.median); // Sort by median descending
+      .sort((a, b) => b.average - a.average); // Sort by average descending
   };
 
   const calculateMedian = (values: number[]): number => {
@@ -204,77 +209,67 @@ export function GamePieceBoxplot({ eventKey }: GamePieceBoxplotProps) {
   const endIdx = Math.min(startIdx + TEAMS_PER_PAGE, boxplotStats.length);
   const currentStats = boxplotStats.slice(startIdx, endIdx);
 
-  // Prepare chart data for current page
-  const chartData: Array<{
-    team: string;
-    teamNumber: number;
-    x: number;
-    y: number;
-    type: 'point' | 'box' | 'whisker' | 'median';
-    index: number;
+  // Prepare data for current page
+  const currentTeamNumbers = currentStats.map(s => s.teamNumber);
+  const currentTeamsData = teamsData.filter(t =>
+    currentTeamNumbers.includes(t.teamNumber)
+  );
+
+  // Prepare scatter points - spread horizontally by match number
+  const scatterData: Array<{
+    x: number; // team index with offset for match progression
+    y: number; // value
+    team: string; // team number for display
+    matchNumber: number; // for tooltip
   }> = [];
 
-  currentStats.forEach((stat, index) => {
-    // Add individual data points
-    stat.values.forEach((value) => {
-      chartData.push({
-        team: `${stat.teamNumber}`,
-        teamNumber: stat.teamNumber,
-        x: index,
-        y: value,
-        type: 'point',
-        index,
+  const spreadRange = 0.35; // How far to spread matches around team center (±0.35 = 0.7 total width)
+
+  currentStats.forEach((stat, teamIndex) => {
+    const teamData = currentTeamsData.find(t => t.teamNumber === stat.teamNumber);
+    if (teamData) {
+      const sortedMatches = teamData.matches
+        .filter(m => {
+          const value = m[selectedMetric];
+          return value !== undefined && value !== null;
+        })
+        .sort((a, b) => a.matchNumber - b.matchNumber);
+
+      const numMatches = sortedMatches.length;
+
+      sortedMatches.forEach((match, matchIndex) => {
+        const value = match[selectedMetric];
+
+        // Spread matches across x-axis: from (teamIndex - spreadRange) to (teamIndex + spreadRange)
+        // First match on the left, last match on the right
+        let xOffset = 0;
+        if (numMatches > 1) {
+          xOffset = -spreadRange + (matchIndex / (numMatches - 1)) * (spreadRange * 2);
+        }
+
+        scatterData.push({
+          x: teamIndex + xOffset,
+          y: value,
+          team: `${stat.teamNumber}`,
+          matchNumber: match.matchNumber,
+        });
       });
-    });
-
-    // Add box boundaries (we'll render these as rectangles)
-    chartData.push({
-      team: `${stat.teamNumber}`,
-      teamNumber: stat.teamNumber,
-      x: index,
-      y: stat.q1,
-      type: 'box',
-      index,
-    });
-
-    chartData.push({
-      team: `${stat.teamNumber}`,
-      teamNumber: stat.teamNumber,
-      x: index,
-      y: stat.q3,
-      type: 'box',
-      index,
-    });
-
-    // Add median line
-    chartData.push({
-      team: `${stat.teamNumber}`,
-      teamNumber: stat.teamNumber,
-      x: index,
-      y: stat.median,
-      type: 'median',
-      index,
-    });
-
-    // Add whiskers (min/max)
-    chartData.push({
-      team: `${stat.teamNumber}`,
-      teamNumber: stat.teamNumber,
-      x: index,
-      y: stat.min,
-      type: 'whisker',
-      index,
-    });
-
-    chartData.push({
-      team: `${stat.teamNumber}`,
-      teamNumber: stat.teamNumber,
-      x: index,
-      y: stat.max,
-      type: 'whisker',
-      index,
-    });
+    }
   });
+
+  // Prepare boxplot data for current page
+  const boxplotData = currentStats.map((stat, index) => ({
+    x: index,
+    team: `${stat.teamNumber}`,
+    min: stat.min,
+    q1: stat.q1,
+    median: stat.median,
+    q3: stat.q3,
+    max: stat.max,
+  }));
+
+  // Categories for x-axis
+  const teamCategories = currentStats.map(s => `${s.teamNumber}`);
 
   const metricLabel =
     METRIC_OPTIONS.find((opt) => opt.value === selectedMetric)?.label ||
@@ -309,17 +304,17 @@ export function GamePieceBoxplot({ eventKey }: GamePieceBoxplotProps) {
       {/* Boxplot Chart */}
       <div className="h-96">
         <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart margin={{ top: 20, right: 20, bottom: 60, left: 60 }}>
+          <ComposedChart
+            data={boxplotData}
+            margin={{ top: 20, right: 20, bottom: 60, left: 60 }}
+          >
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
             <XAxis
               type="number"
               dataKey="x"
               domain={[-0.5, currentStats.length - 0.5]}
-              ticks={currentStats.map((_, i) => i)}
-              tickFormatter={(value) => {
-                const stat = currentStats[value];
-                return stat ? `${stat.teamNumber}` : '';
-              }}
+              ticks={Array.from({ length: currentStats.length }, (_, i) => i)}
+              tickFormatter={(value) => teamCategories[value] || ''}
               label={{
                 value: 'Team Number',
                 position: 'insideBottom',
@@ -327,21 +322,29 @@ export function GamePieceBoxplot({ eventKey }: GamePieceBoxplotProps) {
               }}
               className="text-xs"
             />
-            <YAxis
-              type="number"
-              label={{
-                value: metricLabel,
-                angle: -90,
-                position: 'insideLeft',
-              }}
-              className="text-xs"
-            />
+            <YAxis className="text-xs" />
             <Tooltip
               content={({ active, payload }) => {
                 if (!active || !payload || payload.length === 0) return null;
 
-                const data = payload[0].payload;
-                const stat = currentStats[data.index];
+                const data = payload[0]?.payload;
+                if (!data) return null;
+
+                // Check if it's a scatter point or boxplot data
+                if ('y' in data && 'matchNumber' in data) {
+                  // Scatter point
+                  return (
+                    <div className="bg-background border border-border rounded-lg p-3 shadow-lg">
+                      <p className="font-semibold">Team {data.team}</p>
+                      <p className="text-sm">Match {data.matchNumber}</p>
+                      <p className="text-sm">Value: {data.y}</p>
+                    </div>
+                  );
+                }
+
+                // Boxplot data
+                const teamNum = parseInt(data.team);
+                const stat = currentStats.find(s => s.teamNumber === teamNum);
 
                 if (!stat) return null;
 
@@ -365,98 +368,109 @@ export function GamePieceBoxplot({ eventKey }: GamePieceBoxplotProps) {
 
             {/* Render individual data points */}
             <Scatter
-              data={chartData.filter((d) => d.type === 'point')}
+              name="Match Performance"
+              data={scatterData}
+              dataKey="y"
               fill="#3b82f6"
               fillOpacity={0.6}
-            >
-              {chartData
-                .filter((d) => d.type === 'point')
-                .map((entry, index) => (
-                  <Cell key={`point-${index}`} r={3} />
-                ))}
-            </Scatter>
+            />
 
-            {/* Custom boxplot rendering via shape prop */}
-            <Scatter
-              data={currentStats.map((stat, i) => ({ x: i, y: stat.median }))}
+            {/* Render boxplot elements using Bar with custom shape */}
+            <Bar
+              dataKey="median"
+              fill="transparent"
               shape={(props: unknown) => {
-                const { cx = 0, cy = 0, index = 0 } = props as { cx?: number; cy?: number; index?: number };
-                const stat = currentStats[index];
-                if (!stat) return <></>;  // Return empty fragment instead of null
+                const { x, y, width, height, payload } = props as { x?: number; y?: number; width?: number; height?: number; payload?: typeof boxplotData[0]; value?: number };
 
-                const boxWidth = 40;
-                const yScale = 80 / (stat.max - stat.min || 1); // Approximate scale
+                if (!payload || typeof x !== 'number' || typeof y !== 'number') {
+                  return <></>;
+                }
 
-                const q1Y = cy + (stat.median - stat.q1) * yScale;
-                const q3Y = cy - (stat.q3 - stat.median) * yScale;
-                const minY = cy + (stat.median - stat.min) * yScale;
-                const maxY = cy - (stat.max - stat.median) * yScale;
+                const boxWidth = 120; // Wider to encompass scattered match points
+                const cx = x + (width || 0) / 2;
+
+                // Since y represents the median position, we can calculate other positions
+                // by determining the pixel-per-unit ratio
+                // The 'y' prop is the pixel position for the median value
+                const medianValue = payload.median;
+                const medianPixel = y;
+
+                // Calculate pixels per data unit using the bar height
+                // height is negative for upward bars
+                const pixelsPerUnit = height !== undefined && height !== 0
+                  ? height / medianValue
+                  : 1;
+
+                // Now calculate all y positions relative to the median
+                const q1Pixel = medianPixel + (medianValue - payload.q1) * pixelsPerUnit;
+                const q3Pixel = medianPixel + (medianValue - payload.q3) * pixelsPerUnit;
+                const minPixel = medianPixel + (medianValue - payload.min) * pixelsPerUnit;
+                const maxPixel = medianPixel + (medianValue - payload.max) * pixelsPerUnit;
 
                 return (
                   <g>
-                    {/* Whisker lines (min to Q1, Q3 to max) */}
+                    {/* Whisker lines */}
                     <line
                       x1={cx}
-                      y1={minY}
+                      y1={minPixel}
                       x2={cx}
-                      y2={q1Y}
+                      y2={q1Pixel}
                       stroke="#64748b"
-                      strokeWidth={1}
+                      strokeWidth={2}
                     />
                     <line
                       x1={cx}
-                      y1={q3Y}
+                      y1={q3Pixel}
                       x2={cx}
-                      y2={maxY}
+                      y2={maxPixel}
                       stroke="#64748b"
-                      strokeWidth={1}
+                      strokeWidth={2}
                     />
 
                     {/* Box (Q1 to Q3) */}
                     <rect
                       x={cx - boxWidth / 2}
-                      y={q3Y}
+                      y={Math.min(q1Pixel, q3Pixel)}
                       width={boxWidth}
-                      height={Math.abs(q1Y - q3Y)}
-                      fill="#3b82f6"
+                      height={Math.abs(q1Pixel - q3Pixel)}
+                      fill="#10b981"
                       fillOpacity={0.3}
-                      stroke="#3b82f6"
+                      stroke="#10b981"
                       strokeWidth={2}
                     />
 
                     {/* Median line */}
                     <line
                       x1={cx - boxWidth / 2}
-                      y1={cy}
+                      y1={medianPixel}
                       x2={cx + boxWidth / 2}
-                      y2={cy}
-                      stroke="#1e40af"
+                      y2={medianPixel}
+                      stroke="#059669"
                       strokeWidth={3}
                     />
 
                     {/* Min/max caps */}
                     <line
-                      x1={cx - 10}
-                      y1={minY}
-                      x2={cx + 10}
-                      y2={minY}
+                      x1={cx - 30}
+                      y1={minPixel}
+                      x2={cx + 30}
+                      y2={minPixel}
                       stroke="#64748b"
-                      strokeWidth={1}
+                      strokeWidth={2}
                     />
                     <line
-                      x1={cx - 10}
-                      y1={maxY}
-                      x2={cx + 10}
-                      y2={maxY}
+                      x1={cx - 30}
+                      y1={maxPixel}
+                      x2={cx + 30}
+                      y2={maxPixel}
                       stroke="#64748b"
-                      strokeWidth={1}
+                      strokeWidth={2}
                     />
                   </g>
                 );
               }}
-              fill="transparent"
             />
-          </ScatterChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
 

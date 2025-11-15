@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { Column, PaginationConfig } from '@/types/admin';
 import {
   ScouterWithUser,
@@ -10,6 +11,8 @@ import {
 } from '@/types/scouter';
 import { DataTable } from '@/components/admin/DataTable';
 import { ActionButtons } from '@/components/admin/ActionButtons';
+import { Button } from '@/components/ui/Button';
+import { BarChart3 } from 'lucide-react';
 
 interface ScoutersTableProps {
   scouters: ScouterWithUser[];
@@ -170,13 +173,20 @@ export function ScoutersTable({
       key: 'id',
       header: 'Actions',
       render: (value, row) => (
-        <ActionButtons
-          onEdit={() => onEdit(row)}
-          onDelete={() => onDelete(String(value))}
-          deleteMessage={`Are you sure you want to remove ${
-            row.display_name || row.full_name || row.email
-          } as a scouter? This will not delete their user account.`}
-        />
+        <div className="flex items-center gap-2">
+          <Link href={`/admin/scouters/${value}`}>
+            <Button variant="outline" size="sm" title="View ELO History">
+              <BarChart3 className="h-4 w-4" />
+            </Button>
+          </Link>
+          <ActionButtons
+            onEdit={() => onEdit(row)}
+            onDelete={() => onDelete(String(value))}
+            deleteMessage={`Are you sure you want to remove ${
+              row.display_name || row.full_name || row.email
+            } as a scouter? This will not delete their user account.`}
+          />
+        </div>
       ),
     },
   ];

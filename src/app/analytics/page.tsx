@@ -15,12 +15,14 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Download } from 'lucide-react';
+import { Download, FileText } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { EventOverview } from '@/components/analytics/EventOverview';
 import { OPRLeaderboard } from '@/components/analytics/OPRLeaderboard';
 import { PerformanceTrends } from '@/components/analytics/PerformanceTrends';
 import { TeamComparison } from '@/components/analytics/TeamComparison';
 import { GamePieceBoxplot } from '@/components/analytics/GamePieceBoxplot';
+import { MatchList } from '@/components/analytics/MatchList';
 import type { TeamStatistics } from '@/types';
 
 interface Event {
@@ -30,6 +32,7 @@ interface Event {
 }
 
 export default function AnalyticsPage() {
+  const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEventKey, setSelectedEventKey] = useState<string | null>(null);
   const [teamStats, setTeamStats] = useState<TeamStatistics[]>([]);
@@ -156,14 +159,25 @@ export default function AnalyticsPage() {
             Team performance metrics, trends, and strategic insights
           </p>
         </div>
-        <Button
-          onClick={handleExport}
-          disabled={!teamStats.length}
-          className="gap-2"
-        >
-          <Download className="h-4 w-4" />
-          Export Data
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => router.push(`/analytics/${selectedEventKey}/report`)}
+            disabled={!selectedEventKey || !teamStats.length}
+            className="gap-2"
+          >
+            <FileText className="h-4 w-4" />
+            Generate Report
+          </Button>
+          <Button
+            onClick={handleExport}
+            disabled={!teamStats.length}
+            variant="outline"
+            className="gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Export CSV
+          </Button>
+        </div>
       </div>
 
       {/* Event Selector */}
@@ -237,6 +251,9 @@ export default function AnalyticsPage() {
 
           {/* Game Piece Distribution */}
           <GamePieceBoxplot eventKey={selectedEventKey} />
+
+          {/* Match List */}
+          <MatchList eventKey={selectedEventKey} />
         </>
       )}
 
