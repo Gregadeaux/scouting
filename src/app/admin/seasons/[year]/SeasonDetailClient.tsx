@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/button';
@@ -77,7 +77,7 @@ export function SeasonDetailClient({ year }: SeasonDetailClientProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showToast } = useToast();
 
-  const fetchSeason = async () => {
+  const fetchSeason = useCallback(async () => {
     try {
       const response = await fetch(`/api/admin/seasons/${year}`);
       if (response.ok) {
@@ -94,11 +94,11 @@ export function SeasonDetailClient({ year }: SeasonDetailClientProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [year]);
 
   useEffect(() => {
     fetchSeason();
-  }, [year]);
+  }, [fetchSeason]);
 
   const handleEditSubmit = async (data: SeasonConfigUpdate) => {
     setIsSubmitting(true);

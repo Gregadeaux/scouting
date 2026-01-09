@@ -210,35 +210,7 @@ export interface PitScouting<TCapabilities = JSONBData, TAutoCapabilities = JSON
 // CONFIGURATION & METADATA TYPES
 // ============================================================================
 
-export interface SeasonConfig {
-  year: number;
-  game_name: string;
-  game_description?: string;
-
-  // JSON Schemas for validation (these define the structure of JSONB fields)
-  auto_schema?: JSONBData;
-  teleop_schema?: JSONBData;
-  endgame_schema?: JSONBData;
-  capabilities_schema?: JSONBData;
-
-  // Game configuration
-  match_duration_seconds: number;
-  auto_duration_seconds: number;
-  teleop_duration_seconds: number;
-
-  // Important dates
-  kickoff_date?: string;
-  championship_start_date?: string;
-  championship_end_date?: string;
-
-  // Documentation
-  rules_manual_url?: string;
-  game_animation_url?: string;
-  notes?: string;
-
-  created_at?: string;
-  updated_at?: string;
-}
+// SeasonConfig types are exported from season-config.ts via the wildcard export at the end of this file
 
 // ============================================================================
 // ANALYTICS & STATISTICS TYPES
