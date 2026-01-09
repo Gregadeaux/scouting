@@ -1,284 +1,123 @@
 # FRC Scouting System - AI Assistant Guide
 
-**Last Updated**: 2025-10-24
-**Project Status**: Active Development - Core Infrastructure Complete
+**Last Updated**: 2026-01-09
+**Current Season**: 2025 Reefscape (2026 game releases Jan 10, 2026)
 
 ---
 
-## Quick Orientation
+## Quick Overview
 
-This is a **championship-level FRC (FIRST Robotics Competition) scouting system** built with Next.js 15, TypeScript, Tailwind CSS, and Supabase. The system uses a **JSONB hybrid architecture** that separates evergreen data (teams, matches) from season-specific metrics, allowing adaptation to new games without schema migrations.
+Championship-level FRC scouting system built with **Next.js 15**, **TypeScript**, **Tailwind CSS**, and **Supabase**. Uses a **JSONB hybrid architecture** where ~60-70% of code is evergreen (teams, matches, auth) and ~30-40% is season-specific (game mechanics stored in JSONB).
 
-### Key Architectural Principle
-> 60-70% of scouting data remains consistent across seasons (team identification, match structure, reliability metrics). 30-40% changes annually with new game mechanics.
-
-The JSONB hybrid approach means: **relational structure for the evergreen, flexible JSONB for the game-specific**.
+### Key Principle
+> Relational structure for the evergreen, flexible JSONB for the game-specific.
 
 ---
 
-## Current Application State
+## Tech Stack
 
-### ✅ Fully Implemented & Working
-
-#### 1. **Database Schema & Infrastructure** (100%)
-- PostgreSQL + JSONB hybrid schema in `/supabase/migrations/`
-- Core tables: `teams`, `events`, `match_schedule`, `match_scouting`, `pit_scouting`, `team_statistics`, `season_config`
-- Auth tables: `users`, `user_teams` with RLS policies
-- System tables: `import_jobs`, `audit_logs`
-- Supabase Storage bucket: `robot-photos` (5MB limit, JPEG/PNG/WebP/GIF)
-
-#### 2. **Authentication & Authorization** (100%)
-- Supabase Auth integration (email/password)
-- Role-based access control: `admin`, `mentor`, `scouter`
-- Multi-team support via `user_teams` junction table
-- Protected routes at component and API levels
-- AuthContext provider: `/src/contexts/AuthContext.tsx`
-- Login/Signup/Password Reset flows complete
-
-#### 3. **Admin Dashboard** (80% - Core Complete)
-- ✅ Dashboard home with statistics cards
-- ✅ Events management (full CRUD)
-- ✅ Teams management (full CRUD)
-- ✅ User management (roles, teams, permissions)
-- ✅ The Blue Alliance (TBA) import with background jobs
-- ✅ Event detail pages with coverage tracking
-- ✅ Team detail pages with match history
-- ⏳ Matches management (placeholder)
-- ⏳ Scouters management (needs implementation)
-- ⏳ Scouting data viewer (placeholder)
-- ⏳ Seasons configuration (placeholder)
-
-#### 4. **The Blue Alliance (TBA) Integration** (100%)
-- TBA API client with rate limiting
-- Background import job system
-- Smart merge strategies (preserves local data)
-- Import teams, match schedules, and results
-- Progress tracking with real-time updates
-- Worker endpoint: `/api/admin/workers/process-imports`
-
-#### 5. **Service Layer** (100%)
-- Repository pattern: Team, Event, Match, ImportJob
-- Service layer: TBAApiService, ImportService, TeamService, EventService, MatchService
-- Merge strategies for TBA data integration
-- All TypeScript errors resolved (except 3 minor issues in unrelated files)
-
-#### 6. **Offline Support Infrastructure** (Core Complete)
-- Hexagonal architecture (Core → Infrastructure → Application)
-- IndexedDB for local storage
-- Submission domain model with Result pattern
-- Event bus for decoupled communication
-- Retry strategy with exponential backoff
-- React hooks: `useOfflineStatus`, `useSubmission`, `useSyncQueue`
-
-#### 7. **Pit Scouting UI Components** (100%)
-- Reusable components: Counter, FormSection, ImageUpload, FieldRenderer
-- Custom hooks: `useEvents`, `useEventTeams`, `usePitScouting`
-- Dynamic form generation from field definitions
-- Image upload with drag-and-drop
-- Pit scouting page functional
-
-#### 8. **Storage System** (100%)
-- Supabase Storage utilities (`/src/lib/supabase/storage.ts`)
-- Upload/delete robot photos
-- File validation (size, MIME type)
-- Public URL generation
-- Organized by team/event
-
-#### 9. **2025 Reefscape Configuration** (100%)
-- Type definitions: `/src/types/season-2025.ts`
-- Field configs: `/src/lib/config/season-2025.ts`
-- Validation with JSON Schema
-- Point calculation functions
-- Game elements: Coral, Algae, Reef, Processors, Nets, Barge, Cage
-
-### ⏳ Partially Implemented
-
-- **Match Scouting Forms**: Backend ready, UI pending
-- **Analytics**: Database ready, calculations pending
-- **Offline Sync**: Infrastructure ready, final integration pending
-
-### ❌ Not Yet Implemented
-
-- Match scouting form UI
-- OPR/DPR/CCWM calculations
-- Pick list generation UI
-- QR code sync system
-- Real-time updates via Supabase Realtime
+| Layer | Technology |
+|-------|------------|
+| Frontend | Next.js 15 (App Router), React 19, TypeScript 5 |
+| Styling | Tailwind CSS 3.4, dark mode |
+| Database | Supabase (PostgreSQL + JSONB) |
+| Auth | Supabase Auth (email/password, roles) |
+| Storage | Supabase Storage (robot photos) |
+| Testing | Playwright (E2E), Vitest (unit) |
 
 ---
 
-## Architecture Overview
+## Key Commands
 
-### Tech Stack
-- **Frontend**: Next.js 15 (App Router), React 19, TypeScript 5
-- **Styling**: Tailwind CSS 3.4 with dark mode
-- **Database**: Supabase (PostgreSQL + JSONB)
-- **Auth**: Supabase Auth
-- **Storage**: Supabase Storage
-- **Icons**: lucide-react
-- **Forms**: react-hook-form
-- **PWA**: @ducanh2912/next-pwa
-
-### Directory Structure
-```
-/Users/gregbilletdeaux/Developer/930/scouting/
-├── src/
-│   ├── app/                    # Next.js App Router
-│   │   ├── admin/             # Admin dashboard
-│   │   ├── api/               # API routes
-│   │   ├── auth/              # Auth pages
-│   │   ├── pit-scouting/      # Pit scouting
-│   │   └── offline/           # Offline testing
-│   ├── components/
-│   │   ├── ui/                # Reusable UI
-│   │   ├── admin/             # Admin components
-│   │   ├── auth/              # Auth components
-│   │   ├── pit-scouting/      # Pit scouting
-│   │   └── offline/           # Offline sync
-│   ├── lib/
-│   │   ├── supabase/          # DB, validation, storage
-│   │   ├── repositories/      # Data access
-│   │   ├── services/          # Business logic
-│   │   ├── strategies/        # Merge strategies
-│   │   ├── config/            # Season configs
-│   │   ├── offline/           # Offline hooks
-│   │   └── api/               # API helpers
-│   ├── core/offline/          # Domain layer
-│   ├── infrastructure/offline/ # Infrastructure
-│   ├── types/                 # TypeScript types
-│   ├── hooks/                 # Custom hooks
-│   └── contexts/              # React contexts
-├── supabase/migrations/       # Database migrations
-├── public/                    # Static assets
-└── docs/                      # Documentation (proposed)
+```bash
+npm run dev          # Start development server
+npm run build        # Production build
+npm run type-check   # TypeScript validation (run before commits)
+npm run test         # Run Playwright E2E tests
+npm run lint         # ESLint check
 ```
 
-### Key Design Patterns
-1. **JSONB Hybrid**: Relational + JSONB flexibility
-2. **Repository Pattern**: Data access abstraction
-3. **Service Layer**: Business logic separation
-4. **Hexagonal Architecture**: Core → Ports → Adapters
-5. **Result Pattern**: Type-safe error handling
-6. **Smart Merge**: TBA + local data
-7. **Configuration-Driven**: Season adaptation
+---
+
+## Project Tracking
+
+**Linear Team**: 930-Scouting
+**Issue Prefix**: SCOUT-XXX
+
+### When Starting Work
+1. Find the Linear issue (or create one if missing)
+2. Mark status as "In Progress"
+3. Use branch name from Linear: `feature/scout-XXX-description`
+
+### When Finishing Work
+1. Verify `npm run build` succeeds (no TypeScript/ESLint errors)
+2. Update Linear issue status to "Ready to Test"
+3. If creating PR, link Linear issue using magic words (e.g., "Fixes SCOUT-123")
+
+### Status Flow
+`Backlog` → `Todo` → `In Progress` → `Ready to Test` → `Done`
 
 ---
 
-## Documentation Map
+## Coding Standards
 
-### Essential (Keep at Root)
-- **`README.md`** - Project overview, quick start
-- **`CLAUDE.md`** (this file) - AI assistant guide
-- **`scouting_research.md`** - Championship research
+### Must Follow
+- **No `any` type** - ESLint will fail the build
+- **Run `npm run type-check`** before committing
+- **Test credentials**: Use `.env.test` (see `.env.test.example`)
 
-### Proposed Organization (`/docs/`)
+### UI Design
+- Prioritize clarity and efficient screen space
+- More information visible = less scrolling (without sacrificing usability)
+- Follow existing component patterns in `/src/components/ui/`
 
-#### Setup Guides (`/docs/setup/`)
-- `SUPABASE_SETUP.md`
-- `SUPABASE_AUTH_CONFIG.md`
-- `ADMIN_SETUP.md`
-- `AUDIT_LOG_SETUP.md`
-- `supabase-storage-setup.md`
-- `STORAGE_SETUP_CHECKLIST.md`
-
-#### Feature Guides (`/docs/features/`)
-- **Admin** (`/docs/features/admin/`)
-  - `ADMIN_DASHBOARD_IMPLEMENTATION.md`
-  - `ADMIN_QUICK_START.md`
-  - `ADMIN_ARCHITECTURE.md`
-  - `ADMIN_README.md`
-  - `ADMIN_IMPLEMENTATION_SUMMARY.md`
-- **Auth** (`/docs/features/auth/`)
-  - `AUTHENTICATION.md`
-  - `AUTH_QUICK_START.md`
-- **Storage** (`/docs/features/storage/`)
-  - `STORAGE_IMPLEMENTATION.md`
-  - `STORAGE_QUICK_REFERENCE.md`
-- **Pit Scouting** (`/docs/features/pit-scouting/`)
-  - `PIT_SCOUTING_IMPLEMENTATION.md`
-- **Offline** (`/docs/features/offline/`)
-  - `OFFLINE_COMPONENTS_SUMMARY.md`
-  - `INFRASTRUCTURE_IMPLEMENTATION_STATUS.md`
-
-#### Implementation Summaries (`/docs/progress/` - Archive)
-- `PHASE1_COMPLETE.md`
-- `PHASE_2_SUMMARY.md`
-- `PHASE_3_GUIDE.md`
-- `PHASE3_FIXES_NEEDED.md`
-- `PHASE3_FIXES_COMPLETE.md`
-- `IMPLEMENTATION_SUMMARY.md`
+### Patterns to Copy
+| Task | Reference File |
+|------|----------------|
+| API Route | `/src/app/api/admin/events/route.ts` |
+| Service | `/src/lib/services/team.service.ts` |
+| Repository | `/src/lib/repositories/team.repository.ts` |
+| Admin Page | `/src/app/admin/events/page.tsx` |
+| Form Component | `/src/components/admin/TeamForm.tsx` |
 
 ---
 
-## Quick Start for AI Assistants
+## Directory Structure
 
-### When Asked to Work on This Project
-
-1. **Read CLAUDE.md** (this file) - Current state
-2. **Check README.md** - Architecture overview
-3. **Identify feature area**:
-   - Admin? → `/docs/features/admin/`
-   - Auth? → `/docs/features/auth/`
-   - Offline? → `/src/infrastructure/offline/README.md`
-   - Pit scouting? → `/docs/features/pit-scouting/`
-4. **Follow existing patterns**:
-   - API route? Copy `/src/app/api/admin/events/route.ts`
-   - Service? Copy `/src/lib/services/team.service.ts`
-   - Repository? Copy `/src/lib/repositories/team.repository.ts`
-   - Component? Copy `/src/components/admin/TeamForm.tsx`
-5. **Run type-check**: `npm run type-check`
-
-### Common Tasks
-
-#### Add New Season (2026)
-1. Create `/src/types/season-2026.ts`
-2. Create `/src/lib/config/season-2026.ts`
-3. Update `/src/lib/supabase/validation.ts`
-4. Insert into `season_config` table
-5. See full guide below
-
-#### Add Admin Entity (Matches)
-1. Copy `/src/app/admin/events/page.tsx` → `matches/page.tsx`
-2. Create `/src/app/api/admin/matches/route.ts`
-3. Create `/src/components/admin/MatchForm.tsx`
-4. Update `/src/components/admin/Sidebar.tsx`
-
-#### Create Scouting Form
-1. Use `/src/components/ui/FieldRenderer.tsx`
-2. Get fields from `/src/lib/config/season-2025.ts`
-3. Validate with `/src/lib/supabase/validation.ts`
-4. Submit to API endpoint
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── admin/             # Admin dashboard pages
+│   ├── analytics/         # Analytics pages
+│   ├── api/               # API routes
+│   ├── auth/              # Auth pages
+│   └── pit-scouting/      # Pit scouting page
+├── components/
+│   ├── ui/                # Reusable UI components
+│   ├── admin/             # Admin-specific components
+│   ├── analytics/         # Charts, visualizations
+│   └── match-scouting-v2/ # Match scouting interface
+├── lib/
+│   ├── supabase/          # DB client, validation, storage
+│   ├── repositories/      # Data access layer
+│   ├── services/          # Business logic
+│   ├── config/            # Season configurations
+│   └── algorithms/        # OPR, ELO calculations
+├── types/                 # TypeScript type definitions
+│   ├── index.ts           # Core types (evergreen)
+│   └── season-2025.ts     # 2025 Reefscape types
+└── contexts/              # React contexts (Auth, etc.)
+```
 
 ---
 
-## Known Issues
-
-### TypeScript Errors (3)
-1. `src/lib/services/route-guard.service.ts:174` - UserRole type mismatch
-2. `src/lib/supabase/storage.ts:232,251` - Protected property access
-
-### Missing Features
-- Match scouting form UI
-- OPR/DPR/CCWM calculations
-- Pick list UI
-- QR code sync
-- Real-time updates
-- Unit/integration tests
-
-### Repository Methods (TODOs)
-- `MatchRepository.findByTeamNumber()`
-- `TeamRepository.search(query)`
-- `EventRepository.findByTeamNumber()`
-
----
-
-## 📋 Season Transition Guide
+## Season Transition Guide
 
 When a new FRC game is announced (January), approximately **30-40% of the system** needs updates. The core architecture remains unchanged - that's the beauty of the JSONB hybrid approach!
 
 ### Phase 1: Type Definitions (Week 0-1)
 
-#### ✅ 1. Create `src/types/season-YYYY.ts`
+#### 1. Create `src/types/season-YYYY.ts`
 
 **File**: `src/types/season-YYYY.ts` (replace YYYY with year, e.g., 2026)
 
@@ -372,47 +211,37 @@ export function calculateEndgamePoints(endgame: EndgamePerformanceYYYY): number 
 }
 ```
 
-**Example**: See `src/types/season-2025.ts` for complete reference
+**Reference**: See `src/types/season-2025.ts` for complete example
 
 ---
 
-#### ✅ 2. Update `src/types/index.ts`
+#### 2. Update `src/types/index.ts`
 
-**File**: `src/types/index.ts`
-
-**Change Required**: Update the export statement at the bottom
-
-**Location**: Line ~480 (end of file)
+Add export at the bottom of the file:
 
 ```typescript
-// BEFORE (exports only 2025):
+// BEFORE:
 export type * from './season-2025';
 
-// AFTER (exports both 2025 and new season):
+// AFTER:
 export type * from './season-2025';
 export type * from './season-2026'; // Add new line
 ```
-
-**Why**: This makes all new season types available throughout the codebase
 
 ---
 
 ### Phase 2: Configuration System (Week 1-2)
 
-#### ✅ 3. Create `src/lib/config/season-YYYY.ts`
-
-**File**: `src/lib/config/season-YYYY.ts`
+#### 3. Create `src/lib/config/season-YYYY.ts`
 
 **Purpose**: Define field definitions for form generation and JSON schemas for validation
 
-**Required Content**:
 ```typescript
 // 1. Import season-specific types
 import type {
   AutoPerformanceYYYY,
   TeleopPerformanceYYYY,
   EndgamePerformanceYYYY,
-  // ... all relevant types
 } from '@/types/season-YYYY';
 
 // 2. Season metadata
@@ -435,7 +264,7 @@ export const AUTO_FIELDS_YYYY: FieldDefinition[] = [
   {
     key: 'field_name',
     label: 'Human Readable Label',
-    type: 'counter' | 'boolean' | 'select' | 'text' | ...,
+    type: 'counter' | 'boolean' | 'select' | 'text',
     defaultValue: ...,
     required?: true,
     min?: 0,
@@ -481,24 +310,18 @@ export const GAME_NAME_CONFIG = {
 } as const;
 ```
 
-**Example**: See `src/lib/config/season-2025.ts`
-
-**Non-programmers can edit this file!** The field definitions are declarative and self-documenting.
+**Reference**: See `src/lib/config/season-2025.ts`
 
 ---
 
 ### Phase 3: Validation System (Week 1-2)
 
-#### ✅ 4. Update `src/lib/supabase/validation.ts`
+#### 4. Update `src/lib/supabase/validation.ts`
 
-**File**: `src/lib/supabase/validation.ts`
-
-**Changes Required**: Add three new validator functions
-
-**Location**: After the 2025 validators (~line 110)
+Add after existing 2025 validators:
 
 ```typescript
-// Add these imports at top
+// Add imports at top
 import type {
   AutoPerformanceYYYY,
   TeleopPerformanceYYYY,
@@ -510,97 +333,76 @@ import {
   ENDGAME_SCHEMA_YYYY,
 } from '@/lib/config/season-YYYY';
 
-// Add these functions
-export function validateAutoPerformanceYYYY(
-  data: any
-): ValidationResult {
+// Add validator functions
+export function validateAutoPerformanceYYYY(data: unknown): ValidationResult {
   return validateJSONB(data, AUTO_SCHEMA_YYYY);
 }
 
-export function validateTeleopPerformanceYYYY(
-  data: any
-): ValidationResult {
+export function validateTeleopPerformanceYYYY(data: unknown): ValidationResult {
   return validateJSONB(data, TELEOP_SCHEMA_YYYY);
 }
 
-export function validateEndgamePerformanceYYYY(
-  data: any
-): ValidationResult {
+export function validateEndgamePerformanceYYYY(data: unknown): ValidationResult {
   return validateJSONB(data, ENDGAME_SCHEMA_YYYY);
 }
 
 // Add type guards
-export function isAutoPerformanceYYYY(data: any): data is AutoPerformanceYYYY {
-  const result = validateAutoPerformanceYYYY(data);
-  return result.valid;
+export function isAutoPerformanceYYYY(data: unknown): data is AutoPerformanceYYYY {
+  return validateAutoPerformanceYYYY(data).valid;
 }
 
-export function isTeleopPerformanceYYYY(data: any): data is TeleopPerformanceYYYY {
-  const result = validateTeleopPerformanceYYYY(data);
-  return result.valid;
+export function isTeleopPerformanceYYYY(data: unknown): data is TeleopPerformanceYYYY {
+  return validateTeleopPerformanceYYYY(data).valid;
 }
 
-export function isEndgamePerformanceYYYY(data: any): data is EndgamePerformanceYYYY {
-  const result = validateEndgamePerformanceYYYY(data);
-  return result.valid;
+export function isEndgamePerformanceYYYY(data: unknown): data is EndgamePerformanceYYYY {
+  return validateEndgamePerformanceYYYY(data).valid;
 }
 
 // Add combined validator
 export function validateMatchScoutingDataYYYY(data: {
-  auto_performance: any;
-  teleop_performance: any;
-  endgame_performance: any;
+  auto_performance: unknown;
+  teleop_performance: unknown;
+  endgame_performance: unknown;
 }): ValidationResult {
   const errors: ValidationError[] = [];
 
   const autoResult = validateAutoPerformanceYYYY(data.auto_performance);
   if (!autoResult.valid) {
-    errors.push(
-      ...autoResult.errors.map((e) => ({
-        ...e,
-        field: `auto_performance.${e.field}`,
-      }))
-    );
+    errors.push(...autoResult.errors.map((e) => ({
+      ...e,
+      field: `auto_performance.${e.field}`,
+    })));
   }
 
   const teleopResult = validateTeleopPerformanceYYYY(data.teleop_performance);
   if (!teleopResult.valid) {
-    errors.push(
-      ...teleopResult.errors.map((e) => ({
-        ...e,
-        field: `teleop_performance.${e.field}`,
-      }))
-    );
+    errors.push(...teleopResult.errors.map((e) => ({
+      ...e,
+      field: `teleop_performance.${e.field}`,
+    })));
   }
 
   const endgameResult = validateEndgamePerformanceYYYY(data.endgame_performance);
   if (!endgameResult.valid) {
-    errors.push(
-      ...endgameResult.errors.map((e) => ({
-        ...e,
-        field: `endgame_performance.${e.field}`,
-      }))
-    );
+    errors.push(...endgameResult.errors.map((e) => ({
+      ...e,
+      field: `endgame_performance.${e.field}`,
+    })));
   }
 
-  return {
-    valid: errors.length === 0,
-    errors,
-  };
+  return { valid: errors.length === 0, errors };
 }
 ```
-
-**Pattern**: Copy the 2025 validators and replace `2025` with `YYYY`
 
 ---
 
 ### Phase 4: Database Configuration (Week 1-2)
 
-#### ✅ 5. Insert into `season_config` table
+#### 5. Insert into `season_config` table
 
-**Method**: Run SQL in Supabase SQL Editor
+Run in Supabase SQL Editor:
 
-**SQL to Execute**:
 ```sql
 INSERT INTO season_config (
     year,
@@ -622,8 +424,8 @@ INSERT INTO season_config (
 VALUES (
     YYYY,
     'Game Name',
-    'Full game description explaining mechanics...',
-    '{"type": "object", "properties": {...}}'::jsonb,  -- Copy from config file
+    'Full game description...',
+    '{"type": "object", "properties": {...}}'::jsonb,
     '{"type": "object", "properties": {...}}'::jsonb,
     '{"type": "object", "properties": {...}}'::jsonb,
     150,
@@ -634,290 +436,94 @@ VALUES (
     'YYYY-04-DD',
     'https://link-to-manual.pdf',
     'https://youtube.com/...',
-    'Any additional notes about the season'
+    'Notes'
 )
 ON CONFLICT (year) DO UPDATE SET
     game_name = EXCLUDED.game_name,
     game_description = EXCLUDED.game_description,
     auto_schema = EXCLUDED.auto_schema,
     teleop_schema = EXCLUDED.teleop_schema,
-    endgame_schema = EXCLUDED.endgame_schema,
-    kickoff_date = EXCLUDED.kickoff_date,
-    championship_start_date = EXCLUDED.championship_start_date,
-    championship_end_date = EXCLUDED.championship_end_date,
-    rules_manual_url = EXCLUDED.rules_manual_url,
-    game_animation_url = EXCLUDED.game_animation_url,
-    notes = EXCLUDED.notes;
-```
-
-**Why**: This enables runtime schema lookups and provides metadata for the admin interface
-
----
-
-### Phase 5: Documentation (Week 2-3)
-
-#### ✅ 6. Update `README.md`
-
-**File**: `README.md`
-
-**Sections to Update**:
-
-1. **"🎮 YYYY Game Name" section** (around line 113)
-   - Replace or add alongside 2025 section
-   - Document new game pieces, scoring locations, endgame mechanics
-
-2. **Example JSONB structures** (around line 122-158)
-   - Show example auto/teleop/endgame JSON for new game
-   - Help developers understand data structure
-
-3. **"Season Transition" section** (around line 185)
-   - Update year references (2025 → 2026 becomes 2026 → 2027)
-
-**Example Addition**:
-```markdown
-## 🎮 2026 NewGame
-
-### Game Elements
-- **GamePiece1** (description) and **GamePiece2** (description)
-- **ScoringLocation** for scoring
-- **EndgameChallenge**: Description of endgame
-
-### Data Collection Structure
-
-**Autonomous Period (15s):**
-\```typescript
-{
-  schema_version: "2026.1",
-  left_starting_zone: true,
-  piece1_scored: 3,
-  // ... example fields
-}
-\```
+    endgame_schema = EXCLUDED.endgame_schema;
 ```
 
 ---
 
-### Phase 6: API Integration (Week 3-4)
+### Phase 5: Update Forms & Analytics (Week 2-3)
 
-#### ✅ 7. Update API Routes (Optional but Recommended)
+#### 6. Update Match Scouting Form
 
-**Files to Consider**:
-- `src/app/api/match-scouting/route.ts` (when you create it)
-- Any routes that validate JSONB data
+- Import 2026 field definitions from config
+- Add season detection logic based on event year
+- Update field overlay for new game field layout
 
-**Change**: Add schema version detection and route to appropriate validator
+**Components to update**:
+- `src/components/match-scouting-v2/MatchScoutingInterface.tsx`
+- `src/components/match-scouting-v2/field/FieldOverlay.tsx`
+- Period components (Auto, Teleop, Endgame)
 
-```typescript
-// Example in API route
-import { validateMatchScoutingData2025 } from '@/lib/supabase/validation';
-import { validateMatchScoutingData2026 } from '@/lib/supabase/validation';
+#### 7. Update Analytics
 
-// In POST handler:
-const schemaVersion = body.auto_performance.schema_version;
+- Update OPR calculation for new scoring elements
+- Update radar chart categories
+- Update boxplot categories for new game pieces
 
-let validationResult;
-if (schemaVersion === '2025.1') {
-  validationResult = validateMatchScoutingData2025(body);
-} else if (schemaVersion === '2026.1') {
-  validationResult = validateMatchScoutingData2026(body);
-} else {
-  return errorResponse('Unknown schema version', 400);
-}
-```
+**Components to update**:
+- `src/components/analytics/TeamRadarProfile.tsx`
+- `src/components/analytics/GamePieceBoxplot.tsx`
+- `src/lib/algorithms/opr.ts`
 
 ---
 
-### Phase 7: Form Components (Week 3-6)
-
-#### ✅ 8. Create Scouting Forms (Not Yet Built)
-
-**Future Files** (when implementing forms):
-- `src/components/scouting/MatchScoutingForm.tsx`
-- `src/components/scouting/PitScoutingForm.tsx`
-
-**What to Update**:
-- Import field definitions from new season config
-- Use `FieldDefinition[]` to dynamically generate form fields
-- Switch between seasons based on active year
-
-**Dynamic Form Example**:
-```typescript
-import { AUTO_FIELDS_2026 } from '@/lib/config/season-2026';
-
-// Iterate over field definitions to render form
-AUTO_FIELDS_2026.map(field => (
-  <FormField key={field.key} definition={field} />
-))
-```
-
----
-
-## 🎯 Quick Reference: Files That Change Every Season
+## Quick Reference: Files That Change Per Season
 
 | File | Action | Complexity |
 |------|--------|------------|
-| `src/types/season-YYYY.ts` | **CREATE NEW** | High - Define all interfaces |
-| `src/types/index.ts` | **UPDATE** - Add export | Low - One line |
-| `src/lib/config/season-YYYY.ts` | **CREATE NEW** | High - Define all fields |
-| `src/lib/supabase/validation.ts` | **UPDATE** - Add validators | Medium - Copy/paste pattern |
-| Database `season_config` | **INSERT** - Add row | Low - SQL statement |
-| `README.md` | **UPDATE** - Document game | Low - Markdown |
-| API routes | **UPDATE** - Add version routing | Medium - Optional |
-| Form components | **UPDATE** - Import new config | Low - When forms exist |
+| `src/types/season-YYYY.ts` | CREATE | High |
+| `src/types/index.ts` | UPDATE (1 line) | Low |
+| `src/lib/config/season-YYYY.ts` | CREATE | High |
+| `src/lib/supabase/validation.ts` | UPDATE | Medium |
+| Database `season_config` | INSERT | Low |
+| Match scouting components | UPDATE | Medium |
+| Analytics components | UPDATE | Medium |
+
+## Files That NEVER Change Between Seasons
+
+- Database schema (PostgreSQL structure)
+- Core types in `src/types/index.ts`
+- Supabase client configuration
+- Auth system
+- UI components (Button, Card, etc.)
+- Repository/Service patterns
 
 ---
 
-## 🔄 Files That NEVER Change Between Seasons
+## Testing Checklist (New Season)
 
-These files implement the core architecture and remain stable:
-
-- ✅ `supabase-schema.sql` - Database structure
-- ✅ `src/types/index.ts` (core types) - Base interfaces
-- ✅ `src/lib/supabase/client.ts` - Supabase connection
-- ✅ `src/lib/supabase/server.ts` - Server-side client
-- ✅ `src/lib/supabase/consolidation.ts` - Multi-scout algorithms
-- ✅ `src/lib/api/response.ts` - API helpers
-- ✅ All UI components (`Button.tsx`, `Card.tsx`, etc.)
-
-**This stability is the key benefit of the JSONB hybrid architecture!**
+- [ ] `npm run type-check` passes
+- [ ] New types exported from `src/types/index.ts`
+- [ ] Validation accepts valid data, rejects invalid
+- [ ] Database `season_config` row exists
+- [ ] Default values compile correctly
+- [ ] Point calculations match official scoring
+- [ ] Forms render all fields
+- [ ] Analytics display new metrics
 
 ---
 
-## 📝 Step-by-Step Workflow for AI Assistants
+## Common Mistakes
 
-When user says: *"Let's add support for the 2026 game"*
-
-### Week 0: Kickoff Analysis
-1. Watch game reveal video / read game manual
-2. Identify:
-   - Game pieces and their types
-   - Scoring locations and point values
-   - Autonomous routines
-   - Teleoperated cycles
-   - Endgame challenges
-   - Special mechanics (amplification, bonuses, etc.)
-
-### Week 1: Type System
-1. Create `src/types/season-2026.ts`
-   - Define enums for categorical data
-   - Create Auto/Teleop/Endgame interfaces
-   - Add default values
-   - Write point calculation functions
-2. Update `src/types/index.ts` export
-
-### Week 2: Configuration
-1. Create `src/lib/config/season-2026.ts`
-   - Define metadata (dates, URLs)
-   - Create field definitions (60-100 fields typically)
-   - Write JSON schemas matching interfaces
-2. Update `src/lib/supabase/validation.ts`
-   - Add validator functions (copy 2025 pattern)
-   - Add type guards
-3. Insert into `season_config` table in database
-
-### Week 3: Documentation & Testing
-1. Update `README.md` with game description
-2. Test TypeScript compilation: `npm run type-check`
-3. Verify validation works with sample data
-
-### Week 4+: Application Layer
-1. Update/create form components
-2. Update API routes for version routing
-3. Build analytics specific to new game
-4. Test with scouts using mock data
+1. **Forgetting type export** → Import errors everywhere
+2. **Mismatched schema_version** → Validation always fails
+3. **Missing validators** → Cannot validate new season data
+4. **No database row** → Runtime schema lookups fail
+5. **Using `any` type** → Build fails (ESLint)
 
 ---
 
-## 🧪 Testing Checklist
+## 2026 Season Status
 
-After adding a new season, verify:
+**Linear Project**: [2026 Season Preparation - REEFSCAPE→NEW GAME](https://linear.app/gregadeaux/project/2026-season-preparation-reefscape→new-game-cbf296db9625)
 
-- [ ] TypeScript compiles without errors (`npm run type-check`)
-- [ ] New types are exported from `src/types/index.ts`
-- [ ] Validation functions accept valid data and reject invalid data
-- [ ] Database `season_config` row exists for new year
-- [ ] Default values compile and match interface
-- [ ] Point calculation functions return correct values
-- [ ] README documents new game mechanics
-- [ ] Forms (when built) render correctly with field definitions
+**Issues**: SCOUT-95 through SCOUT-104
 
----
-
-## 💡 Tips for Success
-
-### For AI Assistants
-- **Always maintain schema_version fields** - Critical for data migrations
-- **Follow naming conventions**: `AutoPerformanceYYYY`, `validateAutoPerformanceYYYY`
-- **Copy existing patterns** - 2025 files are reference templates
-- **Preserve backwards compatibility** - Don't remove old season support
-
-### For Developers
-- **Start early** - Kickoff is early January, have system ready by Week 2
-- **Test with mock data** - Create sample JSONB before real scouting
-- **Scout feedback** - Field definitions should match what scouts can observe
-- **Iterate quickly** - You can update field definitions without schema migrations!
-
-### Non-Technical Contributors
-- **You can edit** `src/lib/config/season-YYYY.ts` - It's declarative!
-- **Field definitions** are self-documenting - labels, types, help text
-- **JSON schemas** follow a pattern - copy from similar fields
-- **No database changes needed** - JSONB adapts automatically
-
----
-
-## 🚨 Common Mistakes to Avoid
-
-1. **Forgetting to export new types** from `src/types/index.ts`
-   - Symptom: Import errors in other files
-   - Fix: Add `export type * from './season-YYYY';`
-
-2. **Mismatched schema_version strings**
-   - Symptom: Validation always fails
-   - Fix: Ensure `const: 'YYYY.1'` matches interface
-
-3. **Missing validators in validation.ts**
-   - Symptom: Cannot validate new season data
-   - Fix: Add all three validators + type guards + combined validator
-
-4. **Forgetting database season_config**
-   - Symptom: No schema available for runtime lookups
-   - Fix: Run INSERT SQL in Supabase
-
-5. **Hardcoding year in multiple places**
-   - Symptom: Tedious updates across files
-   - Fix: Use constants from season config
-
----
-
-## 📞 Questions?
-
-If implementing a new season and unsure about any step:
-
-1. **Reference existing season**: `season-2025.ts` is the gold standard
-2. **Check this guide**: Every required file is documented above
-3. **Verify tests pass**: `npm run type-check` catches most issues
-4. **Ask specific questions**: Include which phase/file you're working on
-
----
-
-**Remember**: The whole point of this architecture is that adding a new season is **mostly configuration, not code changes**. If you find yourself modifying core files beyond what's listed here, you may be doing something wrong!
-
-Last Updated: 2026-01-09
-
-## 2026 Season Readiness
-
-The 2025 Reefscape implementation is complete. The system is ready for 2026 game implementation:
-
-- **Season transition guide**: See "Season Transition Guide" section above for step-by-step instructions
-- **Files to create for 2026**: `src/types/season-2026.ts`, `src/lib/config/season-2026.ts`
-- **Files to update**: `src/types/index.ts` (add export), `src/lib/supabase/validation.ts` (add validators)
-- **Database**: Insert new row into `season_config` table
-
-The JSONB hybrid architecture means ~60-70% of code remains unchanged between seasons.
-- When I ask to add features, make sure there is a github issue with proper labels and milestone assignment to track it with. If there is one, reference it to refresh yourself on the requirements and acceptance criteria. Ask additional questions as needed when we begin work on a ticket.
-- When testing in Playwright, use credentials from `.env.test` (see `.env.test.example` for format)
-- when designing UI elements - focus on clarity and efficient use of screen space. Would prefer more information be on the screen at once to limit scrolling, if possible. Don't sacrifice usability for that, but do an honest assesment
-- Once you are finished with a feature, update the github issue, setting its status to "ready to test". When I ask you to test the project, go through all of the github issues for ones with the status "ready to test", and verify for accuracy and usability. If it needs updates, make a comment on the github issue and then set the status to "needs changes". If it is completed, mark it as completed.
-- Do not use the 'any' type. ESLint will error when building
-- When we start working on a feature, find the appropriate github issue and mark its status as 'in progress'
-- When working with github issues and projects, please use the status property to mark things as "In Progress", "Ready to Test", "Needs Changes", and "Done
+**First task** (Jan 10): SCOUT-95 - Watch game reveal and document mechanics

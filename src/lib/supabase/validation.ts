@@ -13,6 +13,13 @@ import type {
   RobotCapabilities2025,
   AutonomousCapabilities2025,
 } from '@/types/season-2025';
+import type {
+  AutoPerformance2026,
+  TeleopPerformance2026,
+  EndgamePerformance2026,
+  RobotCapabilities2026,
+  AutonomousCapabilities2026,
+} from '@/types/season-2026';
 import {
   AUTO_SCHEMA_2025,
   TELEOP_SCHEMA_2025,
@@ -20,6 +27,13 @@ import {
   ROBOT_CAPABILITIES_SCHEMA_2025,
   AUTONOMOUS_CAPABILITIES_SCHEMA_2025,
 } from '@/lib/config/season-2025';
+import {
+  AUTO_SCHEMA_2026,
+  TELEOP_SCHEMA_2026,
+  ENDGAME_SCHEMA_2026,
+  ROBOT_CAPABILITIES_SCHEMA_2026,
+  AUTONOMOUS_CAPABILITIES_SCHEMA_2026,
+} from '@/lib/config/season-2026';
 
 // ============================================================================
 // JSON SCHEMA TYPE
@@ -316,6 +330,164 @@ export function validatePitScoutingData2025(data: {
 
   // Validate autonomous capabilities
   const autoResult = validateAutonomousCapabilities2025(data.autonomous_capabilities);
+  if (!autoResult.valid) {
+    errors.push(
+      ...autoResult.errors.map((e) => ({
+        ...e,
+        field: `autonomous_capabilities.${e.field}`,
+      }))
+    );
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
+// ============================================================================
+// 2026 SEASON-SPECIFIC VALIDATION (PLACEHOLDER - UPDATE AFTER GAME REVEAL)
+// ============================================================================
+
+export function validateAutoPerformance2026(
+  data: unknown
+): ValidationResult {
+  return validateJSONB(data, AUTO_SCHEMA_2026 as JsonSchema);
+}
+
+export function validateTeleopPerformance2026(
+  data: unknown
+): ValidationResult {
+  return validateJSONB(data, TELEOP_SCHEMA_2026 as JsonSchema);
+}
+
+export function validateEndgamePerformance2026(
+  data: unknown
+): ValidationResult {
+  return validateJSONB(data, ENDGAME_SCHEMA_2026 as JsonSchema);
+}
+
+// ============================================================================
+// 2026 TYPE GUARDS
+// ============================================================================
+
+export function isAutoPerformance2026(data: unknown): data is AutoPerformance2026 {
+  const result = validateAutoPerformance2026(data);
+  return result.valid;
+}
+
+export function isTeleopPerformance2026(data: unknown): data is TeleopPerformance2026 {
+  const result = validateTeleopPerformance2026(data);
+  return result.valid;
+}
+
+export function isEndgamePerformance2026(data: unknown): data is EndgamePerformance2026 {
+  const result = validateEndgamePerformance2026(data);
+  return result.valid;
+}
+
+// ============================================================================
+// 2026 MATCH SCOUTING VALIDATION
+// ============================================================================
+
+/**
+ * Validates all three performance JSONB fields for a 2026 match scouting submission
+ */
+export function validateMatchScoutingData2026(data: {
+  auto_performance: unknown;
+  teleop_performance: unknown;
+  endgame_performance: unknown;
+}): ValidationResult {
+  const errors: ValidationError[] = [];
+
+  // Validate auto
+  const autoResult = validateAutoPerformance2026(data.auto_performance);
+  if (!autoResult.valid) {
+    errors.push(
+      ...autoResult.errors.map((e) => ({
+        ...e,
+        field: `auto_performance.${e.field}`,
+      }))
+    );
+  }
+
+  // Validate teleop
+  const teleopResult = validateTeleopPerformance2026(data.teleop_performance);
+  if (!teleopResult.valid) {
+    errors.push(
+      ...teleopResult.errors.map((e) => ({
+        ...e,
+        field: `teleop_performance.${e.field}`,
+      }))
+    );
+  }
+
+  // Validate endgame
+  const endgameResult = validateEndgamePerformance2026(data.endgame_performance);
+  if (!endgameResult.valid) {
+    errors.push(
+      ...endgameResult.errors.map((e) => ({
+        ...e,
+        field: `endgame_performance.${e.field}`,
+      }))
+    );
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
+// ============================================================================
+// 2026 PIT SCOUTING VALIDATION
+// ============================================================================
+
+export function validateRobotCapabilities2026(
+  data: unknown
+): ValidationResult {
+  return validateJSONB(data, ROBOT_CAPABILITIES_SCHEMA_2026 as JsonSchema);
+}
+
+export function validateAutonomousCapabilities2026(
+  data: unknown
+): ValidationResult {
+  return validateJSONB(data, AUTONOMOUS_CAPABILITIES_SCHEMA_2026 as JsonSchema);
+}
+
+// Type guards
+export function isRobotCapabilities2026(data: unknown): data is RobotCapabilities2026 {
+  const result = validateRobotCapabilities2026(data);
+  return result.valid;
+}
+
+export function isAutonomousCapabilities2026(data: unknown): data is AutonomousCapabilities2026 {
+  const result = validateAutonomousCapabilities2026(data);
+  return result.valid;
+}
+
+/**
+ * Validates both robot and autonomous capabilities for a 2026 pit scouting submission
+ */
+export function validatePitScoutingData2026(data: {
+  robot_capabilities: unknown;
+  autonomous_capabilities: unknown;
+}): ValidationResult {
+  const errors: ValidationError[] = [];
+
+  // Validate robot capabilities
+  const robotResult = validateRobotCapabilities2026(data.robot_capabilities);
+  if (!robotResult.valid) {
+    errors.push(
+      ...robotResult.errors.map((e) => ({
+        ...e,
+        field: `robot_capabilities.${e.field}`,
+      }))
+    );
+  }
+
+  // Validate autonomous capabilities
+  const autoResult = validateAutonomousCapabilities2026(data.autonomous_capabilities);
   if (!autoResult.valid) {
     errors.push(
       ...autoResult.errors.map((e) => ({
