@@ -291,13 +291,22 @@ export async function getCurrentUser(
 
 /**
  * Request password reset
+ * Note: This function uses window.location and should only be called client-side
  */
 export async function requestPasswordReset(
   supabase: SupabaseClient,
-  email: string
+  email: string,
+  origin?: string
 ): Promise<{ error: Error | null }> {
+  // Use provided origin or fall back to window.location (client-side only)
+  const redirectOrigin = origin || (typeof window !== 'undefined' ? window.location.origin : '');
+
+  if (!redirectOrigin) {
+    return { error: new Error('Cannot determine redirect URL. This function must be called client-side or with an explicit origin.') };
+  }
+
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/auth/reset-password`,
+    redirectTo: `${redirectOrigin}/auth/reset-password`,
   });
 
   return { error };

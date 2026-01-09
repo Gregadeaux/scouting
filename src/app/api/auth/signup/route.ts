@@ -7,10 +7,18 @@
 
 import { NextRequest } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
-import { signUp, getCurrentUser } from '@/lib/supabase/auth';
+import { signUp } from '@/lib/supabase/auth';
 import { successResponse, errorResponse } from '@/lib/api/auth-middleware';
 import type { SignupFormData } from '@/types/auth';
 import { applyRateLimit, signupRateLimit } from '@/lib/middleware/rate-limit';
+
+/**
+ * Check if an error message indicates a duplicate key violation
+ * This means the database trigger already created the profile - a success case
+ */
+function isDuplicateKeyError(message: string): boolean {
+  return message.includes('duplicate key') || message.includes('already exists');
+}
 
 /**
  * POST /api/auth/signup
@@ -43,14 +51,20 @@ export async function POST(request: NextRequest) {
       return errorResponse('Email and password are required', 400);
     }
 
+    // Sanitize inputs
+    const sanitizedEmail = body.email.trim().toLowerCase();
+    const sanitizedFullName = body.full_name?.trim() || undefined;
+
     const formData: SignupFormData = {
-      email: body.email,
+      email: sanitizedEmail,
       password: body.password,
-      full_name: body.full_name,
+      full_name: sanitizedFullName,
       team_number: body.team_number,
     };
 
     const supabase = await createClient();
+    // Create service client once for use throughout the function
+    const serviceClient = createServiceClient();
 
     // Sign up with Supabase Auth
     // Note: User metadata (full_name, team_number) is stored in auth.users.raw_user_meta_data
@@ -88,20 +102,31 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if profile was created by the trigger
-    // Wait a moment for trigger to complete
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Use retry logic since the trigger runs asynchronously
+    let existingProfile = null;
+    const maxRetries = 5;
+    const retryDelay = 200; // ms between retries
 
-    const { data: existingProfile } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('id', authUser.id)
-      .single();
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', authUser.id)
+        .single();
+
+      if (profile) {
+        existingProfile = profile;
+        console.log(`Profile found on attempt ${attempt}`);
+        break;
+      }
+
+      console.log(`Profile check attempt ${attempt}/${maxRetries}: not found yet`);
+    }
 
     if (!existingProfile) {
-      console.log('Profile not created by trigger, creating atomically with service role client');
-
-      // Use service role client to bypass RLS policies and call atomic function
-      const serviceClient = createServiceClient();
+      console.log('Profile not created by trigger after retries, creating atomically with service role client');
 
       try {
         // Call atomic profile creation function
@@ -120,13 +145,46 @@ export async function POST(request: NextRequest) {
 
         if (rpcError || !result?.success) {
           const errorMessage = rpcError?.message || 'Unknown error during profile creation';
-          console.error('Failed to create user profile atomically:', errorMessage);
 
-          // This is a critical error - rollback the auth user
-          // Note: This is a compensating transaction since Auth and DB are separate services
+          // Check if this is a duplicate key error - means trigger did create the profile
+          // This is actually a success case!
+          if (isDuplicateKeyError(errorMessage)) {
+            console.log('Profile was created by trigger (detected via duplicate key error)');
+            // Profile exists, continue normally
+          } else {
+            console.error('Failed to create user profile atomically:', errorMessage);
+
+            // This is a critical error - rollback the auth user
+            // Note: This is a compensating transaction since Auth and DB are separate services
+            try {
+              await serviceClient.auth.admin.deleteUser(authUser.id);
+              console.log('Rolled back auth user due to atomic profile creation failure');
+            } catch (rollbackError) {
+              console.error('Failed to rollback auth user:', rollbackError);
+            }
+
+            return errorResponse(
+              'Failed to create user profile. Please try again or contact support.',
+              500
+            );
+          }
+        } else {
+          console.log('User profile and team membership created atomically');
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+
+        // Check if this is a duplicate key error - means trigger did create the profile
+        if (isDuplicateKeyError(errorMessage)) {
+          console.log('Profile was created by trigger (detected via exception duplicate key)');
+          // Profile exists, continue normally
+        } else {
+          console.error('Exception during atomic profile creation:', error);
+
+          // Rollback auth user on any exception
           try {
             await serviceClient.auth.admin.deleteUser(authUser.id);
-            console.log('Rolled back auth user due to atomic profile creation failure');
+            console.log('Rolled back auth user due to exception during profile creation');
           } catch (rollbackError) {
             console.error('Failed to rollback auth user:', rollbackError);
           }
@@ -136,49 +194,49 @@ export async function POST(request: NextRequest) {
             500
           );
         }
-
-        console.log('User profile and team membership created atomically');
-      } catch (error) {
-        console.error('Exception during atomic profile creation:', error);
-
-        // Rollback auth user on any exception
-        try {
-          await serviceClient.auth.admin.deleteUser(authUser.id);
-          console.log('Rolled back auth user due to exception during profile creation');
-        } catch (rollbackError) {
-          console.error('Failed to rollback auth user:', rollbackError);
-        }
-
-        return errorResponse(
-          'Failed to create user profile. Please try again or contact support.',
-          500
-        );
       }
     } else {
       console.log('Profile already exists from trigger');
     }
 
-    // Get full user object with profile and permissions
-    const currentUser = await getCurrentUser(supabase);
+    // Get user profile using service client (bypasses RLS since user has no session yet)
+    // The user won't have an active session until they verify their email
+    const { data: userProfile, error: profileError } = await serviceClient
+      .from('user_profiles')
+      .select('*')
+      .eq('id', authUser.id)
+      .single();
 
-    console.log('User profile lookup:', {
-      profileFound: !!currentUser,
+    console.log('User profile lookup with service client:', {
+      profileFound: !!userProfile,
+      profileError: profileError?.message,
       userId: authUser.id
     });
 
-    if (!currentUser) {
+    if (!userProfile || profileError) {
       // Profile should exist now, this shouldn't happen
-      console.error('Profile still not found after manual creation');
+      console.error('Profile still not found after creation:', profileError);
       return errorResponse(
         'Account created but profile setup incomplete. Please contact support.',
         500
       );
     }
 
+    // Construct the user response (simplified since no session yet)
+    const userResponse = {
+      id: authUser.id,
+      email: authUser.email!,
+      full_name: userProfile.full_name,
+      display_name: userProfile.display_name,
+      role: userProfile.role,
+      primary_team_number: userProfile.primary_team_number,
+      created_at: userProfile.created_at,
+    };
+
     // Return the properly structured response with user and session
     return successResponse(
       {
-        user: currentUser,
+        user: userResponse,
         session: null // No session until email is verified
       },
       201
