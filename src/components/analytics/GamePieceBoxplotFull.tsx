@@ -381,7 +381,15 @@ export function GamePieceBoxplotFull({
                     fill="transparent"
                     isAnimationActive={false}
                     shape={(props: unknown) => {
-                      const { x, y, width, height, payload } = props as { x?: number; y?: number; width?: number; height?: number; payload?: typeof boxplotData[0]; value?: number };
+                      const { x, y, width, height, payload, background } = props as {
+                        x?: number;
+                        y?: number;
+                        width?: number;
+                        height?: number;
+                        payload?: typeof boxplotData[0];
+                        value?: number;
+                        background?: { height?: number; y?: number };
+                      };
 
                       if (
                         !payload ||
@@ -394,22 +402,27 @@ export function GamePieceBoxplotFull({
                       const boxWidth = 100;
                       const cx = x + (width || 0) / 2;
 
-                      const medianValue = payload.median;
-                      const medianPixel = y;
+                      // Calculate the chart's Y-axis scale using the background area
+                      // background.height is the full plot area height, background.y is the top
+                      const plotAreaHeight = background?.height || 344; // 384 - margins
+                      const plotAreaTop = background?.y || 10;
 
-                      const pixelsPerUnit =
-                        height !== undefined && height !== 0
-                          ? height / medianValue
-                          : 1;
+                      // Find the max Y value to determine the scale
+                      const yMax = Math.max(
+                        ...boxplotStats.map(s => s.max),
+                        1 // Minimum of 1 to avoid division by zero
+                      );
 
-                      const q1Pixel =
-                        medianPixel + (medianValue - payload.q1) * pixelsPerUnit;
-                      const q3Pixel =
-                        medianPixel + (medianValue - payload.q3) * pixelsPerUnit;
-                      const minPixel =
-                        medianPixel + (medianValue - payload.min) * pixelsPerUnit;
-                      const maxPixel =
-                        medianPixel + (medianValue - payload.max) * pixelsPerUnit;
+                      // Calculate pixels per unit based on actual chart scale
+                      const pixelsPerUnit = plotAreaHeight / yMax;
+                      const baseline = plotAreaTop + plotAreaHeight; // Y=0 position in pixels
+
+                      // Calculate pixel positions from the baseline (Y=0)
+                      const medianPixel = baseline - payload.median * pixelsPerUnit;
+                      const q1Pixel = baseline - payload.q1 * pixelsPerUnit;
+                      const q3Pixel = baseline - payload.q3 * pixelsPerUnit;
+                      const minPixel = baseline - payload.min * pixelsPerUnit;
+                      const maxPixel = baseline - payload.max * pixelsPerUnit;
 
                       // Use team color from payload (default to green if not specified)
                       const boxColor = payload.fill || '#10b981';
