@@ -579,7 +579,9 @@ export interface ScoutingSubmission {
 // This allows importing everything with: import * as ScoutingTypes from '@/types'
 export type * from './season-2025';
 export type * from './season-2026';
+export type * from './season-config';
 export type * from './auth';
 export type * from './team-detail';
 export type * from './scouter';
 export type * from './validation';
+export { getSeasonStatus } from './season-config';

@@ -27,6 +27,9 @@ export * from './statistics.repository';
 // Scouter Repository
 export * from './scouter.repository';
 
+// Season Config Repository
+export * from './season-config.repository';
+
 // Re-export for convenience
 export {
   createImportJobRepository,
@@ -70,3 +73,9 @@ export {
   ScouterRepository,
   type IScouterRepository,
 } from './scouter.repository';
+
+export {
+  createSeasonConfigRepository,
+  SeasonConfigRepository,
+  type ISeasonConfigRepository,
+} from './season-config.repository';
