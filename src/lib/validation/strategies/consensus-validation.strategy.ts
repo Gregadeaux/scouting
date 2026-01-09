@@ -102,7 +102,7 @@ export class ConsensusValidationStrategy implements IValidationStrategy {
    * @returns Array of field-level validation results
    */
   async validate(context: ValidationContext): Promise<ValidationResult[]> {
-    const { matchKey, teamNumber, eventKey, seasonYear, executionId } = context;
+    const { matchKey, teamNumber, eventKey, seasonYear } = context;
 
     // Validate required fields
     if (!matchKey) {

@@ -53,9 +53,9 @@ export async function calculateDPR(
   // 1. Filter completed matches (must have scores)
   const completedMatches = matches.filter(
     m => m.red_score !== null &&
-        m.red_score !== undefined &&
-        m.blue_score !== null &&
-        m.blue_score !== undefined
+      m.red_score !== undefined &&
+      m.blue_score !== null &&
+      m.blue_score !== undefined
   );
 
   if (completedMatches.length < 3) {
@@ -84,7 +84,7 @@ export async function calculateDPR(
 
     // Solve linear system
     dprValues = math.lusolve(ATA, ATb) as math.Matrix;
-  } catch (error) {
+  } catch {
     // Handle singular matrix (use pseudo-inverse)
     warnings.push('Matrix was singular, using pseudo-inverse. Results may be less accurate.');
     const result = handleSingularMatrix(A, b, teams, eventKey, completedMatches);

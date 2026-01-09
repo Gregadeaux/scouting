@@ -76,7 +76,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Download, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TeamScoutingAggregates } from './TeamScoutingAggregates';

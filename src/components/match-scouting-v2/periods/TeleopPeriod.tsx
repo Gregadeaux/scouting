@@ -15,7 +15,7 @@ export function TeleopPeriod() {
   // Approximate field coordinates (will be refined later)
   const centerX = 877;
   const centerY = 450;
-  const leftX = 250;
+
   const rightX = 1505;
   const topY = 150;
 
@@ -61,7 +61,7 @@ export function TeleopPeriod() {
             <ClickableRegion
               key={level}
               shape="rect"
-              coords={{ x: centerX - 175, y: y-100, width: 300, height: 125 }}
+              coords={{ x: centerX - 175, y: y - 100, width: 300, height: 125 }}
               onClick={() => increment('teleop', field)}
               onLongPress={() => decrement('teleop', field)}
               label={level}
@@ -74,7 +74,7 @@ export function TeleopPeriod() {
           {/* Right Side - Barge (Algae) */}
           <ClickableRegion
             shape="rect"
-            coords={{ x: rightX - 195, y: topY-240, width: 150, height: 450 }}
+            coords={{ x: rightX - 195, y: topY - 240, width: 150, height: 450 }}
             onClick={() => increment('teleop', 'algae_scored_barge')}
             onLongPress={() => decrement('teleop', 'algae_scored_barge')}
             label="Barge"

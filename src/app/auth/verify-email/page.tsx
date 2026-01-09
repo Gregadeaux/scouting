@@ -6,7 +6,7 @@
  */
 
 import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase/client';

@@ -6,9 +6,9 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Minus } from 'lucide-react';
 import type { TeamScoutingAggregates } from '@/types/admin';
 
 interface TeamScoutingAggregatesProps {
@@ -48,8 +48,8 @@ function getQualityColor(quality: string): 'default' | 'success' | 'warning' | '
 
 export function TeamScoutingAggregates({
   aggregates,
-  teamNumber,
-  eventKey,
+  teamNumber: _teamNumber,
+  eventKey: _eventKey,
 }: TeamScoutingAggregatesProps) {
   // For trend calculation, we would need access to individual match data
   // For now, we'll show a neutral trend (this could be enhanced later)

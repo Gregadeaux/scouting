@@ -15,7 +15,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type {
   PickList,
-  PickListTeam,
+
   PickListStrategy,
   PickListWeights,
   PickListOptions,
@@ -195,7 +195,7 @@ export class PickListService implements IPickListService {
 
     // Set default options
     const minMatches = options.minMatches ?? 5;
-    const includePicked = options.includePicked ?? false;
+    const _includePicked = options.includePicked ?? true;
 
     // Fetch event info
     const { data: event, error: eventError } = await this.client
@@ -214,7 +214,7 @@ export class PickListService implements IPickListService {
     if (rawTeams.length === 0) {
       throw new Error(
         `No team statistics found for event ${eventKey}. ` +
-          `Have you calculated OPR/DPR/CCWM for this event?`
+        `Have you calculated OPR/DPR/CCWM for this event?`
       );
     }
 
@@ -233,7 +233,7 @@ export class PickListService implements IPickListService {
 
     // Count teams filtered out
     const totalTeams = rawTeams.length;
-    const teamsBeforeFilter = rawTeams.length;
+    const _teamsBeforeFilter = rawTeams.length;
     const teamsFiltered = rawTeams.filter(t => t.matchesPlayed < minMatches).length;
 
     // Generate rankings
@@ -242,7 +242,7 @@ export class PickListService implements IPickListService {
     if (rankedTeams.length === 0) {
       warnings.push(
         `No teams met the minimum matches criteria (${minMatches} matches). ` +
-          `Consider lowering the threshold.`
+        `Consider lowering the threshold.`
       );
     }
 

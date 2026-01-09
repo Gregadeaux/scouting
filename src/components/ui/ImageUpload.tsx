@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
-import { Button } from './Button';
 
 interface ImageUploadProps {
   value: string[]; // Array of image URLs
@@ -51,17 +50,6 @@ export function ImageUpload({
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const validateFile = (file: File): string | null => {
-    if (!file.type.startsWith('image/')) {
-      return 'File must be an image';
-    }
-    if (file.size > maxSizeBytes) {
-      const maxMB = (maxSizeBytes / (1024 * 1024)).toFixed(1);
-      return `File size must be less than ${maxMB}MB`;
-    }
-    return null;
-  };
-
   const handleUpload = useCallback(
     async (files: FileList | null) => {
       if (!files || files.length === 0) return;
@@ -75,9 +63,15 @@ export function ImageUpload({
       }
 
       const file = files[0]; // Handle one file at a time
-      const validationError = validateFile(file);
-      if (validationError) {
-        setError(validationError);
+
+      // Validate file
+      if (!file.type.startsWith('image/')) {
+        setError('File must be an image');
+        return;
+      }
+      if (file.size > maxSizeBytes) {
+        const maxMB = (maxSizeBytes / (1024 * 1024)).toFixed(1);
+        setError(`File size must be less than ${maxMB}MB`);
         return;
       }
 
@@ -156,11 +150,10 @@ export function ImageUpload({
       {/* Upload Area */}
       {canAddMore && (
         <div
-          className={`relative mb-4 rounded-lg border-2 border-dashed p-6 transition-colors ${
-            dragActive
-              ? 'border-frc-blue bg-blue-50 dark:bg-blue-950'
-              : 'border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800'
-          } ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-frc-blue'}`}
+          className={`relative mb-4 rounded-lg border-2 border-dashed p-6 transition-colors ${dragActive
+            ? 'border-frc-blue bg-blue-50 dark:bg-blue-950'
+            : 'border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800'
+            } ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-frc-blue'}`}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}

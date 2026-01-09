@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -58,7 +58,7 @@ export function TBAImportButton({ eventKey, onImportComplete }: TBAImportButtonP
           variant: 'destructive',
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Network error starting import',

@@ -37,7 +37,7 @@ const TEAM_COLORS = [
   '#ef4444', // red
 ];
 
-export function TeamComparison({ eventKey, teamNumbers, teamStats, allEventStats }: TeamComparisonProps) {
+export function TeamComparison({ eventKey: _eventKey, teamNumbers, teamStats, allEventStats }: TeamComparisonProps) {
   if (teamNumbers.length === 0) return null;
 
   // Find max values for normalization across ALL teams at the event (not just selected)

@@ -7,7 +7,7 @@
 
 import type {
   Event,
-  Team,
+
   MatchSchedule,
   MatchScouting,
 } from '@/types';
@@ -113,7 +113,7 @@ export class EventService implements IEventService {
     private readonly scoutingDataRepo: IScoutingDataRepository,
     private readonly importJobRepo: IImportJobRepository,
     private readonly eventMergeStrategy: EventMergeStrategy
-  ) {}
+  ) { }
 
   /**
    * List events with pagination, filtering, and sorting
@@ -590,18 +590,18 @@ export class EventService implements IEventService {
       last_pit_scouted: lastPitScouted,
       active_import_job: activeJob
         ? {
-            job_id: activeJob.job_id,
-            job_type: activeJob.job_type,
-            status: activeJob.status,
-            progress_percent: activeJob.progress_percent,
-          }
+          job_id: activeJob.job_id,
+          job_type: activeJob.job_type,
+          status: activeJob.status,
+          progress_percent: activeJob.progress_percent,
+        }
         : undefined,
       last_successful_import: lastSuccessfulImport
         ? {
-            job_id: lastSuccessfulImport.job_id,
-            completed_at: lastSuccessfulImport.completed_at!,
-            items_imported: lastSuccessfulImport.processed_items,
-          }
+          job_id: lastSuccessfulImport.job_id,
+          completed_at: lastSuccessfulImport.completed_at!,
+          items_imported: lastSuccessfulImport.processed_items,
+        }
         : undefined,
     };
   }

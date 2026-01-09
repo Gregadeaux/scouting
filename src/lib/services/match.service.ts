@@ -113,7 +113,7 @@ export class MatchService implements IMatchService {
     private readonly matchRepo: IMatchRepository,
     private readonly teamRepo: ITeamRepository,
     private readonly scoutingDataRepo: IScoutingDataRepository
-  ) {}
+  ) { }
 
   /**
    * Get matches with filters
@@ -198,7 +198,7 @@ export class MatchService implements IMatchService {
     matchKey: string,
     redScore: number,
     blueScore: number,
-    winningAlliance?: 'red' | 'blue' | 'tie'
+    _winningAlliance?: 'red' | 'blue' | 'tie'
   ): Promise<MatchSchedule> {
     // Repository calculates winning alliance automatically
     await this.matchRepo.updateScores(matchKey, redScore, blueScore);

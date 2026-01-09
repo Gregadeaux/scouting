@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/Card';
 import { StatusBadge } from '@/components/admin/StatusBadge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Select } from '@/components/ui/Select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { TeamScoutingHistory } from '@/components/admin/teams/TeamScoutingHistory';
 import { ArrowLeft, Calendar, Users, Shield, CheckCircle, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
@@ -403,15 +403,19 @@ export default function TeamDetailClient({ team, events, scouters }: TeamDetailC
             {years.length > 0 && (
               <Select
                 value={selectedYear?.toString()}
-                onChange={(e) => setSelectedYear(Number(e.target.value))}
-                options={years.map(year => ({
-                  value: year,
-                  label: year.toString()
-                }))}
-                placeholder="Select Year"
-                size="sm"
-                className="w-32"
-              />
+                onValueChange={(value) => setSelectedYear(Number(value))}
+              >
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Select Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((year) => (
+                    <SelectItem key={year} value={year.toString()}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             )}
           </div>
 

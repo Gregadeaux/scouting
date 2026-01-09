@@ -8,7 +8,7 @@ import type {
   UserProfile,
   UserRole,
   AuthenticatedUser,
-  ROLE_PERMISSIONS,
+
   RolePermissions,
   TeamMembership,
   CreateUserProfileData,

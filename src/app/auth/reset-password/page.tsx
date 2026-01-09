@@ -6,8 +6,8 @@
  */
 
 import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
@@ -168,25 +168,29 @@ export default function ResetPasswordPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="New Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter new password"
-            required
-            autoFocus
-            helpText="At least 8 characters with uppercase, lowercase, and numbers"
-          />
+          <div className="space-y-2">
+            <label className="text-sm font-medium">New Password</label>
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter new password"
+              required
+              autoFocus
+            />
+            <p className="text-xs text-muted-foreground">At least 8 characters with uppercase, lowercase, and numbers</p>
+          </div>
 
-          <Input
-            label="Confirm New Password"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Re-enter new password"
-            required
-          />
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Confirm New Password</label>
+            <Input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Re-enter new password"
+              required
+            />
+          </div>
 
           <Button type="submit" variant="primary" className="w-full" disabled={loading}>
             {loading ? 'Updating...' : 'Update Password'}

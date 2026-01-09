@@ -3,8 +3,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { ScouterLeaderboard } from '@/components/admin/ScouterLeaderboard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Select } from '@/components/ui/Select';
-import { Button } from '@/components/ui/Button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/admin/Toast';
 import { RefreshCw } from 'lucide-react';
 import type { ScouterLeaderboard as LeaderboardType } from '@/types/validation';
@@ -92,7 +92,7 @@ export default function LeaderboardPage() {
 
   // Event options for dropdown
   const eventOptions = [
-    { value: '', label: 'All Events (Season)' },
+    { value: 'all', label: 'All Events (Season)' },
     ...events.map((event) => ({
       value: event.event_key,
       label: event.event_name,
@@ -135,12 +135,22 @@ export default function LeaderboardPage() {
               </label>
               <Select
                 value={selectedYear.toString()}
-                onChange={(e) => {
-                  setSelectedYear(parseInt(e.target.value));
+                onValueChange={(value) => {
+                  setSelectedYear(parseInt(value));
                   setSelectedEvent(null); // Reset event when year changes
                 }}
-                options={yearOptions}
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {yearOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Event Filter */}
@@ -149,11 +159,21 @@ export default function LeaderboardPage() {
                 Event
               </label>
               <Select
-                value={selectedEvent || ''}
-                onChange={(e) => setSelectedEvent(e.target.value || null)}
-                options={eventOptions}
+                value={selectedEvent || 'all'}
+                onValueChange={(value) => setSelectedEvent(value === 'all' ? null : value)}
                 disabled={eventsLoading}
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Events (Season)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {eventOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardContent>

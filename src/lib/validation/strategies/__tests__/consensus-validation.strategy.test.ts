@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Unit tests for ConsensusValidationStrategy
  *
@@ -12,7 +13,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ConsensusValidationStrategy } from '../consensus-validation.strategy';
 import { ScoutingDataRepository } from '@/lib/repositories/scouting-data.repository';
 import { ELORatingCalculator } from '@/lib/algorithms/elo-calculator';
-import type { ValidationContext, ValidationResult } from '@/types/validation';
+import type { ValidationContext, } from '@/types/validation';
 import type { MatchScouting } from '@/types';
 
 // Mock the repository

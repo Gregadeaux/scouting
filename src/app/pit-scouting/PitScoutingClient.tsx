@@ -23,7 +23,7 @@ import { PhysicalSpecsSection } from '@/components/pit-scouting/PhysicalSpecsSec
 import { ImageUploadSection } from '@/components/pit-scouting/ImageUploadSection';
 
 // UI
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   userId: string;

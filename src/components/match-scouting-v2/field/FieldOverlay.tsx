@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
+import Image from 'next/image';
 
 // ============================================================================
 // Types
@@ -35,10 +36,11 @@ export function FieldOverlay({
     <div className={`relative w-full h-full ${className}`}>
       {/* Background image (optional) */}
       {backgroundImage && (
-        <img
+        <Image
           src={backgroundImage}
           alt="Field layout"
-          className="absolute inset-0 w-full h-full object-contain"
+          fill
+          className="object-contain"
           style={{ opacity: backgroundOpacity }}
           draggable={false}
         />

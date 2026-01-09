@@ -6,10 +6,10 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { FileText } from 'lucide-react';
 
 interface Match {
@@ -44,11 +44,7 @@ export function MatchList({ eventKey }: MatchListProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchMatches();
-  }, [eventKey]);
-
-  const fetchMatches = async () => {
+  const fetchMatches = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -67,7 +63,11 @@ export function MatchList({ eventKey }: MatchListProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [eventKey]);
+
+  useEffect(() => {
+    fetchMatches();
+  }, [eventKey, fetchMatches]);
 
   if (isLoading) {
     return (

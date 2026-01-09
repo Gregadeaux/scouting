@@ -2,15 +2,23 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { DataTable } from '@/components/admin/DataTable';
 import { StatusBadge } from '@/components/admin/StatusBadge';
-import { SearchBar } from '@/components/admin/SearchBar';
 import { LoadingSpinner } from '@/components/admin/LoadingSpinner';
 import { useToast } from '@/components/admin/Toast';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EditUserModal } from '@/components/admin/EditUserModal';
 import { fetchWithCsrf } from '@/hooks/useCsrfToken';
+import { Search, Plus, MoreHorizontal, Shield, ShieldAlert, ShieldCheck, Mail, Trash2, Edit } from 'lucide-react';
 import type { UserProfile, UserRole } from '@/types/auth';
 
 interface UserWithTeam extends UserProfile {
@@ -60,8 +68,8 @@ export function UsersTableClient({
   const [users, setUsers] = useState<UserWithTeam[]>(initialUsers);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRole, setSelectedRole] = useState<string>('');
-  const [selectedTeam, setSelectedTeam] = useState<string>('');
+  const [selectedRole, setSelectedRole] = useState<string>('all');
+  const [selectedTeam, setSelectedTeam] = useState<string>('all');
   const [page, setPage] = useState(initialPagination.page);
   const [limit, setLimit] = useState(initialPagination.limit);
   const [total, setTotal] = useState(initialPagination.total);
@@ -73,9 +81,7 @@ export function UsersTableClient({
   const [updating, setUpdating] = useState(false);
 
   // Fetch users
-  // Note: No need to check isAdmin here - the server layout already enforced this
   const fetchUsers = useCallback(async () => {
-
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -84,8 +90,8 @@ export function UsersTableClient({
       });
 
       if (searchTerm) params.append('search', searchTerm);
-      if (selectedRole) params.append('role', selectedRole);
-      if (selectedTeam) params.append('team_number', selectedTeam);
+      if (selectedRole && selectedRole !== 'all') params.append('role', selectedRole);
+      if (selectedTeam && selectedTeam !== 'all') params.append('team_number', selectedTeam);
 
       const response = await fetch(`/api/admin/users?${params}`);
 
@@ -96,10 +102,8 @@ export function UsersTableClient({
       const responseData = await response.json();
       const data: UsersResponse = responseData.data;
 
-      // Filter out any null/undefined users
       setUsers((data.users || []).filter(Boolean));
 
-      // Safely set pagination data with defaults
       if (data.pagination) {
         setPage(data.pagination.page || 1);
         setLimit(data.pagination.limit || 20);
@@ -132,7 +136,7 @@ export function UsersTableClient({
       }
 
       showToast('success', 'User updated successfully');
-      fetchUsers(); // Refresh the list
+      fetchUsers();
       setEditingUser(null);
     } catch (error) {
       console.error('Error updating user:', error);
@@ -155,7 +159,7 @@ export function UsersTableClient({
       }
 
       showToast('success', 'User deleted successfully');
-      fetchUsers(); // Refresh the list
+      fetchUsers();
       setDeleteUser(null);
     } catch (error) {
       console.error('Error deleting user:', error);
@@ -165,7 +169,10 @@ export function UsersTableClient({
 
   // Effects
   useEffect(() => {
-    fetchUsers();
+    const timer = setTimeout(() => {
+      fetchUsers();
+    }, 300); // Debounce search
+    return () => clearTimeout(timer);
   }, [fetchUsers]);
 
   // Columns configuration
@@ -181,7 +188,7 @@ export function UsersTableClient({
               {user.email || '-'}
             </div>
             {user.full_name && (
-              <div className="text-sm text-gray-500 dark:text-gray-400">{user.full_name}</div>
+              <div className="text-sm text-muted-foreground">{user.full_name}</div>
             )}
           </div>
         );
@@ -193,14 +200,14 @@ export function UsersTableClient({
       render: (_value: unknown, user: UserWithTeam) => {
         if (!user || !user.role) return '-';
         const roleColors: Record<UserRole, string> = {
-          admin: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-          mentor: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-          scouter: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+          admin: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200',
+          mentor: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200',
+          scouter: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200',
         };
         const colorClass = roleColors[user.role] || roleColors.scouter;
         return (
           <span
-            className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${colorClass}`}
+            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${colorClass}`}
           >
             {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
           </span>
@@ -218,13 +225,11 @@ export function UsersTableClient({
           return (
             <div>
               <div className="font-medium text-gray-900 dark:text-gray-100">
-                {user.team.team_number} - {user.team.team_name}
+                {user.team.team_number}
               </div>
-              {user.team.team_nickname && (
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  {user.team.team_nickname}
-                </div>
-              )}
+              <div className="text-sm text-muted-foreground truncate max-w-[150px]">
+                {user.team.team_nickname || user.team.team_name}
+              </div>
             </div>
           );
         }
@@ -258,12 +263,24 @@ export function UsersTableClient({
         const isCurrentUser = currentUser?.profile.email === user.email;
         return (
           <div className="flex gap-2">
-            <Button size="sm" variant="secondary" onClick={() => setEditingUser(user)}>
-              Edit
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setEditingUser(user)}
+              className="h-8 w-8 p-0"
+            >
+              <Edit className="h-4 w-4" />
+              <span className="sr-only">Edit</span>
             </Button>
             {!isCurrentUser && (
-              <Button size="sm" variant="danger" onClick={() => setDeleteUser(user)}>
-                Delete
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setDeleteUser(user)}
+                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span className="sr-only">Delete</span>
               </Button>
             )}
           </div>
@@ -272,39 +289,51 @@ export function UsersTableClient({
     },
   ];
 
-  // No client-side auth check needed - the server layout already verified admin access
-  // If user reached this component, they are authenticated and have admin role
   return (
     <>
       <div className="space-y-6">
         {/* Filters */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <SearchBar placeholder="Search by email or name..." onSearch={setSearchTerm} />
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by email or name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9"
+            />
+          </div>
 
-          <div className="flex gap-2">
-            <select
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700"
-              value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value)}
-            >
-              <option value="">All Roles</option>
-              <option value="admin">Admin</option>
-              <option value="mentor">Mentor</option>
-              <option value="scouter">Scouter</option>
-            </select>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="w-full sm:w-[150px]">
+              <Select value={selectedRole} onValueChange={setSelectedRole}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Roles" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Roles</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="mentor">Mentor</SelectItem>
+                  <SelectItem value="scouter">Scouter</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            <select
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700"
-              value={selectedTeam}
-              onChange={(e) => setSelectedTeam(e.target.value)}
-            >
-              <option value="">All Teams</option>
-              {teams.map((team) => (
-                <option key={team.team_number} value={team.team_number.toString()}>
-                  {team.team_number} - {team.team_name}
-                </option>
-              ))}
-            </select>
+            <div className="w-full sm:w-[200px]">
+              <Select value={selectedTeam} onValueChange={setSelectedTeam}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Teams" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Teams</SelectItem>
+                  {teams.map((team) => (
+                    <SelectItem key={team.team_number} value={team.team_number.toString()}>
+                      {team.team_number} - {team.team_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 
@@ -314,15 +343,17 @@ export function UsersTableClient({
             <LoadingSpinner size="lg" />
           </div>
         ) : (
-          <DataTable
-            columns={columns}
-            data={users}
-            pagination={{
-              page,
-              totalPages,
-              onPageChange: setPage,
-            }}
-          />
+          <div className="rounded-md border">
+            <DataTable
+              columns={columns}
+              data={users}
+              pagination={{
+                page,
+                totalPages,
+                onPageChange: setPage,
+              }}
+            />
+          </div>
         )}
       </div>
 

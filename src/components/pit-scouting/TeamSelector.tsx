@@ -1,7 +1,7 @@
 'use client';
 
 import { useEventTeams } from '@/hooks/useEventTeams';
-import { Select } from '@/components/ui/Select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Team } from '@/types';
 
 interface TeamSelectorProps {
@@ -78,10 +78,8 @@ export function TeamSelector({
   }
 
   // Handle change event
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const teamNumberStr = e.target.value;
-
-    if (teamNumberStr === '') {
+  const handleChange = (teamNumberStr: string) => {
+    if (teamNumberStr === '' || teamNumberStr === '__placeholder__') {
       onChange(null, null);
     } else {
       const teamNumber = parseInt(teamNumberStr, 10);
@@ -90,25 +88,30 @@ export function TeamSelector({
     }
   };
 
-  // Build options array for Select component
-  const options = (teams || []).map((team) => ({
-    value: team.team_number,
-    label: `${team.team_number} - ${team.team_nickname || team.team_name}`,
-  }));
-
-  // Sort teams by team number
-  options.sort((a, b) => (a.value as number) - (b.value as number));
+  // Build sorted list of teams
+  const sortedTeams = [...(teams || [])].sort((a, b) => a.team_number - b.team_number);
 
   return (
     <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        Select Team
+      </label>
       <Select
-        label="Select Team"
         value={value?.toString() || ''}
-        onChange={handleChange}
-        options={options}
-        placeholder="-- Select a team --"
+        onValueChange={handleChange}
         disabled={disabled || isLoading}
-      />
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="-- Select a team --" />
+        </SelectTrigger>
+        <SelectContent>
+          {sortedTeams.map((team) => (
+            <SelectItem key={team.team_number} value={team.team_number.toString()}>
+              {team.team_number} - {team.team_nickname || team.team_name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
       {/* Loading state */}
       {isLoading && (

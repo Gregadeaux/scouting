@@ -8,7 +8,7 @@ import { createServiceClient } from '@/lib/supabase/server';
 import type { Event } from '@/types';
 import {
   RepositoryError,
-  EntityNotFoundError,
+
   DatabaseOperationError,
 } from './base.repository';
 

@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getCurrentUser, getUserProfile, canAccessTeam as checkCanAccessTeam } from '@/lib/supabase/auth';
+import { getCurrentUser, canAccessTeam as checkCanAccessTeam } from '@/lib/supabase/auth';
 import type { AuthenticatedUser, UserRole } from '@/types/auth';
 
 // ============================================================================
@@ -30,7 +30,7 @@ export interface AuthenticatedRequest extends NextRequest {
  * Get authenticated user from request
  */
 export async function getAuthenticatedUser(
-  request: NextRequest
+  _request: NextRequest
 ): Promise<AuthenticatedUser | null> {
   try {
     const supabase = await createClient();
@@ -224,7 +224,7 @@ export async function validateRequestBody<T>(
     }
 
     return { data: validatedData };
-  } catch (error) {
+  } catch {
     return errorResponse('Invalid JSON in request body', 400);
   }
 }

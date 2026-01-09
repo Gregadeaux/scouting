@@ -7,8 +7,7 @@ import type { ISubmissionRepository } from '@/core/offline/ports/submission-repo
 import {
   Submission,
   DatabaseError,
-  isPending,
-  isSuccess
+
 } from '@/core/offline/domain';
 import { ResultHelpers } from '@/core/offline/domain';
 import type { Result, SubmissionId, SerializedSubmission, SubmissionFilter } from '@/core/offline/domain/types';
@@ -20,7 +19,7 @@ import { IndexedDBManager } from './database';
 export class IndexedDBSubmissionRepository implements ISubmissionRepository {
   private readonly storeName = 'submissions';
 
-  constructor(private readonly dbManager: IndexedDBManager) {}
+  constructor(private readonly dbManager: IndexedDBManager) { }
 
   /**
    * Saves a submission to IndexedDB

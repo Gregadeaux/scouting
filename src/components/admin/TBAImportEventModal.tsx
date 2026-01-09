@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Download, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -59,7 +59,7 @@ export function TBAImportEventModal({ onSuccess }: TBAImportEventModalProps) {
       } else {
         setError(data.error || 'Failed to import event');
       }
-    } catch (err: unknown) {
+    } catch {
       setError('Network error. Please try again.');
     } finally {
       setIsLoading(false);

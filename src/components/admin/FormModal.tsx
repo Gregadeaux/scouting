@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { Button } from '../ui/Button';
+import { X } from 'lucide-react';
 
 interface FormModalProps {
   isOpen: boolean;

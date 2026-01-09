@@ -9,7 +9,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TBAValidationStrategy } from '../tba-validation.strategy';
 import type {
   ValidationContext,
-  ValidationResult,
+
 } from '@/types/validation';
 import type { TBAMatch } from '@/types/tba';
 import type { MatchScouting, MatchSchedule } from '@/types';

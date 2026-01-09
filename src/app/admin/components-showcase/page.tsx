@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/admin/DataTable';
 import { SearchBar } from '@/components/admin/SearchBar';
 import { StatusBadge } from '@/components/admin/StatusBadge';
@@ -84,7 +84,7 @@ export default function ComponentShowcase() {
             <Button variant="primary" size="sm">
               Primary Small
             </Button>
-            <Button variant="primary" size="md">
+            <Button variant="primary" size="default">
               Primary Medium
             </Button>
             <Button variant="primary" size="lg">
@@ -189,11 +189,27 @@ export default function ComponentShowcase() {
           <CardTitle>Input Fields</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Input label="Text Input" placeholder="Enter text..." />
-          <Input label="With Error" error="This field is required" />
-          <Input type="email" label="Email" placeholder="email@example.com" />
-          <Input type="number" label="Number" placeholder="123" />
-          <Input type="date" label="Date" />
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Text Input</label>
+            <Input placeholder="Enter text..." />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">With Error</label>
+            <Input className="border-red-500" />
+            <p className="text-sm text-red-500">This field is required</p>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Email</label>
+            <Input type="email" placeholder="email@example.com" />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Number</label>
+            <Input type="number" placeholder="123" />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Date</label>
+            <Input type="date" />
+          </div>
         </CardContent>
       </Card>
 
@@ -257,7 +273,10 @@ export default function ComponentShowcase() {
           >
             <div className="space-y-4">
               <p>This is an example modal content.</p>
-              <Input label="Sample Field" placeholder="Enter something..." />
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Sample Field</label>
+                <Input placeholder="Enter something..." />
+              </div>
               <div className="flex justify-end gap-3">
                 <Button variant="secondary" onClick={() => setModalOpen(false)}>
                   Cancel

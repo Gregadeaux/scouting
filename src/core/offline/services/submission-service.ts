@@ -26,12 +26,11 @@ import type {
 import type { SubmissionData } from '../domain/submission';
 import { Submission } from '../domain/submission';
 import type { SubmissionId, Result } from '../domain/types';
-import { Result as ResultHelpers, Priority } from '../domain/types';
-import type { SyncStatus } from '../domain/sync-status';
+import { Result as ResultHelpers } from '../domain/types';
+
 import { isPending, isSyncing, isSuccess, isFailed } from '../domain/sync-status';
 import {
   type OfflineError,
-  isRecoverableError,
   toOfflineError,
   ItemNotFoundError,
 } from '../domain/errors';

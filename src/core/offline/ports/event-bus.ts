@@ -8,8 +8,6 @@
  * without tight coupling to the event publishers.
  */
 
-import type { SubmissionId } from '../domain/types';
-
 /**
  * Base interface for all domain events
  */

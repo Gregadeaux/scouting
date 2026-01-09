@@ -1,6 +1,6 @@
 'use client';
 
-import { Select } from '@/components/ui/Select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { MatchSchedule } from '@/types';
 
 interface MatchTeamSelectorProps {
@@ -81,10 +81,8 @@ export function MatchTeamSelector({
   if (match.blue_3) teams.push({ teamNumber: match.blue_3, allianceColor: 'blue', position: 3, label: `🔵 Blue 3: Team ${match.blue_3}` });
 
   // Handle change event
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const teamNumberStr = e.target.value;
-
-    if (teamNumberStr === '') {
+  const handleChange = (teamNumberStr: string) => {
+    if (teamNumberStr === '' || teamNumberStr === '__placeholder__') {
       onChange(null, null, null);
     } else {
       const teamNumber = parseInt(teamNumberStr, 10);
@@ -97,12 +95,6 @@ export function MatchTeamSelector({
       }
     }
   };
-
-  // Build options array for Select component
-  const options = teams.map((team) => ({
-    value: team.teamNumber,
-    label: team.label,
-  }));
 
   // Handle case where match has no teams assigned
   if (teams.length === 0) {
@@ -125,14 +117,25 @@ export function MatchTeamSelector({
 
   return (
     <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        Select Team to Scout
+      </label>
       <Select
-        label="Select Team to Scout"
         value={value?.toString() || ''}
-        onChange={handleChange}
-        options={options}
-        placeholder="-- Select a team --"
+        onValueChange={handleChange}
         disabled={disabled}
-      />
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="-- Select a team --" />
+        </SelectTrigger>
+        <SelectContent>
+          {teams.map((team) => (
+            <SelectItem key={team.teamNumber} value={team.teamNumber.toString()}>
+              {team.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
       {/* Success state with team count */}
       <p className="text-xs text-gray-400 dark:text-gray-500">

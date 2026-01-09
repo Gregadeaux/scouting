@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { X } from 'lucide-react';
 import { TeamCard } from './TeamCard';
 import { SortSelector, type SortMetric, type SortDirection } from './SortSelector';
@@ -32,7 +32,7 @@ export function PickListColumn({
   sortMetric,
   sortDirection,
   onSortChange,
-  columnIndex,
+  columnIndex: _columnIndex,
 }: PickListColumnProps) {
   // Sort teams by selected metric
   const sortedTeams = useMemo(() => {

@@ -14,7 +14,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/Card';
 import { Printer, ArrowLeft, Download } from 'lucide-react';
 import { TeamRadarProfile } from '@/components/analytics/TeamRadarProfile';

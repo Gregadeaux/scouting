@@ -28,10 +28,10 @@ import { TeleopPerformanceSection } from './TeleopPerformanceSection';
 import { EndgamePerformanceSection } from './EndgamePerformanceSection';
 
 // UI Components
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { FormSection } from '@/components/ui/FormSection';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface MatchScoutingFormProps {
   /**
@@ -127,7 +127,7 @@ export function MatchScoutingForm({
 
   // Selection state
   const [selectedEventKey, setSelectedEventKey] = useState<string | null>(null);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [_selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [selectedMatchKey, setSelectedMatchKey] = useState<string | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<MatchSchedule | null>(null);
   const [selectedTeamNumber, setSelectedTeamNumber] = useState<number | null>(null);
@@ -321,11 +321,10 @@ export function MatchScoutingForm({
 
       {/* Success/Error Messages */}
       {successMessage && (
-        <div className={`mb-6 rounded-lg border p-4 ${
-          isQueued
+        <div className={`mb-6 rounded-lg border p-4 ${isQueued
             ? 'border-blue-200 bg-blue-50 text-blue-800'
             : 'border-green-200 bg-green-50 text-green-800'
-        }`}>
+          }`}>
           {successMessage}
         </div>
       )}
@@ -403,21 +402,25 @@ export function MatchScoutingForm({
           >
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {/* Fouls */}
-              <Input
-                label="Fouls"
-                type="number"
-                min={0}
-                {...register('fouls')}
-                helpText="Number of regular fouls committed"
-              />
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Fouls</label>
+                <Input
+                  type="number"
+                  min={0}
+                  {...register('fouls')}
+                />
+                <p className="text-xs text-muted-foreground">Number of regular fouls committed</p>
+              </div>
 
-              <Input
-                label="Technical Fouls"
-                type="number"
-                min={0}
-                {...register('tech_fouls')}
-                helpText="Number of technical fouls committed"
-              />
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Technical Fouls</label>
+                <Input
+                  type="number"
+                  min={0}
+                  {...register('tech_fouls')}
+                />
+                <p className="text-xs text-muted-foreground">Number of technical fouls committed</p>
+              </div>
 
               {/* Cards and Disconnections */}
               <div className="flex items-center gap-3">
@@ -469,29 +472,55 @@ export function MatchScoutingForm({
               </div>
 
               {/* Ratings */}
-              <Select
-                label="Overall Performance Rating"
-                {...register('overall_rating')}
-                options={[
-                  { value: 1, label: '1 - Poor' },
-                  { value: 2, label: '2 - Below Average' },
-                  { value: 3, label: '3 - Average' },
-                  { value: 4, label: '4 - Good' },
-                  { value: 5, label: '5 - Excellent' },
-                ]}
-              />
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Overall Performance Rating</label>
+                <Select
+                  value={String(getValues('overall_rating'))}
+                  onValueChange={(value) => {
+                    const numValue = parseInt(value, 10);
+                    resetOverallForm({
+                      ...getValues(),
+                      overall_rating: numValue,
+                    });
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select rating" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 - Poor</SelectItem>
+                    <SelectItem value="2">2 - Below Average</SelectItem>
+                    <SelectItem value="3">3 - Average</SelectItem>
+                    <SelectItem value="4">4 - Good</SelectItem>
+                    <SelectItem value="5">5 - Excellent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-              <Select
-                label="Driver Skill Rating"
-                {...register('driver_skill_rating')}
-                options={[
-                  { value: 1, label: '1 - Poor' },
-                  { value: 2, label: '2 - Below Average' },
-                  { value: 3, label: '3 - Average' },
-                  { value: 4, label: '4 - Good' },
-                  { value: 5, label: '5 - Excellent' },
-                ]}
-              />
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Driver Skill Rating</label>
+                <Select
+                  value={String(getValues('driver_skill_rating'))}
+                  onValueChange={(value) => {
+                    const numValue = parseInt(value, 10);
+                    resetOverallForm({
+                      ...getValues(),
+                      driver_skill_rating: numValue,
+                    });
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select rating" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 - Poor</SelectItem>
+                    <SelectItem value="2">2 - Below Average</SelectItem>
+                    <SelectItem value="3">3 - Average</SelectItem>
+                    <SelectItem value="4">4 - Good</SelectItem>
+                    <SelectItem value="5">5 - Excellent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
               {/* General Notes */}
               <div className="md:col-span-2">

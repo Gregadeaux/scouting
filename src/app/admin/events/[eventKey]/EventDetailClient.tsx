@@ -6,7 +6,7 @@ import { ScoutingCoverageWidget } from '@/components/admin/event-detail/Scouting
 import { EventTeamRoster } from '@/components/admin/event-detail/EventTeamRoster';
 import { EventMatchSchedule } from '@/components/admin/event-detail/EventMatchSchedule';
 import { TBAImportButton } from '@/components/admin/event-detail/TBAImportButton';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import type { EventDetail } from '@/types/event-detail';

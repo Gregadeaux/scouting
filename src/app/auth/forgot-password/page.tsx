@@ -6,8 +6,8 @@
  */
 
 import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
@@ -113,15 +113,17 @@ export default function ForgotPasswordPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="Email Address"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="your.email@example.com"
-            required
-            autoFocus
-          />
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Email Address</label>
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your.email@example.com"
+              required
+              autoFocus
+            />
+          </div>
 
           <Button type="submit" variant="primary" className="w-full" disabled={loading}>
             {loading ? 'Sending...' : 'Send Reset Instructions'}

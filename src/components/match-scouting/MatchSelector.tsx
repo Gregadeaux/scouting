@@ -1,7 +1,7 @@
 'use client';
 
 import { useMatches } from '@/hooks/useMatches';
-import { Select } from '@/components/ui/Select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { MatchSchedule } from '@/types';
 
 interface MatchSelectorProps {
@@ -78,10 +78,8 @@ export function MatchSelector({
   }
 
   // Handle change event
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const matchKey = e.target.value;
-
-    if (matchKey === '') {
+  const handleChange = (matchKey: string) => {
+    if (matchKey === '' || matchKey === '__placeholder__') {
       onChange(null, null);
     } else {
       const selectedMatch = matches.find((match) => match.match_key === matchKey);
@@ -109,12 +107,6 @@ export function MatchSelector({
     return `${compLevel} ${set}Match ${matchNum}`;
   };
 
-  // Build options array for Select component
-  const options = (matches || []).map((match) => ({
-    value: match.match_key,
-    label: formatMatchLabel(match),
-  }));
-
   // Sort matches by comp level priority, then match number
   const compLevelPriority: Record<string, number> = {
     qm: 1,
@@ -124,32 +116,39 @@ export function MatchSelector({
     f: 5,
   };
 
-  options.sort((a, b) => {
-    const matchA = matches.find((m) => m.match_key === a.value);
-    const matchB = matches.find((m) => m.match_key === b.value);
-    if (!matchA || !matchB) return 0;
-
-    const priorityA = compLevelPriority[matchA.comp_level] || 0;
-    const priorityB = compLevelPriority[matchB.comp_level] || 0;
+  const sortedMatches = [...(matches || [])].sort((a, b) => {
+    const priorityA = compLevelPriority[a.comp_level] || 0;
+    const priorityB = compLevelPriority[b.comp_level] || 0;
 
     if (priorityA !== priorityB) {
       return priorityA - priorityB;
     }
 
     // Within same comp level, sort by match number
-    return matchA.match_number - matchB.match_number;
+    return a.match_number - b.match_number;
   });
 
   return (
     <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        Select Match
+      </label>
       <Select
-        label="Select Match"
         value={value || ''}
-        onChange={handleChange}
-        options={options}
-        placeholder="-- Select a match --"
+        onValueChange={handleChange}
         disabled={disabled || isLoading}
-      />
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="-- Select a match --" />
+        </SelectTrigger>
+        <SelectContent>
+          {sortedMatches.map((match) => (
+            <SelectItem key={match.match_key} value={match.match_key}>
+              {formatMatchLabel(match)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
       {/* Loading state */}
       {isLoading && (

@@ -17,13 +17,13 @@ import type {
 import { Submission } from '@/core/offline/domain/submission';
 import { SyncError, OfflineError } from '@/core/offline/domain/errors';
 import { ResultHelpers } from '@/core/offline/domain';
-import type { Result, SubmissionId } from '@/core/offline/domain/types';
+import type { Result } from '@/core/offline/domain/types';
 import { createSubmissionId } from '@/core/offline/domain/types';
 import {
   RetryStrategy,
   createRetryStrategy,
   isRetryableError,
-  shouldAbortRetry,
+
   type RetryConfig as InfraRetryConfig
 } from './retry-strategy';
 import { BackgroundSyncAdapter } from '../adapters/BackgroundSyncAdapter';
@@ -524,11 +524,11 @@ export class BackgroundSyncCoordinator implements ISyncCoordinator {
       const offlineError = error instanceof OfflineError
         ? error
         : new OfflineError(
-            error instanceof Error ? error.message : 'Unknown error',
-            'SYNC_FAILED',
-            isRetryableError(error),
-            { error }
-          );
+          error instanceof Error ? error.message : 'Unknown error',
+          'SYNC_FAILED',
+          isRetryableError(error),
+          { error }
+        );
 
       const failedResult = currentSubmission.markAsFailed(offlineError, retryConfig);
       if (failedResult.ok) {

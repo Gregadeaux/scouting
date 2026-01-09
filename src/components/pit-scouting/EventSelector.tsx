@@ -1,7 +1,7 @@
 'use client';
 
 import { useEvents } from '@/hooks/useEvents';
-import { Select } from '@/components/ui/Select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Event } from '@/types';
 
 interface EventSelectorProps {
@@ -57,10 +57,8 @@ export function EventSelector({
   }
 
   // Handle change event
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const eventKey = e.target.value;
-
-    if (eventKey === '') {
+  const handleChange = (eventKey: string) => {
+    if (eventKey === '' || eventKey === '__placeholder__') {
       onChange(null, null);
     } else {
       const selectedEvent = events.find((event) => event.event_key === eventKey);
@@ -77,22 +75,27 @@ export function EventSelector({
     });
   };
 
-  // Build options array for Select component
-  const options = (events || []).map((event) => ({
-    value: event.event_key,
-    label: `${event.event_name} (${event.event_key}) - ${formatDate(event.start_date)}`,
-  }));
-
   return (
     <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        Select Event
+      </label>
       <Select
-        label="Select Event"
         value={value || ''}
-        onChange={handleChange}
-        options={options}
-        placeholder="-- Select an event --"
+        onValueChange={handleChange}
         disabled={disabled || isLoading}
-      />
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="-- Select an event --" />
+        </SelectTrigger>
+        <SelectContent>
+          {(events || []).map((event) => (
+            <SelectItem key={event.event_key} value={event.event_key}>
+              {event.event_name} ({event.event_key}) - {formatDate(event.start_date)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
       {/* Loading state */}
       {isLoading && (

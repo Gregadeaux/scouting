@@ -10,7 +10,6 @@ import { useRouter } from 'next/navigation';
 import { authClient } from '@/lib/api/auth-client';
 import { authStorage } from '@/lib/offline/auth-storage';
 import { authTabSync } from '@/lib/auth/tab-sync';
-import { getPermissionsForRole } from '@/lib/supabase/auth';
 import type {
   AuthContext as IAuthContext,
   AuthenticatedUser,
@@ -173,7 +172,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setError(null);
 
         // Call signup API
-        const currentUser = await authClient.signup(data);
+        await authClient.signup(data);
 
         // Redirect to email verification page
         router.push('/auth/verify-email');

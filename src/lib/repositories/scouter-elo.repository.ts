@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Repository for scouter ELO rating data access
  * Handles CRUD operations for ELO ratings and history
@@ -17,7 +18,7 @@ import type {
 } from '@/types/validation';
 import {
   RepositoryError,
-  EntityNotFoundError,
+
   DatabaseOperationError,
 } from './base.repository';
 
@@ -595,6 +596,7 @@ export class ScouterEloRepository implements IScouterEloRepository {
   }
 
   private async mapToLeaderboardEntries(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rows: any[]
   ): Promise<ScouterLeaderboardEntry[]> {
     const entries: ScouterLeaderboardEntry[] = [];
@@ -631,7 +633,7 @@ export class ScouterEloRepository implements IScouterEloRepository {
     return entries;
   }
 
-  private getValidationTypeFromValidationId(validationId: string): string {
+  private getValidationTypeFromValidationId(_validationId: string): string {
     // This is a placeholder - in reality, we'll fetch from validation_results
     // For now, return 'consensus' as default
     return 'consensus';

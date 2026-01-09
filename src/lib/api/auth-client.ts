@@ -11,7 +11,6 @@ import type {
   LoginFormData,
   SignupFormData,
   UpdateUserProfileData,
-  UserProfile
 } from '@/types/auth';
 
 interface APIResponse<T> {

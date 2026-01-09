@@ -7,7 +7,7 @@ import { Event } from '@/types';
 import { Column, PaginationConfig, MatchWithDetails } from '@/types/admin';
 import { DataTable } from '@/components/admin/DataTable';
 import { SearchBar } from '@/components/admin/SearchBar';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/admin/Toast';
 import { RefreshCw, X } from 'lucide-react';
 

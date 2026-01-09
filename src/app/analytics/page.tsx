@@ -14,7 +14,7 @@
 
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Download, FileText } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { EventOverview } from '@/components/analytics/EventOverview';

@@ -8,7 +8,7 @@ import { ScoreBreakdownCard } from '@/components/admin/matches/ScoreBreakdownCar
 import { VideoLinksCard } from '@/components/admin/matches/VideoLinksCard';
 import { TeamRecentTable } from '@/components/admin/matches/TeamRecentTable';
 import { MatchScoutingSection } from '@/components/admin/matches/MatchScoutingSection';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import type { MatchSchedule, Team, TBAVideo } from '@/types';
 

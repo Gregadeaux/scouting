@@ -224,7 +224,7 @@ export async function uploadRobotPhoto(file: File): Promise<string> {
       const jsonString = atob(base64Data);
       const authData = JSON.parse(jsonString);
       accessToken = authData.access_token;
-    } catch (e) {
+    } catch {
       throw new StorageError('Failed to parse auth cookie', 'COOKIE_PARSE_ERROR');
     }
 
@@ -245,7 +245,7 @@ export async function uploadRobotPhoto(file: File): Promise<string> {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
+      const _errorText = await response.text();
       throw new StorageError(`Upload failed: ${response.statusText}`, 'UPLOAD_ERROR', response.status);
     }
 

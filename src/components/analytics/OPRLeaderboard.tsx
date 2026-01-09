@@ -11,7 +11,7 @@
 
 import { useState } from 'react';
 import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { ArrowUpDown, Check } from 'lucide-react';
 import type { TeamStatistics } from '@/types';
 

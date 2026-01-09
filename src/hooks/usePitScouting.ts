@@ -114,7 +114,7 @@ export function usePitScouting(
     };
 
     loadExistingData();
-  }, [options?.eventKey, options?.teamNumber, options?.enabled]);
+  }, [options, options?.eventKey, options?.teamNumber, options?.enabled]);
 
   const savePitData = useCallback(
     async (formData: PitScoutingFormData): Promise<SavePitDataResult> => {

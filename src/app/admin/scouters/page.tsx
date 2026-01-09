@@ -12,7 +12,7 @@ import { PaginationConfig } from '@/types/admin';
 import { ScoutersTable } from '@/components/admin/scouters/ScoutersTable';
 import { ScouterForm } from '@/components/admin/scouters/ScouterForm';
 import { SearchBar } from '@/components/admin/SearchBar';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/admin/Toast';
 import {
   Dialog,

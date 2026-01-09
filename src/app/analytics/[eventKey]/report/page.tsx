@@ -16,7 +16,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Printer, ArrowLeft, Download } from 'lucide-react';
 import { TeamRadarProfile } from '@/components/analytics/TeamRadarProfile';
 import { GamePieceBoxplotFull } from '@/components/analytics/GamePieceBoxplotFull';

@@ -6,9 +6,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Copy, Trash2, ExternalLink, Users, Calendar, Trophy } from 'lucide-react';
+import { X, Trash2, ExternalLink, Users, Calendar, Trophy } from 'lucide-react';
 import { JSONBDataDisplay } from '@/components/scouting/JSONBDataDisplay';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { REEFSCAPE_CONFIG } from '@/lib/config/season-2025';
 import type { ScoutingEntryWithDetails } from '@/types/admin';
 import Link from 'next/link';
@@ -138,41 +138,37 @@ export function ScoutingDataDetail({
           <nav className="flex gap-6 px-6">
             <button
               onClick={() => setActiveTab('auto')}
-              className={`border-b-2 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'auto'
+              className={`border-b-2 py-3 text-sm font-medium transition-colors ${activeTab === 'auto'
                   ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                   : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-              }`}
+                }`}
             >
               Autonomous
             </button>
             <button
               onClick={() => setActiveTab('teleop')}
-              className={`border-b-2 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'teleop'
+              className={`border-b-2 py-3 text-sm font-medium transition-colors ${activeTab === 'teleop'
                   ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                   : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-              }`}
+                }`}
             >
               Teleoperated
             </button>
             <button
               onClick={() => setActiveTab('endgame')}
-              className={`border-b-2 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'endgame'
+              className={`border-b-2 py-3 text-sm font-medium transition-colors ${activeTab === 'endgame'
                   ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                   : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-              }`}
+                }`}
             >
               Endgame
             </button>
             <button
               onClick={() => setActiveTab('context')}
-              className={`border-b-2 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'context'
+              className={`border-b-2 py-3 text-sm font-medium transition-colors ${activeTab === 'context'
                   ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                   : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-              }`}
+                }`}
             >
               Match Context
             </button>

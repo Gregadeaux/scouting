@@ -6,7 +6,7 @@
 import { IndexedDBManager, getDatabaseManager } from './indexeddb/database';
 import { IndexedDBSubmissionRepository } from './indexeddb/submission-repository';
 import { BackgroundSyncCoordinator, SyncConfig } from './sync/background-sync';
-import { EventBus, getGlobalEventBus, createEventBus } from './events/event-emitter';
+import { getGlobalEventBus, createEventBus } from './events/event-emitter';
 import type { ISubmissionRepository } from '@/core/offline/ports/submission-repository';
 import type { ISyncCoordinator } from '@/core/offline/ports/sync-coordinator';
 import type { IEventBus } from '@/core/offline/ports/event-bus';

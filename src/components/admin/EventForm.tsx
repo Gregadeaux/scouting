@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { EventFormData, FormErrors } from '@/types/admin';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Download, Loader2, AlertCircle } from 'lucide-react';
 
 interface EventFormProps {
@@ -79,7 +79,7 @@ export function EventForm({ initialData, onSubmit, onCancel, isEdit = false }: E
       } else {
         setFetchError(data.error || 'Failed to fetch from TBA');
       }
-    } catch (err) {
+    } catch {
       setFetchError('Network error. Please try again.');
     } finally {
       setIsFetching(false);

@@ -9,7 +9,7 @@ import type { MatchSchedule } from '@/types';
 import type { QueryOptions } from './base.repository';
 import {
   RepositoryError,
-  EntityNotFoundError,
+
   DatabaseOperationError,
 } from './base.repository';
 

@@ -27,12 +27,12 @@ export function MatchScoutingInterface() {
     // Lock to landscape if possible (requires user permission on iOS)
     const lockOrientation = async () => {
       try {
-        // @ts-ignore - ScreenOrientation API not fully typed
-        if (screen.orientation && screen.orientation.lock) {
-          // @ts-ignore
-          await screen.orientation.lock('landscape');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const orientation = screen.orientation as any;
+        if (orientation && orientation.lock) {
+          await orientation.lock('landscape');
         }
-      } catch (err) {
+      } catch {
         // Orientation lock not supported or denied
         console.log('Orientation lock not supported');
       }
@@ -41,10 +41,10 @@ export function MatchScoutingInterface() {
     lockOrientation();
 
     return () => {
-      // @ts-ignore - ScreenOrientation API not fully typed
-      if (screen.orientation && screen.orientation.unlock) {
-        // @ts-ignore
-        screen.orientation.unlock();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const orientation = screen.orientation as any;
+      if (orientation && orientation.unlock) {
+        orientation.unlock();
       }
     };
   }, []);
@@ -57,7 +57,7 @@ export function MatchScoutingInterface() {
           <div className="flex items-center justify-center h-full bg-gray-100">
             <div className="text-center">
               <h1 className="text-4xl font-bold text-gray-800 mb-4">Ready to Scout</h1>
-              <p className="text-gray-600 mb-8">Click "Setup Match" to begin</p>
+              <p className="text-gray-600 mb-8">Click &quot;Setup Match&quot; to begin</p>
               <button
                 onClick={() => setShowPreMatch(true)}
                 className="px-8 py-4 bg-green-600 text-white rounded-lg font-bold text-xl hover:bg-green-700"

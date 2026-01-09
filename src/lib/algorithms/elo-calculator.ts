@@ -117,7 +117,7 @@ export class ELORatingCalculator {
    * @param accuracyScore - Accuracy score
    * @returns Outcome category
    */
-  private determineOutcome(delta: number, accuracyScore: number): ELOOutcome {
+  private determineOutcome(delta: number, _accuracyScore: number): ELOOutcome {
     // Positive delta = rating increased = gain
     if (delta > 0.5) {
       return 'gain';

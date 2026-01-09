@@ -22,7 +22,7 @@ import type {
   CreatePitScoutingDTO,
   UpdatePitScoutingDTO,
   PitScoutingDTO,
-  PaginatedPitScoutingResponse,
+
 } from './types/pit-scouting-dto';
 import { PitScoutingMapper } from '@/lib/mappers/pit-scouting.mapper';
 import { validatePitScoutingData2025 } from '@/lib/supabase/validation';
@@ -150,7 +150,7 @@ export class PitScoutingService implements IPitScoutingService {
    *
    * @param repository - Scouting data repository for database access
    */
-  constructor(private readonly repository: IScoutingDataRepository) {}
+  constructor(private readonly repository: IScoutingDataRepository) { }
 
   /**
    * Get pit scouting entry by team and event

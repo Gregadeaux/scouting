@@ -160,7 +160,7 @@ export class TeamService implements ITeamService {
     private readonly matchRepo: IMatchRepository,
     private readonly scoutingDataRepo: IScoutingDataRepository,
     private readonly teamMergeStrategy: TeamMergeStrategy
-  ) {}
+  ) { }
 
   /**
    * Get teams by event
@@ -184,18 +184,18 @@ export class TeamService implements ITeamService {
       this.getTeamEvents(teamNumber, eventKey ? undefined : new Date().getFullYear()),
       eventKey
         ? this.matchRepo.findByEventKey(eventKey).then((matches) =>
-            matches.filter((m) => this.isTeamInMatch(teamNumber, m))
-          )
+          matches.filter((m) => this.isTeamInMatch(teamNumber, m))
+        )
         : Promise.resolve([]), // TODO: Global team match history requires repository extension
       eventKey
         ? this.scoutingDataRepo.getPitScoutingByEvent(eventKey).then((all) =>
-            all.filter((p) => p.team_number === teamNumber)
-          )
+          all.filter((p) => p.team_number === teamNumber)
+        )
         : Promise.resolve([]), // No global pit scouting query available
       eventKey
         ? this.scoutingDataRepo.getMatchScoutingByEvent(eventKey).then((all) =>
-            all.filter((s) => s.team_number === teamNumber)
-          )
+          all.filter((s) => s.team_number === teamNumber)
+        )
         : Promise.resolve([]), // No global match scouting query available
     ]);
 
@@ -247,9 +247,9 @@ export class TeamService implements ITeamService {
     const latestPitScouting =
       pitScoutingData.length > 0
         ? (pitScoutingData[pitScoutingData.length - 1] as unknown as PitScouting<
-            RobotCapabilities2025,
-            AutonomousCapabilities2025
-          >)
+          RobotCapabilities2025,
+          AutonomousCapabilities2025
+        >)
         : undefined;
 
     // Fetch the scout's name if pit scouting exists
@@ -277,18 +277,18 @@ export class TeamService implements ITeamService {
     const [allMatches, pitScouting, matchScouting] = await Promise.all([
       eventKey
         ? this.matchRepo.findByEventKey(eventKey).then((matches) =>
-            matches.filter((m) => this.isTeamInMatch(teamNumber, m))
-          )
+          matches.filter((m) => this.isTeamInMatch(teamNumber, m))
+        )
         : Promise.resolve([]), // TODO: Global team match history requires repository extension
       eventKey
         ? this.scoutingDataRepo.getPitScoutingByEvent(eventKey).then((all) =>
-            all.filter((p) => p.team_number === teamNumber)
-          )
+          all.filter((p) => p.team_number === teamNumber)
+        )
         : Promise.resolve([]), // No global pit scouting query available
       eventKey
         ? this.scoutingDataRepo.getMatchScoutingByEvent(eventKey).then((all) =>
-            all.filter((s) => s.team_number === teamNumber)
-          )
+          all.filter((s) => s.team_number === teamNumber)
+        )
         : Promise.resolve([]), // No global match scouting query available
     ]);
 
@@ -358,7 +358,7 @@ export class TeamService implements ITeamService {
   /**
    * Get team's events
    */
-  async getTeamEvents(teamNumber: number, year?: number): Promise<Event[]> {
+  async getTeamEvents(teamNumber: number, _year?: number): Promise<Event[]> {
     // TODO: Global team match history requires repository extension
     // For now, return empty array
     this.log(`Global team events lookup not yet supported for team ${teamNumber}`);

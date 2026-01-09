@@ -28,9 +28,8 @@ import {
   deserializeStatus,
 } from './sync-status';
 import {
-  OfflineError,
   ValidationError,
-  MissingFieldError,
+  OfflineError,
   isRecoverableError,
 } from './errors';
 
@@ -313,11 +312,11 @@ export class Submission {
     // Calculate next retry time if retryable
     const nextRetryAt = canRetry
       ? calculateNextRetryTime(
-          this.metadata.retryCount + 1,
-          config.baseRetryDelay,
-          config.maxRetryDelay,
-          config.exponentialBackoff
-        )
+        this.metadata.retryCount + 1,
+        config.baseRetryDelay,
+        config.maxRetryDelay,
+        config.exponentialBackoff
+      )
       : undefined;
 
     const newStatus = markFailed(this.syncStatus, error, canRetry, nextRetryAt);

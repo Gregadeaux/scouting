@@ -55,7 +55,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ChevronDown, ChevronUp, Download, RefreshCw, User } from 'lucide-react';
@@ -186,7 +186,7 @@ function TeamScoutingCard({
 export function MatchScoutingSection({
   matchKey,
   eventKey,
-  compact = false,
+  compact: _compact = false,
 }: MatchScoutingSectionProps) {
   const [expandedTeams, setExpandedTeams] = useState<Set<number>>(new Set());
   const [selectedEntry, setSelectedEntry] = useState<ScoutingEntryWithDetails | null>(null);

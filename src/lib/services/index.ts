@@ -84,7 +84,7 @@ import {
 
 // Import strategies
 import {
-  MergeStrategies,
+
   createTeamMergeStrategy,
   createEventMergeStrategy,
   createMatchMergeStrategy,

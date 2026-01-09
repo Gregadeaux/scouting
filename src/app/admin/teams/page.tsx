@@ -8,7 +8,7 @@ import { Column, PaginationConfig } from '@/types/admin';
 import { DataTable } from '@/components/admin/DataTable';
 import { SearchBar } from '@/components/admin/SearchBar';
 import { ActionButtons } from '@/components/admin/ActionButtons';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/admin/Toast';
 
 export default function TeamsPage() {

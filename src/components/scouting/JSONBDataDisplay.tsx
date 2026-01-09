@@ -22,7 +22,7 @@ import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Copy, Check } from 'lucide-react';
 import { FieldDisplay, FieldDisplayCompact } from './FieldDisplay';
 import type { FieldDefinition } from '@/lib/config/season-2025';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import type { JSONBData } from '@/types';
 
 interface JSONBDataDisplayProps {
@@ -107,7 +107,7 @@ export function JSONBDataDisplay({
   });
 
   // Sort fields within each section by order
-  groupedFields.forEach((fields, section) => {
+  groupedFields.forEach((fields, _section) => {
     fields.sort((a, b) => (a.field.order || 0) - (b.field.order || 0));
   });
 
@@ -190,9 +190,8 @@ export function JSONBDataDisplay({
             <button
               onClick={() => toggleSection(section)}
               disabled={!collapsible}
-              className={`w-full flex items-center justify-between p-3 text-left ${
-                collapsible ? 'hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer' : ''
-              }`}
+              className={`w-full flex items-center justify-between p-3 text-left ${collapsible ? 'hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer' : ''
+                }`}
             >
               <div className="flex items-center gap-2">
                 {collapsible && (

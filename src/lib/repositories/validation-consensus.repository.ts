@@ -9,11 +9,11 @@ import type {
   ConsensusValue,
   ValidationConsensusRow,
   ValidationContext,
-  ConsensusMethod,
+
 } from '@/types/validation';
 import {
   RepositoryError,
-  EntityNotFoundError,
+
   DatabaseOperationError,
 } from './base.repository';
 

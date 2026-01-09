@@ -13,13 +13,12 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/Card';
 import {
   RadarChart,
   PolarGrid,
   PolarAngleAxis,
-  PolarRadiusAxis,
   Radar,
 } from 'recharts';
 import type { TeamStatistics } from '@/types';
@@ -64,36 +63,7 @@ export function TeamRadarProfile({ eventKey, topTeamsCount = 5, sortBy = 'opr', 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (teams) {
-      // Use provided teams array
-      setTeamStats(teams);
-      setIsLoading(false);
-    } else {
-      // Fetch all teams for event
-      fetchTeamStats();
-    }
-  }, [eventKey, teams]);
-
-  // Get the value for a given metric from TeamStatistics
-  const getMetricValue = (team: TeamStatistics, metric: SortMetric): number => {
-    switch (metric) {
-      case 'opr':
-        return team.opr || 0;
-      case 'ccwm':
-        return team.ccwm || 0;
-      case 'auto':
-        return team.avg_auto_score || 0;
-      case 'teleop':
-        return team.avg_teleop_score || 0;
-      case 'endgame':
-        return team.avg_endgame_score || 0;
-      case 'reliability':
-        return team.reliability_score || 0;
-    }
-  };
-
-  const fetchTeamStats = async () => {
+  const fetchTeamStats = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -111,6 +81,35 @@ export function TeamRadarProfile({ eventKey, topTeamsCount = 5, sortBy = 'opr', 
       setError('Failed to load team statistics');
     } finally {
       setIsLoading(false);
+    }
+  }, [eventKey]);
+
+  useEffect(() => {
+    if (teams) {
+      // Use provided teams array
+      setTeamStats(teams);
+      setIsLoading(false);
+    } else {
+      // Fetch all teams for event
+      fetchTeamStats();
+    }
+  }, [eventKey, teams, fetchTeamStats]);
+
+  // Get the value for a given metric from TeamStatistics
+  const getMetricValue = (team: TeamStatistics, metric: SortMetric): number => {
+    switch (metric) {
+      case 'opr':
+        return team.opr || 0;
+      case 'ccwm':
+        return team.ccwm || 0;
+      case 'auto':
+        return team.avg_auto_score || 0;
+      case 'teleop':
+        return team.avg_teleop_score || 0;
+      case 'endgame':
+        return team.avg_endgame_score || 0;
+      case 'reliability':
+        return team.reliability_score || 0;
     }
   };
 
@@ -202,47 +201,47 @@ export function TeamRadarProfile({ eventKey, topTeamsCount = 5, sortBy = 'opr', 
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-      {/* Render individual radar chart for each team */}
-      {sortedTeams.map((team, index) => {
-        const radarData = prepareRadarData(team);
-        const sortedMetricValue = getMetricValue(team, sortBy);
+        {/* Render individual radar chart for each team */}
+        {sortedTeams.map((team, index) => {
+          const radarData = prepareRadarData(team);
+          const sortedMetricValue = getMetricValue(team, sortBy);
 
-        // Use team-specific color if provided, otherwise use default colors
-        const teamColor = teamColors?.[team.team_number] || RADAR_COLORS[index % RADAR_COLORS.length];
-        const isRedAlliance = teamColor.includes('ef4444') || teamColor.includes('red');
-        const isBlueAlliance = teamColor.includes('3b82f6') || teamColor.includes('blue');
+          // Use team-specific color if provided, otherwise use default colors
+          const teamColor = teamColors?.[team.team_number] || RADAR_COLORS[index % RADAR_COLORS.length];
+          const isRedAlliance = teamColor.includes('ef4444') || teamColor.includes('red');
+          const isBlueAlliance = teamColor.includes('3b82f6') || teamColor.includes('blue');
 
-        // Determine card styling based on alliance
-        let cardClassName = "break-inside-avoid";
-        if (isRedAlliance) {
-          cardClassName += " border-red-500/50 bg-red-50/50 dark:bg-red-950/20";
-        } else if (isBlueAlliance) {
-          cardClassName += " border-blue-500/50 bg-blue-50/50 dark:bg-blue-950/20";
-        }
+          // Determine card styling based on alliance
+          let cardClassName = "break-inside-avoid";
+          if (isRedAlliance) {
+            cardClassName += " border-red-500/50 bg-red-50/50 dark:bg-red-950/20";
+          } else if (isBlueAlliance) {
+            cardClassName += " border-blue-500/50 bg-blue-50/50 dark:bg-blue-950/20";
+          }
 
-        return (
-          <Card key={team.team_number} className={cardClassName}>
-            {/* Team Header */}
-            <div className="border-b pb-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-bold">
-                    Team {team.team_number}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    Rank #{index + 1} by {METRIC_LABELS[sortBy]}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold">
-                    {sortBy === 'reliability'
-                      ? `${sortedMetricValue.toFixed(0)}%`
-                      : sortedMetricValue.toFixed(1)}
+          return (
+            <Card key={team.team_number} className={cardClassName}>
+              {/* Team Header */}
+              <div className="border-b pb-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold">
+                      Team {team.team_number}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Rank #{index + 1} by {METRIC_LABELS[sortBy]}
+                    </p>
                   </div>
-                  <div className="text-xs text-muted-foreground">{METRIC_LABELS[sortBy]}</div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold">
+                      {sortBy === 'reliability'
+                        ? `${sortedMetricValue.toFixed(0)}%`
+                        : sortedMetricValue.toFixed(1)}
+                    </div>
+                    <div className="text-xs text-muted-foreground">{METRIC_LABELS[sortBy]}</div>
+                  </div>
                 </div>
               </div>
-            </div>
 
               {/* Radar Chart */}
               <div className="flex items-center justify-center">
@@ -271,10 +270,10 @@ export function TeamRadarProfile({ eventKey, topTeamsCount = 5, sortBy = 'opr', 
                     isAnimationActive={false}
                   />
                 </RadarChart>
-            </div>
-          </Card>
-        );
-      })}
+              </div>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

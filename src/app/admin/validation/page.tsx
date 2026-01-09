@@ -3,8 +3,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Select } from '@/components/ui/Select';
-import { Button } from '@/components/ui/Button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/admin/Toast';
 import { Play, ExternalLink, CheckCircle, XCircle, AlertCircle, TrendingUp, Users } from 'lucide-react';
@@ -111,13 +111,10 @@ export default function ValidationPage() {
   };
 
   // Event options for dropdown
-  const eventOptions = [
-    { value: '', label: 'Select an event...' },
-    ...events.map((event) => ({
-      value: event.event_key,
-      label: `${event.event_name} (${event.year})`,
-    })),
-  ];
+  const eventOptions = events.map((event) => ({
+    value: event.event_key,
+    label: `${event.event_name} (${event.year})`,
+  }));
 
   return (
     <div className="space-y-6">
@@ -152,10 +149,20 @@ export default function ValidationPage() {
             </label>
             <Select
               value={selectedEvent}
-              onChange={(e) => setSelectedEvent(e.target.value)}
-              options={eventOptions}
+              onValueChange={(value) => setSelectedEvent(value)}
               disabled={eventsLoading || loading}
-            />
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select an event..." />
+              </SelectTrigger>
+              <SelectContent>
+                {eventOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Select the event to validate scouting data for
             </p>
@@ -192,7 +199,7 @@ export default function ValidationPage() {
                       <Badge variant="success">High Confidence</Badge>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400 ml-6">
-                      Compare each scouter's data against the consensus value from all scouts.
+                      Compare each scouter&apos;s data against the consensus value from all scouts.
                       Most accurate for fields where multiple scouts observed the same robot.
                     </p>
                     <div className="flex items-center gap-4 mt-2 ml-6 text-xs text-gray-500 dark:text-gray-400">

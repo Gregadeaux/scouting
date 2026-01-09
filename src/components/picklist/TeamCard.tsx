@@ -7,7 +7,7 @@
 
 'use client';
 
-import { Check, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import type { PickListTeam } from '@/types/picklist';
 
 interface TeamCardProps {

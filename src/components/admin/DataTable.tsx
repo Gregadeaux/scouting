@@ -3,6 +3,17 @@
 import React, { useState } from 'react';
 import { Column, SortConfig, PaginationConfig } from '@/types/admin';
 import { LoadingSpinner } from './LoadingSpinner';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Inbox } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface DataTableProps<T> {
   columns: Column<T>[];
@@ -41,21 +52,13 @@ export function DataTable<T>({
 
   const SortIcon = ({ columnKey }: { columnKey: string }) => {
     if (!sortConfig || sortConfig.key !== columnKey) {
-      return (
-        <svg className="ml-1 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-        </svg>
-      );
+      return <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground" />;
     }
 
     return sortConfig.direction === 'asc' ? (
-      <svg className="ml-1 h-4 w-4 text-frc-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-      </svg>
+      <ArrowUp className="ml-2 h-4 w-4 text-primary" />
     ) : (
-      <svg className="ml-1 h-4 w-4 text-frc-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-      </svg>
+      <ArrowDown className="ml-2 h-4 w-4 text-primary" />
     );
   };
 
@@ -69,99 +72,92 @@ export function DataTable<T>({
 
   if (!data || data.length === 0) {
     return (
-      <div className="flex min-h-[400px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 p-8 text-center dark:border-gray-600">
-        <svg
-          className="mb-4 h-12 w-12 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-          />
-        </svg>
-        <p className="text-lg font-medium text-gray-900 dark:text-gray-100">{emptyMessage}</p>
+      <div className="flex min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center animate-in fade-in-50">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+          <Inbox className="h-10 w-10 text-muted-foreground" />
+        </div>
+        <h3 className="mt-4 text-lg font-semibold">{emptyMessage}</h3>
+        <p className="mb-4 mt-2 text-sm text-muted-foreground">
+          There are no records to display at this time.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className={className}>
-      <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead className="bg-gray-50 dark:bg-gray-800">
-            <tr>
+    <div className={cn("space-y-4", className)}>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
               {columns.map((column) => (
-                <th
+                <TableHead
                   key={String(column.key)}
-                  scope="col"
-                  className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 ${
-                    column.sortable ? 'cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700' : ''
-                  } ${column.className || ''}`}
+                  className={cn(
+                    column.sortable && "cursor-pointer select-none hover:bg-muted/50",
+                    column.className
+                  )}
                   onClick={() => column.sortable && handleSort(String(column.key))}
                 >
                   <div className="flex items-center">
                     {column.header}
                     {column.sortable && <SortIcon columnKey={String(column.key)} />}
                   </div>
-                </th>
+                </TableHead>
               ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {data.map((row, rowIndex) => (
-              <tr
+              <TableRow
                 key={rowIndex}
-                className={`hover:bg-gray-50 dark:hover:bg-gray-800 ${
-                  onRowClick ? 'cursor-pointer' : ''
-                }`}
+                className={cn(onRowClick && "cursor-pointer hover:bg-muted/50")}
                 onClick={() => onRowClick?.(row)}
               >
                 {columns.map((column) => (
-                  <td
+                  <TableCell
                     key={String(column.key)}
-                    className={`whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-100 ${
-                      column.className || ''
-                    }`}
+                    className={column.className}
                   >
                     {column.render
                       ? column.render(row[column.key as keyof T], row)
                       : (String(row[column.key as keyof T]) as React.ReactNode)}
-                  </td>
+                  </TableCell>
                 ))}
-              </tr>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {pagination && pagination.limit && pagination.total !== undefined && (
-        <div className="mt-4 flex items-center justify-between">
-          <div className="text-sm text-gray-700 dark:text-gray-300">
-            Showing <span className="font-medium">{(pagination.page - 1) * pagination.limit + 1}</span> to{' '}
-            <span className="font-medium">
+        <div className="flex items-center justify-between px-2">
+          <div className="text-sm text-muted-foreground">
+            Showing <span className="font-medium text-foreground">{(pagination.page - 1) * pagination.limit + 1}</span> to{' '}
+            <span className="font-medium text-foreground">
               {Math.min(pagination.page * pagination.limit, pagination.total)}
             </span>{' '}
-            of <span className="font-medium">{pagination.total}</span> results
+            of <span className="font-medium text-foreground">{pagination.total}</span> results
           </div>
-          <div className="flex gap-2">
-            <button
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => onPageChange?.(pagination.page - 1)}
               disabled={pagination.page === 1}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
             >
-              Previous
-            </button>
-            <button
+              <ChevronLeft className="h-4 w-4" />
+              <span className="sr-only">Previous</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => onPageChange?.(pagination.page + 1)}
               disabled={pagination.page * pagination.limit >= pagination.total}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
             >
-              Next
-            </button>
+              <ChevronRight className="h-4 w-4" />
+              <span className="sr-only">Next</span>
+            </Button>
           </div>
         </div>
       )}

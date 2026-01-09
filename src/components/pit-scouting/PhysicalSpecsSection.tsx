@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { FormSection } from '@/components/ui/FormSection';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
 interface PhysicalSpecsSectionProps {

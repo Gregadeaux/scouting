@@ -114,10 +114,13 @@ export function buildSearchParams(params: Record<string, any>): URLSearchParams 
   return searchParams;
 }
 
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
 /**
  * Merge class names with Tailwind CSS support
  * Combines multiple class names and handles conditional classes
  */
-export function cn(...inputs: (string | undefined | null | false)[]): string {
-  return inputs.filter(Boolean).join(' ');
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }

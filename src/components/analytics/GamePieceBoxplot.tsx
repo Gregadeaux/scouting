@@ -16,8 +16,8 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Select } from '@/components/ui/Select';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   ComposedChart,
@@ -28,7 +28,6 @@ import {
   Tooltip,
   ResponsiveContainer,
   Bar,
-  Cell,
 } from 'recharts';
 
 interface GamePieceBoxplotProps {
@@ -92,7 +91,7 @@ export function GamePieceBoxplot({ eventKey }: GamePieceBoxplotProps) {
   const [currentPage, setCurrentPage] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const chartContainerRef = useRef<HTMLDivElement>(null);
+
 
   const fetchGamePieceData = useCallback(async () => {
     setIsLoading(true);
@@ -288,16 +287,26 @@ export function GamePieceBoxplot({ eventKey }: GamePieceBoxplotProps) {
         </div>
 
         {/* Metric Selector */}
-        <div className="max-w-xs">
+        <div className="max-w-xs space-y-2">
+          <label className="text-sm font-medium">Scoring Metric</label>
           <Select
-            label="Scoring Metric"
             value={selectedMetric}
-            onChange={(e) => {
-              setSelectedMetric(e.target.value as MetricType);
+            onValueChange={(value) => {
+              setSelectedMetric(value as MetricType);
               setCurrentPage(0); // Reset to first page
             }}
-            options={METRIC_OPTIONS}
-          />
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select metric" />
+            </SelectTrigger>
+            <SelectContent>
+              {METRIC_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

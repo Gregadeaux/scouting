@@ -11,7 +11,7 @@ import {
 } from '@/types/scouter';
 import { DataTable } from '@/components/admin/DataTable';
 import { ActionButtons } from '@/components/admin/ActionButtons';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { BarChart3 } from 'lucide-react';
 
 interface ScoutersTableProps {

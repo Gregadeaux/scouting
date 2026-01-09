@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { sanitizeAndLogError, sanitizeError, logError } from '@/lib/utils/error-sanitizer';
+import { sanitizeAndLogError } from '@/lib/utils/error-sanitizer';
 
 /**
  * Standard API response helpers for consistent error handling and response formatting
@@ -64,7 +64,7 @@ export function serverError(message = 'Internal server error') {
  *
  * @example
  * ```typescript
- * try {
+  * try {
  *   const { data, error } = await supabase.from('teams').insert(teamData);
  *   if (error) {
  *     return sanitizedErrorResponse(error, 'create_team');

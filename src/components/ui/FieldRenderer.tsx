@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Input } from './Input';
-import { Select } from './Select';
+import { Input } from './input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 import { Checkbox } from './checkbox';
 import { Counter } from './Counter';
 
@@ -106,12 +106,23 @@ export function FieldRenderer({
           </label>
           <Select
             value={typeof value === 'string' ? value : ''}
-            onChange={(e) => onChange(e.target.value)}
-            options={field.options}
-            placeholder={placeholder || `Select ${label.toLowerCase()}`}
-            error={error}
+            onValueChange={(val) => onChange(val)}
             disabled={disabled}
-          />
+          >
+            <SelectTrigger className={error ? 'border-red-500' : ''}>
+              <SelectValue placeholder={placeholder || `Select ${label.toLowerCase()}`} />
+            </SelectTrigger>
+            <SelectContent>
+              {field.options.map((option) => (
+                <SelectItem key={String(option.value)} value={String(option.value)}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {error && (
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>
+          )}
           {helpText && !error && (
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{helpText}</p>
           )}
@@ -160,10 +171,15 @@ export function FieldRenderer({
             max={field.max}
             step={field.step}
             placeholder={placeholder}
-            error={error}
-            helpText={helpText}
             disabled={disabled}
+            className={error ? 'border-red-500' : ''}
           />
+          {error && (
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>
+          )}
+          {helpText && !error && (
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{helpText}</p>
+          )}
         </div>
       );
 
@@ -217,10 +233,15 @@ export function FieldRenderer({
             value={typeof value === 'string' ? value : ''}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
-            error={error}
-            helpText={helpText}
             disabled={disabled}
+            className={error ? 'border-red-500' : ''}
           />
+          {error && (
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>
+          )}
+          {helpText && !error && (
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{helpText}</p>
+          )}
         </div>
       );
   }

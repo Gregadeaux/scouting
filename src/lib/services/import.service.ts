@@ -29,7 +29,7 @@ import type { ITeamRepository } from '@/lib/repositories/team.repository';
 import type { IMatchRepository } from '@/lib/repositories/match.repository';
 import type { IEventRepository } from '@/lib/repositories/event.repository';
 import type {
-  IMergeStrategy,
+
   TeamMergeStrategy,
   MatchMergeStrategy,
   EventMergeStrategy,
@@ -116,7 +116,7 @@ export class ImportService implements IImportService {
     private readonly teamMergeStrategy: TeamMergeStrategy,
     private readonly matchMergeStrategy: MatchMergeStrategy,
     private readonly eventMergeStrategy: EventMergeStrategy
-  ) {}
+  ) { }
 
   /**
    * Start a new import job
@@ -316,7 +316,7 @@ export class ImportService implements IImportService {
     });
 
     // Process teams in batches
-    const batchSize = 50;
+    const _batchSize = 50;
     const teams: Partial<Team>[] = [];
 
     for (const tbaTeam of tbaTeams) {

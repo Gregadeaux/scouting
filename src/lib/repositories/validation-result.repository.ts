@@ -10,11 +10,11 @@ import type {
   ValidationResultRow,
   ValidationQueryOptions,
   ValidationStrategyType,
-  ValidationOutcome,
+
 } from '@/types/validation';
 import {
   RepositoryError,
-  EntityNotFoundError,
+
   DatabaseOperationError,
 } from './base.repository';
 

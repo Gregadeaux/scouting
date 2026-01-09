@@ -53,14 +53,6 @@ export interface TBAApiConfig {
 }
 
 /**
- * Request metadata for tracking
- */
-interface RequestMetadata {
-  timestamp: number;
-  endpoint: string;
-  attempt: number;
-}
-
 /**
  * TBA API Service Implementation
  *

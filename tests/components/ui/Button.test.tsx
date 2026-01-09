@@ -7,7 +7,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 
 describe('Button Component', () => {
   describe('Rendering', () => {
@@ -80,7 +80,7 @@ describe('Button Component', () => {
     });
 
     it('should render medium size', () => {
-      render(<Button size="md">Medium</Button>);
+      render(<Button size="default">Medium</Button>);
 
       const button = screen.getByRole('button');
       expect(button).toHaveClass('px-4', 'py-2', 'text-base');
@@ -292,7 +292,7 @@ describe('Button Component', () => {
 
   describe('Snapshot-like Tests', () => {
     it('should maintain consistent class structure', () => {
-      render(<Button variant="primary" size="md">Snapshot Test</Button>);
+      render(<Button variant="primary" size="default">Snapshot Test</Button>);
 
       const button = screen.getByRole('button');
       const classList = Array.from(button.classList);

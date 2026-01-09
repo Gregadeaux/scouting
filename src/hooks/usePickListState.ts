@@ -42,14 +42,6 @@ export function usePickListState(eventKey?: string): PickListStateReturn {
   const [pickedTeams, setPickedTeams] = useState<Set<number>>(new Set());
   const [currentEventKey, setCurrentEventKey] = useState<string | undefined>(eventKey);
 
-  // Load picked teams from localStorage on mount or event change
-  useEffect(() => {
-    if (eventKey) {
-      loadFromStorage(eventKey);
-      setCurrentEventKey(eventKey);
-    }
-  }, [eventKey]);
-
   /**
    * Load picked teams from localStorage
    */
@@ -70,6 +62,14 @@ export function usePickListState(eventKey?: string): PickListStateReturn {
       setPickedTeams(new Set());
     }
   }, []);
+
+  // Load picked teams from localStorage on mount or event change
+  useEffect(() => {
+    if (eventKey) {
+      loadFromStorage(eventKey);
+      setCurrentEventKey(eventKey);
+    }
+  }, [eventKey, loadFromStorage]);
 
   /**
    * Save picked teams to localStorage

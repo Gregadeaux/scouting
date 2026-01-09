@@ -20,7 +20,7 @@ interface EventOverviewProps {
   teamStats: TeamStatistics[];
 }
 
-export function EventOverview({ eventKey, teamStats }: EventOverviewProps) {
+export function EventOverview({ eventKey: _eventKey, teamStats }: EventOverviewProps) {
   if (!teamStats.length) return null;
 
   // Calculate event-level statistics

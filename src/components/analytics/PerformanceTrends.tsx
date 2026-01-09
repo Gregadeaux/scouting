@@ -9,7 +9,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/Card';
 import {
   LineChart,
@@ -52,15 +52,7 @@ export function PerformanceTrends({ eventKey, selectedTeams }: PerformanceTrends
   const [isLoading, setIsLoading] = useState(false);
   const [metric, setMetric] = useState<'totalScore' | 'autoScore' | 'teleopScore' | 'endgameScore'>('totalScore');
 
-  useEffect(() => {
-    if (selectedTeams.length > 0) {
-      fetchTrends();
-    } else {
-      setTeamTrends([]);
-    }
-  }, [eventKey, selectedTeams]);
-
-  const fetchTrends = async () => {
+  const fetchTrends = useCallback(async () => {
     setIsLoading(true);
 
     try {
@@ -84,7 +76,15 @@ export function PerformanceTrends({ eventKey, selectedTeams }: PerformanceTrends
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [eventKey, selectedTeams]);
+
+  useEffect(() => {
+    if (selectedTeams.length > 0) {
+      fetchTrends();
+    } else {
+      setTeamTrends([]);
+    }
+  }, [eventKey, selectedTeams, fetchTrends]);
 
   if (selectedTeams.length === 0) {
     return (
@@ -198,11 +198,10 @@ function MetricButton({ label, active, onClick }: MetricButtonProps) {
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-1 text-sm rounded-md transition-colors ${
-        active
-          ? 'bg-primary text-primary-foreground'
-          : 'bg-secondary hover:bg-secondary/80'
-      }`}
+      className={`px-3 py-1 text-sm rounded-md transition-colors ${active
+        ? 'bg-primary text-primary-foreground'
+        : 'bg-secondary hover:bg-secondary/80'
+        }`}
     >
       {label}
     </button>

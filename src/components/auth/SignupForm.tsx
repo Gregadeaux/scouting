@@ -7,8 +7,8 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/Card';
 import { validatePasswordStrength, isValidEmail } from '@/lib/supabase/auth';
 import type { SignupFormData } from '@/types/auth';

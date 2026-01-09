@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Scouter Validation Service
  *
@@ -141,7 +142,7 @@ export class ScouterValidationService implements IScouterValidationService {
     private readonly validationResultRepo: IValidationResultRepository,
     private readonly consensusRepo: IValidationConsensusRepository,
     private readonly matchRepo: IMatchRepository
-  ) {}
+  ) { }
 
   /**
    * Validate all matches in an event
@@ -602,7 +603,7 @@ export class ScouterValidationService implements IScouterValidationService {
     executionId: string
   ): Promise<ELOUpdateSummary> {
     // Get starting rating
-    let currentRating = await this.scouterEloRepo.getCurrentRating(
+    const currentRating = await this.scouterEloRepo.getCurrentRating(
       scouterId,
       scouterResults[0].seasonYear
     );
@@ -740,6 +741,11 @@ export class ScouterValidationService implements IScouterValidationService {
   }
 }
 
+import { createScouterEloRepository } from '@/lib/repositories/scouter-elo.repository';
+import { createValidationResultRepository } from '@/lib/repositories/validation-result.repository';
+import { createValidationConsensusRepository } from '@/lib/repositories/validation-consensus.repository';
+import { createMatchRepository } from '@/lib/repositories/match.repository';
+
 /**
  * Factory function to create ScouterValidationService with dependencies
  *
@@ -760,12 +766,6 @@ export function createScouterValidationService(dependencies?: {
   // Use provided dependencies or create defaults
   const strategies = dependencies?.strategies || new Map();
   const eloCalculator = dependencies?.eloCalculator || new ELORatingCalculator();
-
-  // Import and create repositories
-  const { createScouterEloRepository } = require('@/lib/repositories/scouter-elo.repository');
-  const { createValidationResultRepository } = require('@/lib/repositories/validation-result.repository');
-  const { createValidationConsensusRepository } = require('@/lib/repositories/validation-consensus.repository');
-  const { createMatchRepository } = require('@/lib/repositories/match.repository');
 
   const scouterEloRepo = dependencies?.scouterEloRepo || createScouterEloRepository();
   const validationResultRepo =

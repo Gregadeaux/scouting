@@ -17,14 +17,7 @@
  */
 
 import type {
-  AutoPerformance2025,
-  TeleopPerformance2025,
-  EndgamePerformance2025,
-  RobotCapabilities2025,
-  AutonomousCapabilities2025,
-  ReefLevel,
-  CageLevel,
-  GamePieceType,
+
 } from '@/types/season-2025';
 
 // ============================================================================

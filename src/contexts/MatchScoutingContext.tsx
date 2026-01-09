@@ -296,7 +296,6 @@ function matchScoutingReducer(
 
       // Pop last action
       const undoStack = [...state.undoStack];
-      const lastAction = undoStack.pop();
 
       // Rebuild state by replaying all actions except the last
       let replayedState = { ...initialState };

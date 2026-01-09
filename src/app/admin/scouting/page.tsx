@@ -10,7 +10,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, Download, RefreshCw, Hash } from 'lucide-react';
 import { ScoutingDataList } from '@/components/admin/scouting/ScoutingDataList';
 import { ScoutingDataDetail } from '@/components/admin/scouting/ScoutingDataDetail';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { buildSearchParams, debounce } from '@/lib/utils';
 import type { ScoutingEntryWithDetails, ScoutingListOptions } from '@/types/admin';
 
