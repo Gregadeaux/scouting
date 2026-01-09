@@ -394,20 +394,26 @@ export function SeasonDetailClient({ year }: SeasonDetailClientProps) {
 
       {/* Edit Metadata Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Season Metadata</DialogTitle>
-            <DialogDescription>
-              Update the metadata for {season.game_name} ({year}). Note: JSON schemas should be
-              modified in code for type safety.
-            </DialogDescription>
-          </DialogHeader>
-          <SeasonMetadataForm
-            season={season}
-            onSubmit={handleEditSubmit}
-            onCancel={() => setEditDialogOpen(false)}
-            isSubmitting={isSubmitting}
-          />
+        <DialogContent className="max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto p-0">
+          <div className="sticky top-0 z-10 border-b border-gray-200 bg-white px-6 py-5 dark:border-gray-700 dark:bg-gray-900">
+            <DialogHeader className="p-0">
+              <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                Edit Season Metadata
+              </DialogTitle>
+              <DialogDescription className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+                Update the metadata for {season.game_name} ({year}). JSON schemas should be
+                modified in code for type safety.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+          <div className="px-6 py-5">
+            <SeasonMetadataForm
+              season={season}
+              onSubmit={handleEditSubmit}
+              onCancel={() => setEditDialogOpen(false)}
+              isSubmitting={isSubmitting}
+            />
+          </div>
         </DialogContent>
       </Dialog>
     </div>
