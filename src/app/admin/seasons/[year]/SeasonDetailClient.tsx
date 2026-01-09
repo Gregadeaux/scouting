@@ -5,17 +5,27 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { JsonSchemaViewer } from '@/components/admin/JsonSchemaViewer';
+import { SeasonMetadataForm } from '@/components/admin/SeasonMetadataForm';
+import { useToast } from '@/components/admin/Toast';
 import {
   ArrowLeft,
   Calendar,
   Clock,
   ExternalLink,
   FileText,
+  Pencil,
   Play,
   Settings,
 } from 'lucide-react';
-import type { SeasonConfig, SeasonStatus } from '@/types';
+import type { SeasonConfig, SeasonConfigUpdate, SeasonStatus } from '@/types';
 import { getSeasonStatus } from '@/types';
 
 interface SeasonDetailClientProps {
@@ -63,29 +73,58 @@ export function SeasonDetailClient({ year }: SeasonDetailClientProps) {
   const [season, setSeason] = useState<SeasonConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showToast } = useToast();
+
+  const fetchSeason = async () => {
+    try {
+      const response = await fetch(`/api/admin/seasons/${year}`);
+      if (response.ok) {
+        const data = await response.json();
+        setSeason(data.data);
+      } else if (response.status === 404) {
+        setError('Season configuration not found');
+      } else {
+        setError('Failed to fetch season configuration');
+      }
+    } catch (err) {
+      console.error('Error fetching season:', err);
+      setError('An error occurred while fetching season');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function fetchSeason() {
-      try {
-        const response = await fetch(`/api/admin/seasons/${year}`);
-        if (response.ok) {
-          const data = await response.json();
-          setSeason(data.data);
-        } else if (response.status === 404) {
-          setError('Season configuration not found');
-        } else {
-          setError('Failed to fetch season configuration');
-        }
-      } catch (err) {
-        console.error('Error fetching season:', err);
-        setError('An error occurred while fetching season');
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchSeason();
   }, [year]);
+
+  const handleEditSubmit = async (data: SeasonConfigUpdate) => {
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`/api/admin/seasons/${year}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setSeason(result.data);
+        setEditDialogOpen(false);
+        showToast('success', 'Season configuration updated successfully');
+      } else {
+        const errorData = await response.json();
+        showToast('error', errorData.error || 'Failed to update season configuration');
+      }
+    } catch (err) {
+      console.error('Error updating season:', err);
+      showToast('error', 'An error occurred while updating');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -167,6 +206,10 @@ export function SeasonDetailClient({ year }: SeasonDetailClientProps) {
             <p className="text-2xl font-semibold text-blue-600 dark:text-blue-400">{year}</p>
           </div>
         </div>
+        <Button onClick={() => setEditDialogOpen(true)}>
+          <Pencil className="mr-2 h-4 w-4" />
+          Edit Metadata
+        </Button>
       </div>
 
       {/* Description */}
@@ -348,6 +391,25 @@ export function SeasonDetailClient({ year }: SeasonDetailClientProps) {
           )}
         </div>
       </div>
+
+      {/* Edit Metadata Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Season Metadata</DialogTitle>
+            <DialogDescription>
+              Update the metadata for {season.game_name} ({year}). Note: JSON schemas should be
+              modified in code for type safety.
+            </DialogDescription>
+          </DialogHeader>
+          <SeasonMetadataForm
+            season={season}
+            onSubmit={handleEditSubmit}
+            onCancel={() => setEditDialogOpen(false)}
+            isSubmitting={isSubmitting}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
