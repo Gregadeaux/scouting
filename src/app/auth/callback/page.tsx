@@ -41,10 +41,11 @@ export default function AuthCallbackPage() {
 
           if (userRole) {
             const redirectPath = getRedirectPathForRole(userRole);
-            router.replace(redirectPath);
+            // Use hard navigation to ensure cookies are sent with request
+            window.location.href = redirectPath;
           } else {
             // User has no role - redirect to complete profile
-            router.replace('/auth/complete-profile');
+            window.location.href = '/auth/complete-profile';
           }
         } else if (event === 'SIGNED_OUT') {
           setError('Authentication failed. Please try again.');
@@ -75,9 +76,9 @@ export default function AuthCallbackPage() {
 
         if (userRole) {
           const redirectPath = getRedirectPathForRole(userRole);
-          router.replace(redirectPath);
+          window.location.href = redirectPath;
         } else {
-          router.replace('/auth/complete-profile');
+          window.location.href = '/auth/complete-profile';
         }
       }
     };
