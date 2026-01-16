@@ -17,19 +17,13 @@ export default function AuthCallbackPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const handleCallback = async () => {
-      try {
-        // Supabase client automatically detects and processes hash fragment tokens
-        // when detectSessionInUrl is true (which it is in our client config)
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    // Listen for auth state changes - this will fire when Supabase
+    // processes the hash fragment tokens from the OAuth redirect
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state change:', event, session?.user?.email);
 
-        if (sessionError) {
-          console.error('Error getting session:', sessionError);
-          setError(sessionError.message);
-          return;
-        }
-
-        if (session) {
+        if (event === 'SIGNED_IN' && session) {
           // Get user role from metadata or profile
           let userRole: UserRole | undefined =
             (session.user.user_metadata?.role || session.user.app_metadata?.role) as UserRole | undefined;
@@ -52,20 +46,49 @@ export default function AuthCallbackPage() {
             // User has no role - redirect to complete profile
             router.replace('/auth/complete-profile');
           }
-        } else {
-          // No session - redirect to login
+        } else if (event === 'SIGNED_OUT') {
           setError('Authentication failed. Please try again.');
           setTimeout(() => {
             router.replace('/auth/login');
           }, 2000);
         }
-      } catch (err) {
-        console.error('Callback error:', err);
-        setError('An unexpected error occurred. Please try again.');
+      }
+    );
+
+    // Also check if there's already a session (in case the event already fired)
+    const checkExistingSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (session) {
+        let userRole: UserRole | undefined =
+          (session.user.user_metadata?.role || session.user.app_metadata?.role) as UserRole | undefined;
+
+        if (!userRole) {
+          const { data: profile } = await supabase
+            .from('user_profiles')
+            .select('role')
+            .eq('id', session.user.id)
+            .single();
+
+          userRole = profile?.role as UserRole | undefined;
+        }
+
+        if (userRole) {
+          const redirectPath = getRedirectPathForRole(userRole);
+          router.replace(redirectPath);
+        } else {
+          router.replace('/auth/complete-profile');
+        }
       }
     };
 
-    handleCallback();
+    // Small delay to allow Supabase to process hash fragment
+    const timeout = setTimeout(checkExistingSession, 100);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, [router]);
 
   if (error) {
