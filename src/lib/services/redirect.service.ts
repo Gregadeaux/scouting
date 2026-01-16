@@ -21,6 +21,7 @@ export const ROUTE_CONFIG = {
     '/auth/forgot-password',
     '/auth/reset-password',
     '/auth/verify-email',
+    '/auth/callback',
   ],
 
   // Routes that should redirect authenticated users
