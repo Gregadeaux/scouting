@@ -31,6 +31,7 @@ import {
   createMatchRepository,
   type IMatchRepository,
 } from '@/lib/repositories';
+import { calculateAllComponentOPRs } from '@/lib/services/tba-attribution.service';
 
 /**
  * OPR metrics including all three calculations
@@ -249,6 +250,57 @@ export class OPRService implements IOPRService {
 
     // Recalculate
     return this.calculateOPRMetrics(eventKey);
+  }
+
+  /**
+   * Calculate component OPR values (auto, teleop hub, endgame, total hub)
+   * from TBA score_breakdown data. Stores results in team_statistics.
+   */
+  async calculateComponentOPRMetrics(eventKey: string): Promise<void> {
+    console.log(`[OPRService] Calculating component OPR for event: ${eventKey}`);
+
+    const matches = await this.matchRepo.findByEventKey(eventKey);
+    const matchesWithBreakdown = matches.filter(
+      m => m.score_breakdown !== null && m.score_breakdown !== undefined
+    );
+
+    if (matchesWithBreakdown.length < 3) {
+      console.log(`[OPRService] Not enough matches with score_breakdown (${matchesWithBreakdown.length}), skipping component OPR`);
+      return;
+    }
+
+    const componentOPRs = await calculateAllComponentOPRs(eventKey, matchesWithBreakdown);
+
+    // Store component OPR values -- merge with existing team_statistics rows
+    const allTeams = new Set<number>([
+      ...componentOPRs.autoOPR.keys(),
+      ...componentOPRs.teleopHubOPR.keys(),
+      ...componentOPRs.endgameOPR.keys(),
+      ...componentOPRs.totalHubOPR.keys(),
+    ]);
+
+    for (const teamNumber of allTeams) {
+      const { error } = await this.client
+        .from('team_statistics')
+        .upsert({
+          team_number: teamNumber,
+          event_key: eventKey,
+          auto_opr: componentOPRs.autoOPR.get(teamNumber) ?? null,
+          teleop_hub_opr: componentOPRs.teleopHubOPR.get(teamNumber) ?? null,
+          endgame_opr: componentOPRs.endgameOPR.get(teamNumber) ?? null,
+          total_hub_opr: componentOPRs.totalHubOPR.get(teamNumber) ?? null,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'team_number,event_key',
+          ignoreDuplicates: false,
+        });
+
+      if (error) {
+        console.error(`[OPRService] Error storing component OPR for team ${teamNumber}:`, error);
+      }
+    }
+
+    console.log(`[OPRService] Stored component OPR for ${allTeams.size} teams`);
   }
 
   /**

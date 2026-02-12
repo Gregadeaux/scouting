@@ -40,23 +40,46 @@ const TEAM_COLORS = [
 export function TeamComparison({ eventKey: _eventKey, teamNumbers, teamStats, allEventStats }: TeamComparisonProps) {
   if (teamNumbers.length === 0) return null;
 
+  // Detect if component OPR data exists (2026+)
+  const hasComponentOPR = allEventStats.some(
+    (t) => t.auto_opr != null || t.teleop_hub_opr != null || t.endgame_opr != null
+  );
+
   // Find max values for normalization across ALL teams at the event (not just selected)
   const maxOPR = Math.max(...allEventStats.map(s => s.opr || 0), 1);
   const maxCCWM = Math.max(...allEventStats.map(s => s.ccwm || 0), 1);
-  const maxAuto = Math.max(...allEventStats.map(s => s.avg_auto_score || 0), 1);
-  const maxTeleop = Math.max(...allEventStats.map(s => s.avg_teleop_score || 0), 1);
-  const maxEndgame = Math.max(...allEventStats.map(s => s.avg_endgame_score || 0), 1);
   const maxReliability = 100;
 
-  // Prepare radar chart data
-  const radarData = [
-    { metric: 'OPR', ...Object.fromEntries(teamStats.map(s => [`team${s.team_number}`, ((s.opr || 0) / maxOPR) * 100])) },
-    { metric: 'CCWM', ...Object.fromEntries(teamStats.map(s => [`team${s.team_number}`, ((s.ccwm || 0) / maxCCWM) * 100])) },
-    { metric: 'Auto', ...Object.fromEntries(teamStats.map(s => [`team${s.team_number}`, ((s.avg_auto_score || 0) / maxAuto) * 100])) },
-    { metric: 'Teleop', ...Object.fromEntries(teamStats.map(s => [`team${s.team_number}`, ((s.avg_teleop_score || 0) / maxTeleop) * 100])) },
-    { metric: 'Endgame', ...Object.fromEntries(teamStats.map(s => [`team${s.team_number}`, ((s.avg_endgame_score || 0) / maxEndgame) * 100])) },
-    { metric: 'Reliability', ...Object.fromEntries(teamStats.map(s => [`team${s.team_number}`, ((s.reliability_score || 0) / maxReliability) * 100])) },
-  ];
+  // Prepare radar chart data - different categories for 2025 vs 2026
+  let radarData;
+  if (hasComponentOPR) {
+    const maxAutoOPR = Math.max(...allEventStats.map(s => s.auto_opr || 0), 1);
+    const maxTeleopOPR = Math.max(...allEventStats.map(s => s.teleop_hub_opr || 0), 1);
+    const maxEndgameOPR = Math.max(...allEventStats.map(s => s.endgame_opr || 0), 1);
+    const maxAvgRating = 5;
+
+    radarData = [
+      { metric: 'OPR', ...Object.fromEntries(teamStats.map(s => [`team${s.team_number}`, ((s.opr || 0) / maxOPR) * 100])) },
+      { metric: 'CCWM', ...Object.fromEntries(teamStats.map(s => [`team${s.team_number}`, ((s.ccwm || 0) / maxCCWM) * 100])) },
+      { metric: 'Auto OPR', ...Object.fromEntries(teamStats.map(s => [`team${s.team_number}`, ((s.auto_opr || 0) / maxAutoOPR) * 100])) },
+      { metric: 'Teleop OPR', ...Object.fromEntries(teamStats.map(s => [`team${s.team_number}`, ((s.teleop_hub_opr || 0) / maxTeleopOPR) * 100])) },
+      { metric: 'Endgame OPR', ...Object.fromEntries(teamStats.map(s => [`team${s.team_number}`, ((s.endgame_opr || 0) / maxEndgameOPR) * 100])) },
+      { metric: 'Avg Rating', ...Object.fromEntries(teamStats.map(s => [`team${s.team_number}`, ((s.avg_defense_rating || 0) / maxAvgRating) * 100])) },
+    ];
+  } else {
+    const maxAuto = Math.max(...allEventStats.map(s => s.avg_auto_score || 0), 1);
+    const maxTeleop = Math.max(...allEventStats.map(s => s.avg_teleop_score || 0), 1);
+    const maxEndgame = Math.max(...allEventStats.map(s => s.avg_endgame_score || 0), 1);
+
+    radarData = [
+      { metric: 'OPR', ...Object.fromEntries(teamStats.map(s => [`team${s.team_number}`, ((s.opr || 0) / maxOPR) * 100])) },
+      { metric: 'CCWM', ...Object.fromEntries(teamStats.map(s => [`team${s.team_number}`, ((s.ccwm || 0) / maxCCWM) * 100])) },
+      { metric: 'Auto', ...Object.fromEntries(teamStats.map(s => [`team${s.team_number}`, ((s.avg_auto_score || 0) / maxAuto) * 100])) },
+      { metric: 'Teleop', ...Object.fromEntries(teamStats.map(s => [`team${s.team_number}`, ((s.avg_teleop_score || 0) / maxTeleop) * 100])) },
+      { metric: 'Endgame', ...Object.fromEntries(teamStats.map(s => [`team${s.team_number}`, ((s.avg_endgame_score || 0) / maxEndgame) * 100])) },
+      { metric: 'Reliability', ...Object.fromEntries(teamStats.map(s => [`team${s.team_number}`, ((s.reliability_score || 0) / maxReliability) * 100])) },
+    ];
+  }
 
   return (
     <Card className="p-6">
@@ -123,18 +146,37 @@ export function TeamComparison({ eventKey: _eventKey, teamNumbers, teamStats, al
                   label="CCWM"
                   values={teamStats.map(s => s.ccwm?.toFixed(1) || 'N/A')}
                 />
-                <StatRow
-                  label="Avg Auto"
-                  values={teamStats.map(s => s.avg_auto_score?.toFixed(1) || 'N/A')}
-                />
-                <StatRow
-                  label="Avg Teleop"
-                  values={teamStats.map(s => s.avg_teleop_score?.toFixed(1) || 'N/A')}
-                />
-                <StatRow
-                  label="Avg Endgame"
-                  values={teamStats.map(s => s.avg_endgame_score?.toFixed(1) || 'N/A')}
-                />
+                {hasComponentOPR ? (
+                  <>
+                    <StatRow
+                      label="Auto OPR"
+                      values={teamStats.map(s => s.auto_opr?.toFixed(1) || 'N/A')}
+                    />
+                    <StatRow
+                      label="Teleop OPR"
+                      values={teamStats.map(s => s.teleop_hub_opr?.toFixed(1) || 'N/A')}
+                    />
+                    <StatRow
+                      label="Endgame OPR"
+                      values={teamStats.map(s => s.endgame_opr?.toFixed(1) || 'N/A')}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <StatRow
+                      label="Avg Auto"
+                      values={teamStats.map(s => s.avg_auto_score?.toFixed(1) || 'N/A')}
+                    />
+                    <StatRow
+                      label="Avg Teleop"
+                      values={teamStats.map(s => s.avg_teleop_score?.toFixed(1) || 'N/A')}
+                    />
+                    <StatRow
+                      label="Avg Endgame"
+                      values={teamStats.map(s => s.avg_endgame_score?.toFixed(1) || 'N/A')}
+                    />
+                  </>
+                )}
                 <StatRow
                   label="Reliability %"
                   values={teamStats.map(s => s.reliability_score?.toFixed(0) || 'N/A')}

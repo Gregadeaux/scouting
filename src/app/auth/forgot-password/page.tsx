@@ -33,18 +33,18 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      // Fire-and-forget: always show success to prevent email enumeration
+      await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       });
-
-      if (resetError) throw resetError;
-
-      setSent(true);
     } catch (err) {
+      // Log for debugging but don't expose to user
       console.error('Password reset error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to send reset email');
     } finally {
       setLoading(false);
+      // Always show the success message regardless of whether the email
+      // exists or Supabase returned an error. This prevents email enumeration.
+      setSent(true);
     }
   };
 

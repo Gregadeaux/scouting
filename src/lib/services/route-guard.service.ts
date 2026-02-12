@@ -17,15 +17,14 @@ export const ROUTE_GUARDS = {
   // Admin routes - accessible by admins and mentors (with read-only for mentors)
   '/admin': ['admin', 'mentor'],
 
+  // Lead scout dashboard - accessible by admins and mentors
+  '/lead-scout': ['admin', 'mentor'],
+
   // Protected routes accessible by all authenticated users
   '/dashboard': ['admin', 'mentor', 'scouter'],
-  '/pit-scouting': ['admin', 'mentor', 'scouter'],
   '/scouting': ['admin', 'mentor', 'scouter'],
   '/analytics': ['admin', 'mentor', 'scouter'],
   '/profile': ['admin', 'mentor', 'scouter'],
-
-  // Future: Mentor routes (subset of admin features)
-  // '/team-management': ['admin', 'mentor'],
 } as const;
 
 /**

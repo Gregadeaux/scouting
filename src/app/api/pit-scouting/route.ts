@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { successResponse, errorResponse, serverError, unauthorizedError } from '@/lib/api/response';
 import { ScoutingDataRepository } from '@/lib/repositories/scouting-data.repository';
 import {
@@ -16,10 +16,12 @@ import type {
 } from '@/lib/services/types/pit-scouting-dto';
 
 /**
- * Create service instance with authenticated client
+ * Create service instance with service role client.
+ * API routes handle their own auth checks (getUser), so we use the
+ * service role to bypass RLS for database operations.
  */
-async function getPitScoutingService() {
-  const supabase = await createClient();
+function getPitScoutingService() {
+  const supabase = createServiceClient();
   const repository = new ScoutingDataRepository(supabase);
   return new PitScoutingService(repository);
 }
@@ -87,8 +89,8 @@ export async function POST(request: NextRequest) {
       team_comments: body.team_comments,
     };
 
-    // Delegate to service
-    const service = await getPitScoutingService();
+    // Delegate to service (reuse same client for RLS)
+    const service = getPitScoutingService();
     const result = await service.createPitScouting(dto);
 
     return successResponse(result, 201);
@@ -163,8 +165,8 @@ export async function GET(request: NextRequest) {
       return errorResponse('team_number must be a valid number', 400);
     }
 
-    // Delegate to service
-    const service = await getPitScoutingService();
+    // Delegate to service (reuse same client for RLS)
+    const service = getPitScoutingService();
 
     // If filtering by event_key only, use optimized method
     if (queryParams.event_key && !queryParams.team_number && !queryParams.scout_id) {
@@ -261,8 +263,8 @@ export async function PUT(request: NextRequest) {
       team_comments: body.team_comments,
     };
 
-    // Delegate to service
-    const service = await getPitScoutingService();
+    // Delegate to service (reuse same client for RLS)
+    const service = getPitScoutingService();
     const result = await service.updatePitScouting(dto.id, dto);
 
     return successResponse(result);

@@ -399,11 +399,11 @@ export class ImportService implements IImportService {
 
         if (failureCount > 0) {
           this.log(`Warning: ${failureCount} teams failed to import`);
-          // Log individual failures
+          // Log individual failures (using out_team_number from the renamed output column)
           results
             ?.filter((r: { success: boolean }) => !r.success)
-            .forEach((r: { team_number: number; error_message: string }) => {
-              this.log(`  Team ${r.team_number}: ${r.error_message}`);
+            .forEach((r: { out_team_number: number; error_message: string }) => {
+              this.log(`  Team ${r.out_team_number}: ${r.error_message}`);
             });
         }
 

@@ -41,6 +41,7 @@ export interface Event {
   country?: string;
   start_date: string; // ISO date string
   end_date: string; // ISO date string
+  manual_schedule?: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -109,6 +110,21 @@ export interface MatchSchedule {
 }
 
 export type CompLevel = 'qm' | 'ef' | 'qf' | 'sf' | 'f';
+
+// ============================================================================
+// SCOUTING SESSION TYPES (Live Session Sync)
+// ============================================================================
+
+export interface ScoutingSession {
+  id: string;
+  event_key: string;
+  current_match_number: number;
+  comp_level: CompLevel;
+  session_data: Record<string, unknown>;
+  updated_by?: string;
+  created_at?: string;
+  updated_at?: string;
+}
 
 // ============================================================================
 // SCOUTING DATA TYPES (Hybrid Structure)
@@ -245,6 +261,12 @@ export interface TeamStatistics {
   avg_defense_rating?: number;
   avg_driver_skill?: number;
   avg_speed_rating?: number;
+
+  // Component OPR (from TBA score_breakdown, 2026+)
+  auto_opr?: number;
+  teleop_hub_opr?: number;
+  endgame_opr?: number;
+  total_hub_opr?: number;
 
   // Pick list rankings
   first_pick_ability?: number;
@@ -556,4 +578,13 @@ export type * from './auth';
 export type * from './team-detail';
 export type * from './scouter';
 export type * from './validation';
+export type * from './scouting-session';
 export { getSeasonStatus } from './season-config';
+export {
+  ALL_STATION_KEYS,
+  createDefaultOrchestrationState,
+  parseStationKey,
+  stationLabel,
+  isOrchestrationState,
+  getOrchestration,
+} from './scouting-session';

@@ -19,6 +19,14 @@ import {
   type TeleopPerformance2025,
   type EndgamePerformance2025,
 } from '@/types/season-2025';
+import {
+  calculateAutoClimbPoints2026,
+  calculateEndgameClimbPoints2026,
+  getAverageRating2026,
+  type AutoPerformance2026,
+  type TeleopPerformance2026,
+  type EndgamePerformance2026,
+} from '@/types/season-2026';
 
 interface RouteParams {
   params: Promise<{
@@ -85,9 +93,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       const endgameData = match.endgame_performance as Record<string, unknown> | null;
 
       // Access match_number and event_key from the joined match_schedule table
-      const matchSchedule = match.match_schedule as { match_number: number; event_key: string } | { match_number: number; event_key: string }[] | null;
-      const matchNumber = Array.isArray(matchSchedule) ? matchSchedule[0]?.match_number ?? 0 : matchSchedule?.match_number ?? 0;
-      const matchEventKey = Array.isArray(matchSchedule) ? matchSchedule[0]?.event_key ?? '' : matchSchedule?.event_key ?? '';
+      // Supabase may return a single object or an array depending on the join
+      type MatchScheduleJoin = { match_number: number; event_key: string };
+      const rawSchedule = match.match_schedule as MatchScheduleJoin | MatchScheduleJoin[] | null;
+      const matchSchedule = Array.isArray(rawSchedule) ? rawSchedule[0] : rawSchedule;
+      const matchNumber = matchSchedule?.match_number ?? 0;
+      const matchEventKey = matchSchedule?.event_key ?? '';
 
       // Extract year from event_key (format: "2025wimu" -> 2025)
       const eventYear = matchEventKey ? parseInt(matchEventKey.substring(0, 4), 10) : 0;
@@ -103,7 +114,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
       // Use season-specific calculation functions based on schema version or year
       if (schemaVersion === '2025.1' || eventYear === 2025) {
-        // 2025 Reefscape season
         if (autoData) {
           autoScore = calculateAutoPoints2025(autoData as unknown as AutoPerformance2025);
         }
@@ -113,15 +123,17 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         if (endgameData) {
           endgameScore = calculateEndgamePoints2025(endgameData as unknown as EndgamePerformance2025);
         }
+      } else if (schemaVersion === '2026.1' || eventYear === 2026) {
+        if (autoData) {
+          autoScore = calculateAutoClimbPoints2026(autoData as unknown as AutoPerformance2026);
+        }
+        if (endgameData) {
+          endgameScore = calculateEndgameClimbPoints2026(endgameData as unknown as EndgamePerformance2026);
+        }
       }
-      // Add more seasons here as needed:
-      // else if (schemaVersion === '2026.1' || eventYear === 2026) {
-      //   autoScore = calculateAutoPoints2026(autoData as AutoPerformance2026);
-      //   teleopScore = calculateTeleopPoints2026(teleopData as TeleopPerformance2026);
-      //   endgameScore = calculateEndgamePoints2026(endgameData as EndgamePerformance2026);
-      // }
 
-      return {
+      // Build base response
+      const matchResult: Record<string, unknown> = {
         matchNumber,
         eventKey: matchEventKey,
         year: eventYear,
@@ -130,7 +142,26 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         endgameScore,
         totalScore: autoScore + teleopScore + endgameScore,
       };
-    }).sort((a, b) => a.matchNumber - b.matchNumber);
+
+      // Add 2026-specific fields
+      if (schemaVersion === '2026.1' || eventYear === 2026) {
+        const teleop2026 = teleopData as unknown as TeleopPerformance2026 | null;
+        const endgame2026 = endgameData as unknown as EndgamePerformance2026 | null;
+        const auto2026 = autoData as unknown as AutoPerformance2026 | null;
+        matchResult.scoringRating = teleop2026?.scoring_rating;
+        matchResult.feedingRating = teleop2026?.feeding_rating;
+        matchResult.defenseRating = teleop2026?.defense_rating;
+        matchResult.reliabilityRating = teleop2026?.reliability_rating;
+        matchResult.avgRating = teleop2026 ? getAverageRating2026(teleop2026) : undefined;
+        matchResult.autoClimbSuccess = auto2026?.auto_climb_success;
+        matchResult.endgameClimbSuccess = endgame2026?.endgame_climb_success;
+        matchResult.endgameClimbLevel = endgame2026?.endgame_climb_level;
+        matchResult.wasDisabled = endgame2026?.was_disabled;
+        matchResult.season = 2026;
+      }
+
+      return matchResult;
+    }).sort((a, b) => (a.matchNumber as number) - (b.matchNumber as number));
 
     return successResponse({
       teamNumber: teamNum,

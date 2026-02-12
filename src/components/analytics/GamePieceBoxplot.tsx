@@ -27,7 +27,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Bar,
 } from 'recharts';
 
 interface GamePieceBoxplotProps {
@@ -36,6 +35,7 @@ interface GamePieceBoxplotProps {
 
 interface TeamMatchData {
   matchNumber: number;
+  // 2025 fields
   coralL1: number;
   coralL2: number;
   coralL3: number;
@@ -44,6 +44,15 @@ interface TeamMatchData {
   algaeBarge: number;
   allCoral: number;
   allAlgae: number;
+  // 2026 fields (hub counts from TBA score_breakdown)
+  autoCount: number;
+  transitionCount: number;
+  shift1Count: number;
+  shift2Count: number;
+  shift3Count: number;
+  shift4Count: number;
+  endgameCount: number;
+  totalCount: number;
 }
 
 interface TeamData {
@@ -70,9 +79,17 @@ type MetricType =
   | 'algaeProcessor'
   | 'algaeBarge'
   | 'allCoral'
-  | 'allAlgae';
+  | 'allAlgae'
+  | 'autoCount'
+  | 'transitionCount'
+  | 'shift1Count'
+  | 'shift2Count'
+  | 'shift3Count'
+  | 'shift4Count'
+  | 'endgameCount'
+  | 'totalCount';
 
-const METRIC_OPTIONS = [
+const METRIC_OPTIONS_2025 = [
   { value: 'allCoral', label: 'All Coral (L1+L2+L3+L4)' },
   { value: 'allAlgae', label: 'All Algae (Processor+Barge)' },
   { value: 'coralL1', label: 'Coral Level 1' },
@@ -83,15 +100,30 @@ const METRIC_OPTIONS = [
   { value: 'algaeBarge', label: 'Algae Barge' },
 ];
 
+const METRIC_OPTIONS_2026 = [
+  { value: 'totalCount', label: 'Total Game Pieces' },
+  { value: 'autoCount', label: 'Auto Game Pieces' },
+  { value: 'transitionCount', label: 'Transition Game Pieces' },
+  { value: 'shift1Count', label: 'Shift 1 Game Pieces' },
+  { value: 'shift2Count', label: 'Shift 2 Game Pieces' },
+  { value: 'shift3Count', label: 'Shift 3 Game Pieces' },
+  { value: 'shift4Count', label: 'Shift 4 Game Pieces' },
+  { value: 'endgameCount', label: 'Endgame Game Pieces' },
+];
+
 const TEAMS_PER_PAGE = 10;
 
 export function GamePieceBoxplot({ eventKey }: GamePieceBoxplotProps) {
   const [teamsData, setTeamsData] = useState<TeamData[]>([]);
+  const [season, setSeason] = useState<number>(2025);
   const [selectedMetric, setSelectedMetric] = useState<MetricType>('allCoral');
   const [currentPage, setCurrentPage] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Store baseline (y=0) and top (y=yMax) pixel positions for each team
+  const scaleRef = useRef<Map<string, { baseline: number; top: number; yMax: number }>>(new Map());
 
+  const METRIC_OPTIONS = season >= 2026 ? METRIC_OPTIONS_2026 : METRIC_OPTIONS_2025;
 
   const fetchGamePieceData = useCallback(async () => {
     setIsLoading(true);
@@ -102,7 +134,13 @@ export function GamePieceBoxplot({ eventKey }: GamePieceBoxplotProps) {
       const data = await response.json();
 
       if (data.success && data.data) {
+        const apiSeason = data.data.season || 2025;
+        setSeason(apiSeason);
         setTeamsData(data.data.teams || []);
+        // Set default metric based on season
+        if (apiSeason >= 2026) {
+          setSelectedMetric('totalCount');
+        }
       } else {
         setError(data.error || 'Failed to load game piece data');
       }
@@ -256,15 +294,58 @@ export function GamePieceBoxplot({ eventKey }: GamePieceBoxplotProps) {
     }
   });
 
-  // Prepare boxplot data for current page
-  const boxplotData = currentStats.map((stat, index) => ({
+  // Calculate Y-axis domain - must include all scatter data points
+  const allYValues = scatterData.map((d) => d.y);
+  const yMin = 0;
+  const yMax = Math.max(...allYValues, ...currentStats.map((s) => s.max), 1);
+
+  // Create baseline reference points (y=0) - used to establish pixel scale
+  const baselineData: Array<{
+    x: number;
+    y: number;
+    team: string;
+    yDomainMax: number;
+  }> = currentStats.map((stat, index) => ({
     x: index,
+    y: 0,
+    team: `${stat.teamNumber}`,
+    yDomainMax: yMax,
+  }));
+
+  // Create top reference points (y=yMax) - used to establish pixel scale
+  const topData: Array<{
+    x: number;
+    y: number;
+    team: string;
+    yDomainMax: number;
+  }> = currentStats.map((stat, index) => ({
+    x: index,
+    y: yMax,
+    team: `${stat.teamNumber}`,
+    yDomainMax: yMax,
+  }));
+
+  // Create boxplot drawing points (one per team with all stats)
+  const boxplotDrawData: Array<{
+    x: number;
+    y: number;
+    team: string;
+    min: number;
+    q1: number;
+    median: number;
+    q3: number;
+    max: number;
+    yDomainMax: number;
+  }> = currentStats.map((stat, index) => ({
+    x: index,
+    y: stat.median, // Position at median for the scatter point
     team: `${stat.teamNumber}`,
     min: stat.min,
     q1: stat.q1,
     median: stat.median,
     q3: stat.q3,
     max: stat.max,
+    yDomainMax: yMax,
   }));
 
   // Categories for x-axis
@@ -273,13 +354,14 @@ export function GamePieceBoxplot({ eventKey }: GamePieceBoxplotProps) {
   const metricLabel =
     METRIC_OPTIONS.find((opt) => opt.value === selectedMetric)?.label ||
     'Game Pieces';
+  const chartTitle = season >= 2026 ? 'Hub Scoring Distribution' : 'Game Piece Distribution';
 
   return (
     <Card className="p-4">
       <div className="mb-4 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">
-            Game Piece Distribution - {metricLabel}
+            {chartTitle} - {metricLabel}
           </h3>
           <div className="text-sm text-muted-foreground">
             Teams {startIdx + 1}-{endIdx} of {boxplotStats.length}
@@ -314,7 +396,6 @@ export function GamePieceBoxplot({ eventKey }: GamePieceBoxplotProps) {
       <div className="h-96">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
-            data={boxplotData}
             margin={{ top: 20, right: 20, bottom: 60, left: 60 }}
           >
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -331,7 +412,7 @@ export function GamePieceBoxplot({ eventKey }: GamePieceBoxplotProps) {
               }}
               className="text-xs"
             />
-            <YAxis className="text-xs" />
+            <YAxis domain={[yMin, yMax]} allowDataOverflow={true} className="text-xs" />
             <Tooltip
               content={({ active, payload }) => {
                 if (!active || !payload || payload.length === 0) return null;
@@ -375,6 +456,64 @@ export function GamePieceBoxplot({ eventKey }: GamePieceBoxplotProps) {
               }}
             />
 
+            {/* Baseline reference points (y=0) - invisible, just to capture pixel positions */}
+            <Scatter
+              name="Baseline Refs"
+              data={baselineData}
+              dataKey="y"
+              fill="transparent"
+              isAnimationActive={false}
+              shape={(props: unknown) => {
+                const p = props as {
+                  cx?: number;
+                  cy?: number;
+                  payload?: {
+                    team: string;
+                    yDomainMax: number;
+                  };
+                };
+
+                const { cy, payload } = p;
+
+                if (payload && typeof cy === 'number') {
+                  // Store baseline pixel position
+                  const existing = scaleRef.current.get(payload.team) || { baseline: 0, top: 0, yMax: payload.yDomainMax };
+                  scaleRef.current.set(payload.team, { ...existing, baseline: cy, yMax: payload.yDomainMax });
+                }
+
+                return <></>; // Invisible
+              }}
+            />
+
+            {/* Top reference points (y=yMax) - invisible, just to capture pixel positions */}
+            <Scatter
+              name="Top Refs"
+              data={topData}
+              dataKey="y"
+              fill="transparent"
+              isAnimationActive={false}
+              shape={(props: unknown) => {
+                const p = props as {
+                  cx?: number;
+                  cy?: number;
+                  payload?: {
+                    team: string;
+                    yDomainMax: number;
+                  };
+                };
+
+                const { cy, payload } = p;
+
+                if (payload && typeof cy === 'number') {
+                  // Store top pixel position
+                  const existing = scaleRef.current.get(payload.team) || { baseline: 0, top: 0, yMax: payload.yDomainMax };
+                  scaleRef.current.set(payload.team, { ...existing, top: cy });
+                }
+
+                return <></>; // Invisible
+              }}
+            />
+
             {/* Render individual data points */}
             <Scatter
               name="Match Performance"
@@ -384,41 +523,61 @@ export function GamePieceBoxplot({ eventKey }: GamePieceBoxplotProps) {
               fillOpacity={0.6}
             />
 
-            {/* Render boxplot elements using Bar with custom shape */}
-            <Bar
-              dataKey="median"
+            {/* Boxplot drawing - renders after reference points are captured */}
+            <Scatter
+              name="Boxplot"
+              data={boxplotDrawData}
+              dataKey="y"
               fill="transparent"
+              isAnimationActive={false}
               shape={(props: unknown) => {
-                const { x, y, width, height, payload } = props as { x?: number; y?: number; width?: number; height?: number; payload?: typeof boxplotData[0]; value?: number };
+                const p = props as {
+                  cx?: number;
+                  cy?: number;
+                  payload?: {
+                    team: string;
+                    min: number;
+                    q1: number;
+                    median: number;
+                    q3: number;
+                    max: number;
+                    yDomainMax: number;
+                  };
+                };
 
-                if (!payload || typeof x !== 'number' || typeof y !== 'number') {
+                const { cx, payload } = p;
+
+                if (!payload || typeof cx !== 'number') {
                   return <></>;
                 }
 
-                const boxWidth = 120; // Wider to encompass scattered match points
-                const cx = x + (width || 0) / 2;
+                const scale = scaleRef.current.get(payload.team);
+                if (!scale || scale.baseline === 0 && scale.top === 0) {
+                  return <></>;
+                }
 
-                // Since y represents the median position, we can calculate other positions
-                // by determining the pixel-per-unit ratio
-                // The 'y' prop is the pixel position for the median value
-                const medianValue = payload.median;
-                const medianPixel = y;
+                // Calculate pixels per unit from reference points
+                // baseline is at y=0, top is at y=yMax
+                // In SVG, y increases downward, so baseline.cy > top.cy
+                const pixelsPerUnit = (scale.baseline - scale.top) / scale.yMax;
 
-                // Calculate pixels per data unit using the bar height
-                // height is negative for upward bars
-                const pixelsPerUnit = height !== undefined && height !== 0
-                  ? height / medianValue
-                  : 1;
+                if (pixelsPerUnit <= 0) {
+                  return <></>;
+                }
 
-                // Now calculate all y positions relative to the median
-                const q1Pixel = medianPixel + (medianValue - payload.q1) * pixelsPerUnit;
-                const q3Pixel = medianPixel + (medianValue - payload.q3) * pixelsPerUnit;
-                const minPixel = medianPixel + (medianValue - payload.min) * pixelsPerUnit;
-                const maxPixel = medianPixel + (medianValue - payload.max) * pixelsPerUnit;
+                // Calculate pixel positions for all values
+                // pixelY = baseline - value * pixelsPerUnit
+                const minPixel = scale.baseline - payload.min * pixelsPerUnit;
+                const q1Pixel = scale.baseline - payload.q1 * pixelsPerUnit;
+                const medianPixel = scale.baseline - payload.median * pixelsPerUnit;
+                const q3Pixel = scale.baseline - payload.q3 * pixelsPerUnit;
+                const maxPixel = scale.baseline - payload.max * pixelsPerUnit;
+
+                const boxWidth = 60; // Wider to encompass scattered match points
 
                 return (
                   <g>
-                    {/* Whisker lines */}
+                    {/* Lower whisker: min to q1 */}
                     <line
                       x1={cx}
                       y1={minPixel}
@@ -427,6 +586,7 @@ export function GamePieceBoxplot({ eventKey }: GamePieceBoxplotProps) {
                       stroke="#64748b"
                       strokeWidth={2}
                     />
+                    {/* Upper whisker: q3 to max */}
                     <line
                       x1={cx}
                       y1={q3Pixel}
@@ -436,12 +596,12 @@ export function GamePieceBoxplot({ eventKey }: GamePieceBoxplotProps) {
                       strokeWidth={2}
                     />
 
-                    {/* Box (Q1 to Q3) */}
+                    {/* Box: q1 to q3 */}
                     <rect
                       x={cx - boxWidth / 2}
-                      y={Math.min(q1Pixel, q3Pixel)}
+                      y={q3Pixel}
                       width={boxWidth}
-                      height={Math.abs(q1Pixel - q3Pixel)}
+                      height={q1Pixel - q3Pixel}
                       fill="#10b981"
                       fillOpacity={0.3}
                       stroke="#10b981"
@@ -458,19 +618,20 @@ export function GamePieceBoxplot({ eventKey }: GamePieceBoxplotProps) {
                       strokeWidth={3}
                     />
 
-                    {/* Min/max caps */}
+                    {/* Min cap */}
                     <line
-                      x1={cx - 30}
+                      x1={cx - 15}
                       y1={minPixel}
-                      x2={cx + 30}
+                      x2={cx + 15}
                       y2={minPixel}
                       stroke="#64748b"
                       strokeWidth={2}
                     />
+                    {/* Max cap */}
                     <line
-                      x1={cx - 30}
+                      x1={cx - 15}
                       y1={maxPixel}
-                      x2={cx + 30}
+                      x2={cx + 15}
                       y2={maxPixel}
                       stroke="#64748b"
                       strokeWidth={2}

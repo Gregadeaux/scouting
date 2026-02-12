@@ -13,6 +13,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { PickListControls } from '@/components/picklist/PickListControls';
 import { PickListGrid, type PickListColumnConfig } from '@/components/picklist/PickListGrid';
 import { SaveConfigDialog } from '@/components/picklist/SaveConfigDialog';
@@ -30,6 +31,8 @@ interface Event {
 const INITIAL_SORT_METRICS: SortMetric[] = ['compositeScore', 'opr', 'ccwm', 'autoScore'];
 
 export default function PickListPage() {
+  const searchParams = useSearchParams();
+
   // State
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEventKey, setSelectedEventKey] = useState<string | null>(null);
@@ -57,6 +60,14 @@ export default function PickListPage() {
   useEffect(() => {
     fetchEvents();
   }, []);
+
+  // Auto-select event from URL query parameter
+  useEffect(() => {
+    const eventFromUrl = searchParams.get('event');
+    if (eventFromUrl && !selectedEventKey) {
+      setSelectedEventKey(eventFromUrl);
+    }
+  }, [searchParams, selectedEventKey]);
 
   // Load pick list when event changes
   useEffect(() => {

@@ -76,11 +76,11 @@ test.describe('Login Page - Email/Password Authentication', () => {
     await page.click('button[type="submit"]');
 
     // Wait for redirect - should go to admin dashboard based on user role
-    await page.waitForURL(/\/(admin|pit-scouting|dashboard)/, { timeout: 10000 });
+    await page.waitForURL(/\/(admin|scouting\/pit|dashboard)/, { timeout: 10000 });
 
     // Verify we're on an authenticated page
     const url = page.url();
-    expect(['/admin', '/pit-scouting', '/dashboard'].some(path => url.includes(path))).toBe(true);
+    expect(['/admin', '/scouting/pit', '/dashboard'].some(path => url.includes(path))).toBe(true);
   });
 
   test('should validate required fields', async ({ page }) => {
@@ -240,7 +240,7 @@ test.describe('Login Page - Navigation', () => {
 
     // Should redirect to the specified page (if authorized)
     // Note: May redirect to role default if not authorized for requested page
-    await page.waitForURL(/\/(admin|pit-scouting|dashboard)/, { timeout: 10000 });
+    await page.waitForURL(/\/(admin|scouting\/pit|dashboard)/, { timeout: 10000 });
   });
 });
 
@@ -253,11 +253,11 @@ test.describe('Login Page - Role-Based Redirects', () => {
     await page.click('button[type="submit"]');
 
     // Wait for redirect
-    await page.waitForURL(/\/(admin|pit-scouting|dashboard)/, { timeout: 10000 });
+    await page.waitForURL(/\/(admin|scouting\/pit|dashboard)/, { timeout: 10000 });
 
     // Verify we landed on an authenticated route
     const url = page.url();
-    const validRoutes = ['/admin', '/pit-scouting', '/dashboard'];
+    const validRoutes = ['/admin', '/scouting/pit', '/dashboard'];
     const isValidRoute = validRoutes.some(route => url.includes(route));
     expect(isValidRoute).toBe(true);
   });
@@ -284,7 +284,7 @@ test.describe('Login Page - Session Handling', () => {
     await page.click('button[type="submit"]');
 
     // Wait for redirect
-    await page.waitForURL(/\/(admin|pit-scouting|dashboard)/, { timeout: 10000 });
+    await page.waitForURL(/\/(admin|scouting\/pit|dashboard)/, { timeout: 10000 });
 
     // Reload page
     await page.reload();
@@ -352,7 +352,7 @@ test.describe('Login Page - Accessibility', () => {
     await page.locator('input[name="password"]').press('Enter');
 
     // Should submit and redirect
-    await page.waitForURL(/\/(admin|pit-scouting|dashboard)/, { timeout: 10000 });
+    await page.waitForURL(/\/(admin|scouting\/pit|dashboard)/, { timeout: 10000 });
   });
 
   test('should have visible focus states', async ({ page }) => {

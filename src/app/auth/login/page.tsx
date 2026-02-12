@@ -6,21 +6,23 @@
  */
 
 import { LoginForm } from '@/components/auth/LoginForm';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
-import { useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
 /**
  * Login Page
  *
  * Public route for user authentication.
+ * Supports ?redirect= query parameter to redirect after login.
  * Redirect logic is handled by:
  * - Middleware: Prevents authenticated users from accessing this page
  * - AuthContext: Routes users to role-specific pages after successful login
  */
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || undefined;
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-900">
@@ -36,8 +38,11 @@ export default function LoginPage() {
 
         <LoginForm
           onSuccess={() => {
-            // AuthContext.signIn handles role-based redirect via RedirectService
-            // No need to redirect here - just let the auth flow complete
+            // If a redirect parameter was provided, navigate there after login
+            // This overrides the default role-based redirect from the server action
+            if (redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')) {
+              router.push(redirectTo);
+            }
           }}
           onForgotPassword={() => {
             router.push('/auth/forgot-password');
@@ -60,5 +65,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginPageContent />
+    </Suspense>
   );
 }

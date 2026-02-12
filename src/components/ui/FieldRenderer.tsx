@@ -98,6 +98,12 @@ export function FieldRenderer({
           </div>
         );
       }
+      // Radix Select forbids items with value="". Separate out any empty-value
+      // option and use its label as the placeholder text instead.
+      const emptyOption = field.options.find((o) => String(o.value) === '');
+      const selectableOptions = field.options.filter((o) => String(o.value) !== '');
+      const selectPlaceholder = emptyOption?.label || placeholder || `Select ${label.toLowerCase()}`;
+
       return (
         <div className={className}>
           <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -105,15 +111,15 @@ export function FieldRenderer({
             {required && <span className="ml-1 text-red-500">*</span>}
           </label>
           <Select
-            value={typeof value === 'string' ? value : ''}
+            value={typeof value === 'string' && value !== '' ? value : undefined}
             onValueChange={(val) => onChange(val)}
             disabled={disabled}
           >
             <SelectTrigger className={error ? 'border-red-500' : ''}>
-              <SelectValue placeholder={placeholder || `Select ${label.toLowerCase()}`} />
+              <SelectValue placeholder={selectPlaceholder} />
             </SelectTrigger>
             <SelectContent>
-              {field.options.map((option) => (
+              {selectableOptions.map((option) => (
                 <SelectItem key={String(option.value)} value={String(option.value)}>
                   {option.label}
                 </SelectItem>

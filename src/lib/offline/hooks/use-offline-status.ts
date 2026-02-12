@@ -44,39 +44,20 @@ export interface OfflineStatus {
  * @returns Current connectivity status
  */
 export function useOfflineStatus(): OfflineStatus {
-  // Initialize with navigator.onLine if available, otherwise assume online
-  const [isOnline, setIsOnline] = useState<boolean>(() => {
-    if (typeof navigator === 'undefined') {
-      return true; // SSR fallback
-    }
-    return navigator.onLine;
-  });
+  // Always initialize as online to avoid hydration mismatch between server and client.
+  // The useEffect below will sync with the real navigator.onLine value after mount.
+  const [isOnline, setIsOnline] = useState<boolean>(true);
 
   useEffect(() => {
-    // Only run in browser
-    if (typeof window === 'undefined') {
-      return;
-    }
+    // Sync initial state with browser
+    setIsOnline(navigator.onLine);
 
-    /**
-     * Handle online event
-     */
-    const handleOnline = () => {
-      setIsOnline(true);
-    };
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
 
-    /**
-     * Handle offline event
-     */
-    const handleOffline = () => {
-      setIsOnline(false);
-    };
-
-    // Add event listeners
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Cleanup
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);

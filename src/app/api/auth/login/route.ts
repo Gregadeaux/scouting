@@ -41,10 +41,7 @@ export async function POST(request: NextRequest) {
     const { user: authUser, error: signInError } = await signIn(supabase, formData);
 
     if (signInError || !authUser) {
-      return errorResponse(
-        signInError?.message || 'Invalid email or password',
-        401
-      );
+      return errorResponse('Invalid email or password', 401);
     }
 
     // Get full user object with profile and permissions

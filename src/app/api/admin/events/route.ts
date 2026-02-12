@@ -88,6 +88,7 @@ export async function POST(request: NextRequest) {
           country: body.country || null,
           start_date: body.start_date,
           end_date: body.end_date,
+          manual_schedule: body.manual_schedule ?? false,
         },
       ])
       .select()

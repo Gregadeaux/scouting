@@ -25,7 +25,7 @@ import type {
 
 } from './types/pit-scouting-dto';
 import { PitScoutingMapper } from '@/lib/mappers/pit-scouting.mapper';
-import { validatePitScoutingData2025 } from '@/lib/supabase/validation';
+import { validatePitScoutingData2025, validatePitScoutingData2026 } from '@/lib/supabase/validation';
 
 /**
  * Custom error classes for pit scouting service
@@ -71,7 +71,7 @@ export class UnsupportedSchemaVersionError extends Error {
 /**
  * Supported schema versions for validation routing
  */
-const SUPPORTED_SCHEMA_VERSIONS = ['2025.1'] as const;
+const SUPPORTED_SCHEMA_VERSIONS = ['2025.1', '2026.1'] as const;
 type SupportedSchemaVersion = (typeof SUPPORTED_SCHEMA_VERSIONS)[number];
 
 /**
@@ -339,6 +339,9 @@ export class PitScoutingService implements IPitScoutingService {
     switch (schemaVersion) {
       case '2025.1':
         return validatePitScoutingData2025(data);
+
+      case '2026.1':
+        return validatePitScoutingData2026(data);
 
       default:
         // This should never happen due to detectSchemaVersion check,

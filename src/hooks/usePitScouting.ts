@@ -80,14 +80,12 @@ export function usePitScouting(
   }, []);
 
   // Auto-load data when event/team changes
-  useEffect(() => {
-    const shouldLoad =
-      options &&
-      options.eventKey &&
-      options.teamNumber &&
-      options.enabled !== false;
+  const eventKey = options?.eventKey ?? null;
+  const teamNumber = options?.teamNumber ?? null;
+  const enabled = options?.enabled !== false;
 
-    if (!shouldLoad) {
+  useEffect(() => {
+    if (!eventKey || !teamNumber || !enabled) {
       setLoadData(null);
       return;
     }
@@ -97,10 +95,7 @@ export function usePitScouting(
       setError(null);
 
       try {
-        const result = await pitScoutingService.loadPitData(
-          options.eventKey!,
-          options.teamNumber!
-        );
+        const result = await pitScoutingService.loadPitData(eventKey, teamNumber);
         setLoadData(result);
       } catch (err) {
         const errorMessage =
@@ -114,7 +109,7 @@ export function usePitScouting(
     };
 
     loadExistingData();
-  }, [options, options?.eventKey, options?.teamNumber, options?.enabled]);
+  }, [eventKey, teamNumber, enabled]);
 
   const savePitData = useCallback(
     async (formData: PitScoutingFormData): Promise<SavePitDataResult> => {

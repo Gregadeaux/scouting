@@ -8,9 +8,9 @@ export default async function PitScoutingPage() {
   const { data: { user }, error } = await supabase.auth.getUser();
 
   if (error || !user) {
-    redirect('/auth/login?redirect=/pit-scouting');
+    redirect('/auth/login?redirect=/scouting/pit');
   }
-  
+
   return <PitScoutingClient userId={user.id} />;
 }
 

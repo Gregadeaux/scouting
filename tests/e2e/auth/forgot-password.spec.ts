@@ -135,14 +135,12 @@ test.describe('Forgot Password Page', () => {
     await fillForgotPasswordForm(page, TEST_CREDENTIALS.email);
     await page.click('button[type="submit"]');
 
-    // Should show error message - either custom message or API error message
-    const errorContainer = page.locator('.bg-red-100, .bg-red-900').first();
-    await expect(errorContainer).toBeVisible({
-      timeout: 5000,
+    // The forgot password flow intentionally catches ALL errors and always shows
+    // the success message to prevent email enumeration (security best practice).
+    // So even with a mocked error, the page should show "Check Your Email"
+    await expect(page.locator('h1:has-text("Check Your Email")')).toBeVisible({
+      timeout: 10000,
     });
-
-    // Should remain on forgot password page
-    await expect(page).toHaveURL('/auth/forgot-password');
   });
 
   test('should show loading state during submission', async ({ page }) => {
@@ -240,7 +238,7 @@ test.describe('Forgot Password Page', () => {
       }
     });
 
-    test('should preserve email on API error', async ({ page, context }) => {
+    test('should show success even on API error (prevents email enumeration)', async ({ page, context }) => {
       // Mock API error
       await context.route('**/auth/v1/recover**', (route) => {
         route.fulfill({
@@ -256,13 +254,14 @@ test.describe('Forgot Password Page', () => {
       await fillForgotPasswordForm(page, testEmail);
       await page.click('button[type="submit"]');
 
-      // Should show error
-      await expect(page.locator('.bg-red-100, .bg-red-900')).toBeVisible({
-        timeout: 5000,
+      // The forgot password flow intentionally catches ALL errors and always shows
+      // the success message to prevent email enumeration (security best practice).
+      await expect(page.locator('h1:has-text("Check Your Email")')).toBeVisible({
+        timeout: 10000,
       });
 
-      // Email should still be in the input
-      await expect(page.locator('input[type="email"]')).toHaveValue(testEmail);
+      // Should display the email that was submitted
+      await expect(page.locator(`strong:has-text("${testEmail}")`)).toBeVisible();
     });
   });
 

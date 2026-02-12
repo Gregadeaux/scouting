@@ -82,6 +82,15 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         // Continue anyway - OPR is supplementary data
       }
 
+      // Calculate component OPR (auto, teleop hub, endgame) from TBA score_breakdown
+      try {
+        await oprService.calculateComponentOPRMetrics(eventKey);
+        console.log(`[Analytics API] Calculated component OPR for event ${eventKey}`);
+      } catch (componentOprError) {
+        console.error(`[Analytics API] Failed to calculate component OPR:`, componentOprError);
+        // Continue anyway - component OPR is supplementary
+      }
+
       // Fetch the newly calculated stats from database
       const { data: newStats, error: newStatsError } = await supabase
         .from('team_statistics')

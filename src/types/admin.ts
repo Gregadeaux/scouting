@@ -230,6 +230,18 @@ export interface PreviewMetrics {
   teleop_points: number;
   endgame_points: number;
   total_points: number;
+  // 2026 season fields (optional — only populated for 2026 events)
+  avg_rating?: number;
+  climb_points?: number;
+  scoring_rating?: number;
+  feeding_rating?: number;
+  defense_rating?: number;
+  reliability_rating?: number;
+  auto_climb_success?: boolean;
+  endgame_climb_success?: boolean;
+  endgame_climb_level?: string;
+  was_disabled?: boolean;
+  season?: number;
 }
 
 export interface ScoutingEntryWithDetails {
@@ -293,4 +305,15 @@ export interface TeamScoutingAggregates {
   avg_total_points: number;
   complete_entries: number;
   data_quality_distribution: Record<string, number>;
+  // 2026 season fields (optional — only populated for 2026 events)
+  avg_scoring_rating?: number;
+  avg_feeding_rating?: number;
+  avg_defense_rating?: number;
+  avg_reliability_rating?: number;
+  avg_overall_rating?: number;
+  avg_climb_points?: number;
+  auto_climb_rate?: number;
+  endgame_climb_rate?: number;
+  disabled_rate?: number;
+  season?: number;
 }

@@ -11,17 +11,14 @@
  * - Error handling
  */
 
-import type {
-  RobotCapabilities2025,
-  AutonomousCapabilities2025,
-} from '@/types/season-2025';
-
 export interface PitScoutingFormData {
   event_key: string;
   team_number: number;
   scout_id: string;
-  robot_capabilities: Partial<RobotCapabilities2025>;
-  autonomous_capabilities: Partial<AutonomousCapabilities2025>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  robot_capabilities: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  autonomous_capabilities: Record<string, any>;
   drive_train?: string;
   drive_motors?: string;
   programming_language?: string;
@@ -155,8 +152,10 @@ class PitScoutingService {
    * Handles null/undefined values and provides defaults
    */
   transformToFormState(record: PitScoutingRecord | null): {
-    robotCapabilities: Partial<RobotCapabilities2025>;
-    autonomousCapabilities: Partial<AutonomousCapabilities2025>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    robotCapabilities: Record<string, any>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    autonomousCapabilities: Record<string, any>;
     physicalSpecs: Record<string, string | number | undefined>;
     photos: string[];
     existingId: string | null;

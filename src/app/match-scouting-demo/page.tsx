@@ -78,7 +78,7 @@ function MatchScoutingDemo() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
+    <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-950">
       {/* Timer Header */}
       {isInitialized && <PeriodTimer />}
 
@@ -87,7 +87,7 @@ function MatchScoutingDemo() {
 
       {/* Bottom Controls */}
       {isInitialized && state.currentPeriod !== 'pre-match' && state.currentPeriod !== 'submitted' && (
-        <div className="bg-white border-t shadow-lg p-4">
+        <div className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg p-4">
           <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
             {/* Left: Undo Button */}
             <UndoButton />
@@ -106,7 +106,7 @@ function MatchScoutingDemo() {
                   className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
                     state.currentPeriod === 'auto'
                       ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
                   }`}
                 >
                   Auto
@@ -116,7 +116,7 @@ function MatchScoutingDemo() {
                   className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
                     state.currentPeriod === 'teleop'
                       ? 'bg-green-600 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
                   }`}
                 >
                   Teleop
@@ -126,7 +126,7 @@ function MatchScoutingDemo() {
                   className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
                     state.currentPeriod === 'endgame'
                       ? 'bg-orange-600 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
                   }`}
                 >
                   Endgame

@@ -422,3 +422,14 @@ export function canEditTeamData(user: { role: string } | null): boolean {
   if (!user) return false;
   return ['admin', 'scouter'].includes(user.role);
 }
+
+/**
+ * Check if user can manage scouting sessions (lead scout operations)
+ *
+ * @param user - User object with role property, or null
+ * @returns true if user can manage scouting sessions
+ */
+export function canManageScoutingSession(user: { role: string } | null): boolean {
+  if (!user) return false;
+  return ['admin', 'mentor'].includes(user.role);
+}

@@ -10,7 +10,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   ComposedChart,
   Scatter,
@@ -18,11 +18,11 @@ import {
   YAxis,
   CartesianGrid,
   ResponsiveContainer,
-  Bar,
 } from 'recharts';
 
 interface TeamMatchData {
   matchNumber: number;
+  // 2025 fields
   coralL1: number;
   coralL2: number;
   coralL3: number;
@@ -31,6 +31,15 @@ interface TeamMatchData {
   algaeBarge: number;
   allCoral: number;
   allAlgae: number;
+  // 2026 fields
+  autoCount: number;
+  transitionCount: number;
+  shift1Count: number;
+  shift2Count: number;
+  shift3Count: number;
+  shift4Count: number;
+  endgameCount: number;
+  totalCount: number;
 }
 
 interface TeamData {
@@ -57,7 +66,15 @@ type MetricType =
   | 'algaeProcessor'
   | 'algaeBarge'
   | 'allCoral'
-  | 'allAlgae';
+  | 'allAlgae'
+  | 'autoCount'
+  | 'transitionCount'
+  | 'shift1Count'
+  | 'shift2Count'
+  | 'shift3Count'
+  | 'shift4Count'
+  | 'endgameCount'
+  | 'totalCount';
 
 interface PrintableBoxplotProps {
   eventKey: string;
@@ -75,6 +92,14 @@ const METRIC_LABELS: Record<MetricType, string> = {
   coralL4: 'Coral Level 4',
   algaeProcessor: 'Algae Processor',
   algaeBarge: 'Algae Barge',
+  totalCount: 'Total Game Pieces',
+  autoCount: 'Auto Game Pieces',
+  transitionCount: 'Transition Game Pieces',
+  shift1Count: 'Shift 1 Game Pieces',
+  shift2Count: 'Shift 2 Game Pieces',
+  shift3Count: 'Shift 3 Game Pieces',
+  shift4Count: 'Shift 4 Game Pieces',
+  endgameCount: 'Endgame Game Pieces',
 };
 
 export function PrintableBoxplot({
@@ -85,6 +110,8 @@ export function PrintableBoxplot({
 }: PrintableBoxplotProps) {
   const [teamsData, setTeamsData] = useState<TeamData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  // Store baseline (y=0) and top (y=yMax) pixel positions for each team
+  const scaleRef = useRef<Map<string, { baseline: number; top: number; yMax: number }>>(new Map());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -178,7 +205,7 @@ export function PrintableBoxplot({
     currentTeamNumbers.includes(t.teamNumber)
   );
 
-  // Prepare scatter points
+  // Prepare scatter points for match performances
   const scatterData: Array<{
     x: number;
     y: number;
@@ -219,15 +246,58 @@ export function PrintableBoxplot({
     }
   });
 
-  // Prepare boxplot data
-  const boxplotData = boxplotStats.map((stat, index) => ({
+  // Calculate Y-axis domain - must include all scatter data points
+  const allYValues = scatterData.map((d) => d.y);
+  const yMin = 0;
+  const yMax = Math.max(...allYValues, ...boxplotStats.map((s) => s.max), 1);
+
+  // Create baseline reference points (y=0) - used to establish pixel scale
+  const baselineData: Array<{
+    x: number;
+    y: number;
+    team: string;
+    yDomainMax: number;
+  }> = boxplotStats.map((stat, index) => ({
     x: index,
+    y: 0,
+    team: `${stat.teamNumber}`,
+    yDomainMax: yMax,
+  }));
+
+  // Create top reference points (y=yMax) - used to establish pixel scale
+  const topData: Array<{
+    x: number;
+    y: number;
+    team: string;
+    yDomainMax: number;
+  }> = boxplotStats.map((stat, index) => ({
+    x: index,
+    y: yMax,
+    team: `${stat.teamNumber}`,
+    yDomainMax: yMax,
+  }));
+
+  // Create boxplot drawing points (one per team with all stats)
+  const boxplotDrawData: Array<{
+    x: number;
+    y: number;
+    team: string;
+    min: number;
+    q1: number;
+    median: number;
+    q3: number;
+    max: number;
+    yDomainMax: number;
+  }> = boxplotStats.map((stat, index) => ({
+    x: index,
+    y: stat.median, // Position at median for the scatter point
     team: `${stat.teamNumber}`,
     min: stat.min,
     q1: stat.q1,
     median: stat.median,
     q3: stat.q3,
     max: stat.max,
+    yDomainMax: yMax,
   }));
 
   const teamCategories = boxplotStats.map((s) => `${s.teamNumber}`);
@@ -239,7 +309,6 @@ export function PrintableBoxplot({
       <div style={{ height: '280px', width: '100%' }}>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
-            data={boxplotData}
             margin={{ top: 10, right: 10, bottom: 40, left: 50 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -258,6 +327,8 @@ export function PrintableBoxplot({
               style={{ fontSize: 10 }}
             />
             <YAxis
+              domain={[yMin, yMax]}
+              allowDataOverflow={true}
               label={{
                 value: metricLabel,
                 angle: -90,
@@ -265,6 +336,64 @@ export function PrintableBoxplot({
                 style: { fontSize: 11 },
               }}
               style={{ fontSize: 10 }}
+            />
+
+            {/* Baseline reference points (y=0) - invisible, just to capture pixel positions */}
+            <Scatter
+              name="Baseline Refs"
+              data={baselineData}
+              dataKey="y"
+              fill="transparent"
+              isAnimationActive={false}
+              shape={(props: unknown) => {
+                const p = props as {
+                  cx?: number;
+                  cy?: number;
+                  payload?: {
+                    team: string;
+                    yDomainMax: number;
+                  };
+                };
+
+                const { cy, payload } = p;
+
+                if (payload && typeof cy === 'number') {
+                  // Store baseline pixel position
+                  const existing = scaleRef.current.get(payload.team) || { baseline: 0, top: 0, yMax: payload.yDomainMax };
+                  scaleRef.current.set(payload.team, { ...existing, baseline: cy, yMax: payload.yDomainMax });
+                }
+
+                return <></>; // Invisible
+              }}
+            />
+
+            {/* Top reference points (y=yMax) - invisible, just to capture pixel positions */}
+            <Scatter
+              name="Top Refs"
+              data={topData}
+              dataKey="y"
+              fill="transparent"
+              isAnimationActive={false}
+              shape={(props: unknown) => {
+                const p = props as {
+                  cx?: number;
+                  cy?: number;
+                  payload?: {
+                    team: string;
+                    yDomainMax: number;
+                  };
+                };
+
+                const { cy, payload } = p;
+
+                if (payload && typeof cy === 'number') {
+                  // Store top pixel position
+                  const existing = scaleRef.current.get(payload.team) || { baseline: 0, top: 0, yMax: payload.yDomainMax };
+                  scaleRef.current.set(payload.team, { ...existing, top: cy });
+                }
+
+                return <></>; // Invisible
+              }}
             />
 
             {/* Scatter points for match performances */}
@@ -277,57 +406,61 @@ export function PrintableBoxplot({
               isAnimationActive={false}
             />
 
-            {/* Boxplot bars */}
-            <Bar
-              dataKey="median"
+            {/* Boxplot drawing - renders after reference points are captured */}
+            <Scatter
+              name="Boxplot"
+              data={boxplotDrawData}
+              dataKey="y"
               fill="transparent"
               isAnimationActive={false}
               shape={(props: unknown) => {
                 const p = props as {
-                  x?: number;
-                  y?: number;
-                  width?: number;
-                  height?: number;
+                  cx?: number;
+                  cy?: number;
                   payload?: {
-                    median: number;
-                    q1: number;
-                    q3: number;
+                    team: string;
                     min: number;
+                    q1: number;
+                    median: number;
+                    q3: number;
                     max: number;
+                    yDomainMax: number;
                   };
                 };
 
-                const { x, y, width, height, payload } = p;
+                const { cx, payload } = p;
 
-                if (
-                  !payload ||
-                  typeof x !== 'number' ||
-                  typeof y !== 'number'
-                ) {
+                if (!payload || typeof cx !== 'number') {
                   return <></>;
                 }
 
-                const boxWidth = 100;
-                const cx = x + (width || 0) / 2;
-                const medianValue = payload.median;
-                const medianPixel = y;
-                const pixelsPerUnit =
-                  height !== undefined && height !== 0
-                    ? height / medianValue
-                    : 1;
+                const scale = scaleRef.current.get(payload.team);
+                if (!scale || scale.baseline === 0 && scale.top === 0) {
+                  return <></>;
+                }
 
-                const q1Pixel =
-                  medianPixel + (medianValue - payload.q1) * pixelsPerUnit;
-                const q3Pixel =
-                  medianPixel + (medianValue - payload.q3) * pixelsPerUnit;
-                const minPixel =
-                  medianPixel + (medianValue - payload.min) * pixelsPerUnit;
-                const maxPixel =
-                  medianPixel + (medianValue - payload.max) * pixelsPerUnit;
+                // Calculate pixels per unit from reference points
+                // baseline is at y=0, top is at y=yMax
+                // In SVG, y increases downward, so baseline.cy > top.cy
+                const pixelsPerUnit = (scale.baseline - scale.top) / scale.yMax;
+
+                if (pixelsPerUnit <= 0) {
+                  return <></>;
+                }
+
+                // Calculate pixel positions for all values
+                // pixelY = baseline - value * pixelsPerUnit
+                const minPixel = scale.baseline - payload.min * pixelsPerUnit;
+                const q1Pixel = scale.baseline - payload.q1 * pixelsPerUnit;
+                const medianPixel = scale.baseline - payload.median * pixelsPerUnit;
+                const q3Pixel = scale.baseline - payload.q3 * pixelsPerUnit;
+                const maxPixel = scale.baseline - payload.max * pixelsPerUnit;
+
+                const boxWidth = 24;
 
                 return (
                   <g>
-                    {/* Whiskers */}
+                    {/* Lower whisker: min to q1 */}
                     <line
                       x1={cx}
                       y1={minPixel}
@@ -336,6 +469,7 @@ export function PrintableBoxplot({
                       stroke="#64748b"
                       strokeWidth={1.5}
                     />
+                    {/* Upper whisker: q3 to max */}
                     <line
                       x1={cx}
                       y1={q3Pixel}
@@ -345,12 +479,12 @@ export function PrintableBoxplot({
                       strokeWidth={1.5}
                     />
 
-                    {/* Box */}
+                    {/* Box: q1 to q3 */}
                     <rect
                       x={cx - boxWidth / 2}
-                      y={Math.min(q1Pixel, q3Pixel)}
+                      y={q3Pixel}
                       width={boxWidth}
-                      height={Math.abs(q1Pixel - q3Pixel)}
+                      height={q1Pixel - q3Pixel}
                       fill="#10b981"
                       fillOpacity={0.3}
                       stroke="#10b981"
@@ -367,19 +501,20 @@ export function PrintableBoxplot({
                       strokeWidth={2.5}
                     />
 
-                    {/* Min/max caps */}
+                    {/* Min cap */}
                     <line
-                      x1={cx - 25}
+                      x1={cx - 12}
                       y1={minPixel}
-                      x2={cx + 25}
+                      x2={cx + 12}
                       y2={minPixel}
                       stroke="#64748b"
                       strokeWidth={1.5}
                     />
+                    {/* Max cap */}
                     <line
-                      x1={cx - 25}
+                      x1={cx - 12}
                       y1={maxPixel}
-                      x2={cx + 25}
+                      x2={cx + 12}
                       y2={maxPixel}
                       stroke="#64748b"
                       strokeWidth={1.5}

@@ -250,6 +250,143 @@ function handleSingularMatrix(
 }
 
 /**
+ * Calculate Component OPR using a custom score extractor
+ *
+ * This reuses the same linear algebra approach as calculateOPR but accepts
+ * a callback to extract sub-scores (e.g., auto points, teleop hub points)
+ * instead of using the total match score.
+ *
+ * @param eventKey - Event key
+ * @param matches - Array of completed matches
+ * @param scoreExtractor - Function that extracts the relevant score for an alliance.
+ *   Return null to skip a match (e.g., if score_breakdown is missing).
+ * @returns OPR values for each team based on the extracted sub-score
+ */
+export async function calculateComponentOPR(
+  eventKey: string,
+  matches: MatchSchedule[],
+  scoreExtractor: (match: MatchSchedule, alliance: 'red' | 'blue') => number | null
+): Promise<OPRCalculationResult> {
+  // Filter to matches where both alliances have extractable scores
+  const validMatches = matches.filter(m => {
+    const redScore = scoreExtractor(m, 'red');
+    const blueScore = scoreExtractor(m, 'blue');
+    return redScore !== null && blueScore !== null;
+  });
+
+  if (validMatches.length < 3) {
+    throw new Error(
+      `Insufficient matches for component OPR. Need at least 3 valid matches, found ${validMatches.length}`
+    );
+  }
+
+  const teams = extractUniqueTeams(validMatches);
+  if (teams.length < 3) {
+    throw new Error(
+      `Insufficient teams for component OPR. Need at least 3 teams, found ${teams.length}`
+    );
+  }
+
+  const { A, b } = buildMatricesWithExtractor(validMatches, teams, scoreExtractor);
+
+  let oprValues: math.Matrix;
+  const warnings: string[] = [];
+
+  try {
+    const AT = math.transpose(A);
+    const ATA = math.multiply(AT, A) as math.Matrix;
+    const ATb = math.multiply(AT, b) as math.Matrix;
+    oprValues = math.lusolve(ATA, ATb) as math.Matrix;
+  } catch {
+    warnings.push('Matrix was singular, using pseudo-inverse. Results may be less accurate.');
+    const Apinv = math.pinv(A as unknown as math.MathType) as math.Matrix;
+    oprValues = math.multiply(Apinv, b) as math.Matrix;
+  }
+
+  const results: OPRResult[] = teams.map((teamNumber, index) => ({
+    teamNumber,
+    opr: Number((oprValues.get([index, 0]) as number).toFixed(2)),
+    matchesPlayed: countTeamMatches(validMatches, teamNumber),
+  }));
+
+  results.sort((a, b) => b.opr - a.opr);
+
+  return {
+    eventKey,
+    teams: results,
+    calculatedAt: new Date(),
+    totalMatches: validMatches.length,
+    warnings,
+  };
+}
+
+/**
+ * Build coefficient matrix A and score vector b using a custom score extractor.
+ * Same structure as buildMatrices but uses the extractor callback for scores.
+ */
+function buildMatricesWithExtractor(
+  matches: MatchSchedule[],
+  teams: number[],
+  scoreExtractor: (match: MatchSchedule, alliance: 'red' | 'blue') => number | null
+): { A: math.Matrix; b: math.Matrix } {
+  const teamIndexMap = new Map(teams.map((t, i) => [t, i]));
+  const teamCount = teams.length;
+
+  const A: number[][] = [];
+  const b: number[] = [];
+
+  matches.forEach(match => {
+    const redScore = scoreExtractor(match, 'red');
+    const blueScore = scoreExtractor(match, 'blue');
+
+    if (redScore !== null) {
+      const redRow = new Array(teamCount).fill(0);
+
+      if (match.red_1) {
+        const idx = teamIndexMap.get(match.red_1);
+        if (idx !== undefined) redRow[idx] = 1;
+      }
+      if (match.red_2) {
+        const idx = teamIndexMap.get(match.red_2);
+        if (idx !== undefined) redRow[idx] = 1;
+      }
+      if (match.red_3) {
+        const idx = teamIndexMap.get(match.red_3);
+        if (idx !== undefined) redRow[idx] = 1;
+      }
+
+      A.push(redRow);
+      b.push(redScore);
+    }
+
+    if (blueScore !== null) {
+      const blueRow = new Array(teamCount).fill(0);
+
+      if (match.blue_1) {
+        const idx = teamIndexMap.get(match.blue_1);
+        if (idx !== undefined) blueRow[idx] = 1;
+      }
+      if (match.blue_2) {
+        const idx = teamIndexMap.get(match.blue_2);
+        if (idx !== undefined) blueRow[idx] = 1;
+      }
+      if (match.blue_3) {
+        const idx = teamIndexMap.get(match.blue_3);
+        if (idx !== undefined) blueRow[idx] = 1;
+      }
+
+      A.push(blueRow);
+      b.push(blueScore);
+    }
+  });
+
+  return {
+    A: math.matrix(A),
+    b: math.matrix(b.map(v => [v])),
+  };
+}
+
+/**
  * Validate OPR results for sanity
  *
  * @param results - OPR calculation results

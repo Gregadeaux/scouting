@@ -25,6 +25,14 @@ import {
   type EndgamePerformance2025,
 } from '@/types/season-2025';
 import {
+  calculateAutoClimbPoints2026,
+  calculateEndgameClimbPoints2026,
+  getAverageRating2026,
+  type AutoPerformance2026,
+  type TeleopPerformance2026,
+  type EndgamePerformance2026,
+} from '@/types/season-2026';
+import {
   RepositoryError,
   DatabaseOperationError,
 } from './base.repository';
@@ -152,6 +160,7 @@ export class ScoutingDataRepository implements IScoutingDataRepository {
   /**
    * Get all match scouting entries for an event
    * Query by joining through match_schedule via match_key FK
+   * Uses !inner join to properly filter by event_key
    */
   async getMatchScoutingByEvent(eventKey: string): Promise<MatchScouting[]> {
     try {
@@ -159,7 +168,7 @@ export class ScoutingDataRepository implements IScoutingDataRepository {
         .from('match_scouting')
         .select(`
           *,
-          match_schedule!match_scouting_match_key_fkey(event_key)
+          match_schedule!match_scouting_match_key_fkey!inner(event_key)
         `)
         .eq('match_schedule.event_key', eventKey)
         .order('match_key', { ascending: true })
@@ -559,9 +568,19 @@ export class ScoutingDataRepository implements IScoutingDataRepository {
     try {
       // Build query with joins to teams and events
       // Note: Uses match_key FK after migration 009 is applied
-      let query = this.client
-        .from('match_scouting')
-        .select(`
+      // When filtering by eventKey, we use !inner join to properly filter rows
+      const selectString = options.eventKey
+        ? `
+          *,
+          teams!match_scouting_team_number_fkey(team_name),
+          match_schedule!match_scouting_match_key_fkey!inner(
+            event_key,
+            comp_level,
+            match_number,
+            events!match_schedule_event_key_fkey(event_name)
+          )
+        `
+        : `
           *,
           teams!match_scouting_team_number_fkey(team_name),
           match_schedule!match_scouting_match_key_fkey(
@@ -570,11 +589,15 @@ export class ScoutingDataRepository implements IScoutingDataRepository {
             match_number,
             events!match_schedule_event_key_fkey(event_name)
           )
-        `, { count: 'exact' });
+        `;
+
+      let query = this.client
+        .from('match_scouting')
+        .select(selectString, { count: 'exact' });
 
       // Apply filters
       if (options.eventKey) {
-        // Filter by event_key through the match_schedule join
+        // Filter by event_key through the match_schedule inner join
         query = query.eq('match_schedule.event_key', options.eventKey);
       }
       if (options.teamNumber) {
@@ -657,17 +680,47 @@ export class ScoutingDataRepository implements IScoutingDataRepository {
     let endgame_points = 0;
 
     try {
-      // Calculate auto points if data exists
+      const auto = entry.auto_performance as Record<string, unknown> | undefined;
+      const teleop = entry.teleop_performance as Record<string, unknown> | undefined;
+      const schemaVersion = (auto?.schema_version ?? teleop?.schema_version) as string | undefined;
+
+      if (schemaVersion === '2026.1') {
+        // 2026 season: climb points only; teleop is ratings-based (not points)
+        const auto2026 = entry.auto_performance as unknown as AutoPerformance2026 | null;
+        const teleop2026 = entry.teleop_performance as unknown as TeleopPerformance2026 | null;
+        const endgame2026 = entry.endgame_performance as unknown as EndgamePerformance2026 | null;
+
+        if (auto2026) auto_points = calculateAutoClimbPoints2026(auto2026);
+        if (endgame2026) endgame_points = calculateEndgameClimbPoints2026(endgame2026);
+
+        return {
+          auto_points,
+          teleop_points: 0,
+          endgame_points,
+          total_points: auto_points + endgame_points,
+          climb_points: auto_points + endgame_points,
+          scoring_rating: teleop2026?.scoring_rating,
+          feeding_rating: teleop2026?.feeding_rating,
+          defense_rating: teleop2026?.defense_rating,
+          reliability_rating: teleop2026?.reliability_rating,
+          avg_rating: teleop2026 ? getAverageRating2026(teleop2026) : undefined,
+          auto_climb_success: auto2026?.auto_climb_success,
+          endgame_climb_success: endgame2026?.endgame_climb_success,
+          endgame_climb_level: endgame2026?.endgame_climb_level,
+          was_disabled: endgame2026?.was_disabled,
+          season: 2026,
+        };
+      }
+
+      // 2025 Reefscape season (default)
       if (entry.auto_performance && typeof entry.auto_performance === 'object') {
         auto_points = calculateAutoPoints(entry.auto_performance as unknown as AutoPerformance2025);
       }
 
-      // Calculate teleop points if data exists
       if (entry.teleop_performance && typeof entry.teleop_performance === 'object') {
         teleop_points = calculateTeleopPoints(entry.teleop_performance as unknown as TeleopPerformance2025);
       }
 
-      // Calculate endgame points if data exists
       if (entry.endgame_performance && typeof entry.endgame_performance === 'object') {
         endgame_points = calculateEndgamePoints(entry.endgame_performance as unknown as EndgamePerformance2025);
       }
@@ -948,11 +1001,12 @@ export class ScoutingDataRepository implements IScoutingDataRepository {
       }
 
       // Calculate aggregates from all entries (not just paginated)
+      // Uses !inner to properly filter by event_key
       const { data: allData, error: allError } = await this.client
         .from('match_scouting')
         .select(`
           *,
-          match_schedule!match_scouting_match_key_fkey(event_key, match_number)
+          match_schedule!match_scouting_match_key_fkey!inner(event_key, match_number)
         `)
         .eq('team_number', teamNumber)
         .eq('match_schedule.event_key', eventKey);
@@ -1000,6 +1054,38 @@ export class ScoutingDataRepository implements IScoutingDataRepository {
         }
       });
 
+      // Build aggregates with optional 2026 fields
+      const aggregates: TeamScoutingAggregates = {
+        total_matches: uniqueMatches.size,
+        avg_auto_points: Math.round(avgAutoPoints * 10) / 10,
+        avg_teleop_points: Math.round(avgTeleopPoints * 10) / 10,
+        avg_endgame_points: Math.round(avgEndgamePoints * 10) / 10,
+        avg_total_points: Math.round(avgTotalPoints * 10) / 10,
+        complete_entries: completeEntries,
+        data_quality_distribution: qualityDistribution,
+      };
+
+      // Add 2026 season-specific aggregates if applicable
+      const entries2026 = allEntries.filter(e => e.preview_metrics?.season === 2026);
+      if (entries2026.length > 0) {
+        const count = entries2026.length;
+        const sumField = (field: keyof PreviewMetrics) =>
+          entries2026.reduce((sum, e) => sum + ((e.preview_metrics?.[field] as number) ?? 0), 0);
+        const countTrue = (field: keyof PreviewMetrics) =>
+          entries2026.filter(e => e.preview_metrics?.[field] === true).length;
+
+        aggregates.avg_scoring_rating = Math.round((sumField('scoring_rating') / count) * 10) / 10;
+        aggregates.avg_feeding_rating = Math.round((sumField('feeding_rating') / count) * 10) / 10;
+        aggregates.avg_defense_rating = Math.round((sumField('defense_rating') / count) * 10) / 10;
+        aggregates.avg_reliability_rating = Math.round((sumField('reliability_rating') / count) * 10) / 10;
+        aggregates.avg_overall_rating = Math.round((sumField('avg_rating') / count) * 10) / 10;
+        aggregates.avg_climb_points = Math.round((sumField('climb_points') / count) * 10) / 10;
+        aggregates.auto_climb_rate = Math.round((countTrue('auto_climb_success') / count) * 100);
+        aggregates.endgame_climb_rate = Math.round((countTrue('endgame_climb_success') / count) * 100);
+        aggregates.disabled_rate = Math.round((countTrue('was_disabled') / count) * 100);
+        aggregates.season = 2026;
+      }
+
       return {
         data: enrichedEntries,
         pagination: {
@@ -1008,15 +1094,7 @@ export class ScoutingDataRepository implements IScoutingDataRepository {
           total,
           has_more: total > offset + limit,
         },
-        aggregates: {
-          total_matches: uniqueMatches.size,
-          avg_auto_points: Math.round(avgAutoPoints * 10) / 10,
-          avg_teleop_points: Math.round(avgTeleopPoints * 10) / 10,
-          avg_endgame_points: Math.round(avgEndgamePoints * 10) / 10,
-          avg_total_points: Math.round(avgTotalPoints * 10) / 10,
-          complete_entries: completeEntries,
-          data_quality_distribution: qualityDistribution,
-        },
+        aggregates,
       };
     } catch (error) {
       if (error instanceof RepositoryError) {

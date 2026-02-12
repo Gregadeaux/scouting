@@ -83,9 +83,15 @@ export async function GET(
     }
 
     // Extract teams from the joined data
-    // Supabase returns data in format: [{ teams: [{...}] }, { teams: [{...}] }]
+    // Supabase types infer an array, but the FK is many-to-one so runtime may return
+    // a single object. Handle both shapes safely.
     const teams = data
-      .map((row: { teams: Team[] | null }) => row.teams?.[0] || null)
+      .map((row) => {
+        const t = row.teams;
+        if (!t) return null;
+        if (Array.isArray(t)) return t[0] as Team | undefined ?? null;
+        return t as unknown as Team;
+      })
       .filter((team): team is Team => team !== null);
 
     return successResponse(teams);

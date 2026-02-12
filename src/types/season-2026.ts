@@ -1,129 +1,138 @@
 /**
  * 2026 Season Type Definitions
  *
- * PLACEHOLDER FILE - UPDATE AFTER GAME REVEAL (January 10, 2026)
+ * SIMPLIFIED SCOUTING APPROACH:
+ * - Ball scoring is too fast to scout manually - TBA provides this data
+ * - Scouts focus on: Climbs (auto/endgame), qualitative ratings, disabled tracking
+ * - Target: <60 seconds per robot to complete scouting form
  *
- * This file contains stub types that will compile and allow the full pipeline
- * to be tested before the actual game mechanics are revealed. After the game
- * reveal, update the following:
- * - Game piece types and names
- * - Scoring location types
- * - Auto/Teleop/Endgame specific fields
- * - Point values
- * - Capability interfaces
+ * Data Sources:
+ * - TBA: Ball scores via webhooks, score_breakdown for OPR calculation
+ * - Scouting: Climbs, ratings, disabled tracking
  */
 
 import { BasePerformanceData, MatchScouting, PitScouting } from './index';
 
 // ============================================================================
-// GAME PIECE & SCORING LOCATION TYPES (PLACEHOLDER)
+// ENUMS & TYPE LITERALS
 // ============================================================================
 
 /**
- * PLACEHOLDER: Update with actual game piece names after reveal
- * Example from 2025: 'coral' | 'algae'
+ * Climb levels available in the 2026 game
+ * Auto only supports L1, endgame supports all levels
  */
-export type GamePieceType2026 = 'piece_a' | 'piece_b';
+export type ClimbLevel2026 = 'none' | 'L1' | 'L2' | 'L3';
 
 /**
- * PLACEHOLDER: Update with actual scoring locations after reveal
- * Example from 2025: 'L1' | 'L2' | 'L3' | 'L4'
+ * Climb position on the bar for coordination tracking
  */
-export type ScoringLocation2026 = 'low' | 'mid' | 'high';
+export type ClimbPosition2026 = 'left' | 'center' | 'right';
 
 /**
- * PLACEHOLDER: Update with actual endgame action types after reveal
- * Example from 2025: 'shallow' | 'deep' (for cage climbing)
+ * Reasons a robot may become disabled during a match
  */
-export type EndgameAction2026 = 'action_1' | 'action_2' | 'action_3';
+export type DisabledReason2026 =
+  | 'robot_died'
+  | 'stuck_on_bump'
+  | 'stuck_on_balls'
+  | 'stuck_in_trench'
+  | 'disabled_by_refs'
+  | 'other';
 
 /**
- * PLACEHOLDER: Update with actual pickup locations after reveal
- * Example from 2025: 'ground' | 'station' | 'reef' | 'lollipop'
+ * Rating scale labels for display
  */
-export type PickupLocation2026 = 'ground' | 'station';
+export const RATING_LABELS_2026 = {
+  1: 'Poor',
+  2: 'Below Average',
+  3: 'Average',
+  4: 'Good',
+  5: 'Excellent',
+} as const;
 
 // ============================================================================
-// AUTONOMOUS PERIOD
+// AUTONOMOUS PERIOD (15 seconds)
 // ============================================================================
 
+/**
+ * Auto performance is simple: just track auto climb
+ * Ball scoring is too fast and handled by TBA
+ */
 export interface AutoPerformance2026 extends BasePerformanceData {
   schema_version: '2026.1';
 
-  // Mobility (common across most FRC games)
-  left_starting_zone: boolean;
+  /** Did the robot attempt to climb in auto? */
+  auto_climb_attempted: boolean;
 
-  // PLACEHOLDER: Scoring fields - update after reveal
-  // Example structure based on typical FRC games
-  pieces_scored_low: number;
-  pieces_scored_mid: number;
-  pieces_scored_high: number;
-  pieces_missed: number;
+  /** Did the auto climb succeed? */
+  auto_climb_success: boolean;
 
-  // Preloaded piece tracking (common pattern)
-  preloaded_piece_type?: GamePieceType2026;
-  preloaded_piece_scored: boolean;
+  /** Position on the bar (left/center/right) - for coordination */
+  auto_climb_position?: ClimbPosition2026;
 
-  // Notes
+  /** Additional observations about auto performance */
   notes?: string;
 }
 
 // ============================================================================
-// TELEOPERATED PERIOD
+// TELEOPERATED PERIOD (2:15)
 // ============================================================================
 
+/**
+ * Teleop focuses on qualitative ratings rather than counting
+ * Ball scoring is tracked via TBA webhooks
+ */
 export interface TeleopPerformance2026 extends BasePerformanceData {
   schema_version: '2026.1';
 
-  // PLACEHOLDER: Scoring fields - update after reveal
-  pieces_scored_low: number;
-  pieces_scored_mid: number;
-  pieces_scored_high: number;
-  pieces_missed: number;
+  /** How well did they score? (1-5 scale) */
+  scoring_rating: number;
 
-  // Cycle Tracking (common metric)
-  cycles_completed: number;
+  /** How well did they feed balls to alliance partners? (1-5 scale) */
+  feeding_rating: number;
 
-  // Pickup Locations - PLACEHOLDER
-  ground_pickups: number;
-  station_pickups: number;
+  /** How effective was their defense? (1-5 scale) */
+  defense_rating: number;
 
-  // Defense (common fields)
-  defense_time_seconds: number;
-  defense_effectiveness?: 'none' | 'minimal' | 'moderate' | 'effective' | 'dominant';
-  defended_by_opponent_seconds: number;
+  /** How reliable/consistent was the robot? (1-5 scale) */
+  reliability_rating: number;
 
-  // Penalties
-  penalties_caused: number;
-
-  // Notes
+  /** Additional observations about teleop performance */
   notes?: string;
 }
 
 // ============================================================================
-// ENDGAME PERIOD
+// ENDGAME PERIOD (Last ~30 seconds)
 // ============================================================================
 
+/**
+ * Endgame tracks climb attempts and disabled status
+ */
 export interface EndgamePerformance2026 extends BasePerformanceData {
   schema_version: '2026.1';
 
-  // PLACEHOLDER: Endgame action - update after reveal
-  // Could be climbing, parking, balancing, etc.
-  endgame_attempted: boolean;
-  endgame_successful: boolean;
-  endgame_action_achieved?: EndgameAction2026;
+  /** Did the robot attempt to climb in endgame? */
+  endgame_climb_attempted: boolean;
 
-  // Timing
-  endgame_start_time_seconds?: number;
-  endgame_completion_time_seconds?: number;
+  /** What level did they attempt/achieve? */
+  endgame_climb_level: ClimbLevel2026;
 
-  // Calculated Points (for reference)
-  endgame_points: number;
+  /** Did the endgame climb succeed? */
+  endgame_climb_success: boolean;
 
-  // Cooperation
-  cooperation_with_alliance?: string;
+  /** Position on the bar (left/center/right) - for coordination */
+  endgame_climb_position?: ClimbPosition2026;
 
-  // Notes
+  /** Was the robot disabled at any point during the match? */
+  was_disabled: boolean;
+
+  /** Why was the robot disabled? */
+  disabled_reason?: DisabledReason2026;
+
+  /** Additional details about the disability */
+  disabled_notes?: string;
+
+  /** Additional observations about endgame performance */
   notes?: string;
 }
 
@@ -131,79 +140,94 @@ export interface EndgamePerformance2026 extends BasePerformanceData {
 // PIT SCOUTING - ROBOT CAPABILITIES
 // ============================================================================
 
+/**
+ * Robot capabilities for 2026 - focused on climb and general info
+ * Ball scoring capabilities less important since TBA tracks actual performance
+ */
 export interface RobotCapabilities2026 {
   schema_version: '2026.1';
 
-  // Game Piece Handling - PLACEHOLDER
-  can_handle_piece_a: boolean;
-  can_handle_piece_b: boolean;
-  can_handle_both_simultaneously: boolean;
-  preferred_game_piece?: GamePieceType2026;
+  /** Can the robot fit through the trench? (based on robot height) */
+  can_fit_through_trench: boolean;
 
-  // Scoring Capabilities - PLACEHOLDER
-  can_score: boolean;
-  can_score_low: boolean;
-  can_score_mid: boolean;
-  can_score_high: boolean;
-  max_scoring_location?: ScoringLocation2026;
+  /** Can the robot climb in auto? */
+  can_auto_climb: boolean;
 
-  // Pickup Capabilities
-  can_pickup_from_ground: boolean;
-  can_pickup_from_station: boolean;
-  pickup_mechanism_type?: string;
+  /** Can the robot climb in endgame? */
+  can_endgame_climb: boolean;
 
-  // Cycle Performance
-  estimated_cycle_time_seconds?: number;
-  scoring_consistency?: 'low' | 'medium' | 'high';
+  /** Maximum climb level achievable */
+  max_climb_level?: ClimbLevel2026;
 
-  // Special Features
-  has_vision_targeting: boolean;
-  has_automated_scoring: boolean;
-  programming_features?: string[];
+  /** Preferred climb position */
+  preferred_climb_position?: ClimbPosition2026;
 
-  // Notes
+  /** Estimated climb time in seconds */
+  estimated_climb_time_seconds?: number;
+
+  /** Can they feed balls effectively? */
+  can_feed: boolean;
+
+  /** Do they primarily play defense? */
+  plays_defense: boolean;
+
+  /** Drive train type */
+  drive_train_type?: string;
+
+  /** Special features or capabilities */
+  special_features?: string;
+
+  /** Additional notes */
   notes?: string;
 }
 
+/**
+ * Autonomous capabilities for 2026
+ */
 export interface AutonomousCapabilities2026 {
   schema_version: '2026.1';
 
-  // Autonomous Scoring
-  auto_scoring_capability: boolean;
-  auto_max_pieces: number;
-  auto_preferred_starting_position?: 1 | 2 | 3;
+  /** Does the robot have an auto routine? */
+  has_auto_routine: boolean;
 
-  // Autonomous Features
-  auto_uses_vision: boolean;
-  auto_path_planning: boolean;
-  auto_multi_piece_capable: boolean;
+  /** Can they auto climb? */
+  auto_climb_capable: boolean;
 
-  // Reliability
+  /** Preferred starting position (1/2/3) */
+  preferred_starting_position?: 1 | 2 | 3;
+
+  /** Estimated auto success rate (0-100) */
   auto_success_rate_estimate?: number;
-  auto_tested_at_competitions: boolean;
 
-  // Strategy
+  /** Description of auto strategy */
   auto_strategy_description?: string;
 
-  // Notes
+  /** Additional notes */
   notes?: string;
 }
 
+/**
+ * Endgame-specific capabilities
+ */
 export interface EndgameCapabilities2026 {
   schema_version: '2026.1';
 
-  // PLACEHOLDER: Endgame capability - update after reveal
-  can_perform_endgame: boolean;
-  max_endgame_action?: EndgameAction2026;
+  /** Can the robot climb? */
+  can_climb: boolean;
 
-  // Reliability
-  endgame_success_rate_estimate?: number;
-  endgame_time_estimate_seconds?: number;
+  /** Maximum climb level */
+  max_climb_level?: ClimbLevel2026;
 
-  // Strategy
-  endgame_preference?: EndgameAction2026 | 'situational';
+  /** Estimated success rate (0-100) */
+  climb_success_rate_estimate?: number;
 
-  // Notes
+  /** Estimated time to climb in seconds */
+  climb_time_estimate_seconds?: number;
+
+  /** Strategy preference */
+  climb_strategy?: 'early' | 'late' | 'situational';
+
+  /** Additional notes */
   notes?: string;
 }
 
@@ -239,29 +263,20 @@ export type PitScouting2026 = PitScouting<
  */
 export const DEFAULT_AUTO_PERFORMANCE_2026: AutoPerformance2026 = {
   schema_version: '2026.1',
-  left_starting_zone: false,
-  pieces_scored_low: 0,
-  pieces_scored_mid: 0,
-  pieces_scored_high: 0,
-  pieces_missed: 0,
-  preloaded_piece_scored: false,
+  auto_climb_attempted: false,
+  auto_climb_success: false,
 };
 
 /**
  * Default/empty teleop performance for form initialization
+ * Ratings default to 3 (Average) to encourage scouts to adjust
  */
 export const DEFAULT_TELEOP_PERFORMANCE_2026: TeleopPerformance2026 = {
   schema_version: '2026.1',
-  pieces_scored_low: 0,
-  pieces_scored_mid: 0,
-  pieces_scored_high: 0,
-  pieces_missed: 0,
-  cycles_completed: 0,
-  ground_pickups: 0,
-  station_pickups: 0,
-  defense_time_seconds: 0,
-  defended_by_opponent_seconds: 0,
-  penalties_caused: 0,
+  scoring_rating: 3,
+  feeding_rating: 3,
+  defense_rating: 3,
+  reliability_rating: 3,
 };
 
 /**
@@ -269,133 +284,158 @@ export const DEFAULT_TELEOP_PERFORMANCE_2026: TeleopPerformance2026 = {
  */
 export const DEFAULT_ENDGAME_PERFORMANCE_2026: EndgamePerformance2026 = {
   schema_version: '2026.1',
-  endgame_attempted: false,
-  endgame_successful: false,
-  endgame_points: 0,
+  endgame_climb_attempted: false,
+  endgame_climb_level: 'none',
+  endgame_climb_success: false,
+  was_disabled: false,
+};
+
+/**
+ * Default/empty robot capabilities for 2026 pit scouting form initialization
+ */
+export const DEFAULT_ROBOT_CAPABILITIES_2026: RobotCapabilities2026 = {
+  schema_version: '2026.1',
+  can_fit_through_trench: false,
+  can_auto_climb: false,
+  can_endgame_climb: false,
+  can_feed: false,
+  plays_defense: false,
 };
 
 // ============================================================================
-// SCORING CALCULATIONS (PLACEHOLDER - UPDATE AFTER REVEAL)
+// POINT VALUES (For reference - actual scoring from TBA)
 // ============================================================================
 
 /**
- * PLACEHOLDER: Point values for 2026 season
- * Update with official game manual values after reveal
+ * Point values for 2026 season
+ * These are estimates - auto/teleop ball scoring comes from TBA
+ * We only calculate climb points from scouting data
  */
 export const SEASON_2026_POINT_VALUES = {
   auto: {
-    mobility: 3, // Typical FRC mobility points
-    piece_low: 2,
-    piece_mid: 4,
-    piece_high: 6,
-  },
-  teleop: {
-    piece_low: 1,
-    piece_mid: 2,
-    piece_high: 4,
+    climb_L1: 6, // Auto climb bonus
   },
   endgame: {
-    action_1: 3,
-    action_2: 6,
-    action_3: 12,
+    climb_L1: 3,
+    climb_L2: 6,
+    climb_L3: 12,
   },
 } as const;
 
+// ============================================================================
+// SCORING CALCULATIONS (Climb only - balls from TBA)
+// ============================================================================
+
 /**
- * Calculate total autonomous points from auto performance
+ * Calculate auto climb points
  */
-export function calculateAutoPoints2026(auto: AutoPerformance2026): number {
-  const { auto: points } = SEASON_2026_POINT_VALUES;
+export function calculateAutoClimbPoints2026(auto: AutoPerformance2026): number {
+  if (auto.auto_climb_success) {
+    return SEASON_2026_POINT_VALUES.auto.climb_L1;
+  }
+  return 0;
+}
 
-  let total = 0;
-
-  // Mobility
-  if (auto.left_starting_zone) {
-    total += points.mobility;
+/**
+ * Calculate endgame climb points
+ */
+export function calculateEndgameClimbPoints2026(endgame: EndgamePerformance2026): number {
+  if (!endgame.endgame_climb_success) {
+    return 0;
   }
 
-  // Scoring
-  total += auto.pieces_scored_low * points.piece_low;
-  total += auto.pieces_scored_mid * points.piece_mid;
-  total += auto.pieces_scored_high * points.piece_high;
-
-  return total;
-}
-
-/**
- * Calculate total teleop points from teleop performance
- */
-export function calculateTeleopPoints2026(teleop: TeleopPerformance2026): number {
-  const { teleop: points } = SEASON_2026_POINT_VALUES;
-
-  let total = 0;
-
-  // Scoring
-  total += teleop.pieces_scored_low * points.piece_low;
-  total += teleop.pieces_scored_mid * points.piece_mid;
-  total += teleop.pieces_scored_high * points.piece_high;
-
-  return total;
-}
-
-/**
- * Calculate total endgame points from endgame performance
- */
-export function calculateEndgamePoints2026(endgame: EndgamePerformance2026): number {
   const { endgame: points } = SEASON_2026_POINT_VALUES;
 
-  let total = 0;
-
-  // Endgame action
-  if (endgame.endgame_successful && endgame.endgame_action_achieved) {
-    switch (endgame.endgame_action_achieved) {
-      case 'action_1':
-        total += points.action_1;
-        break;
-      case 'action_2':
-        total += points.action_2;
-        break;
-      case 'action_3':
-        total += points.action_3;
-        break;
-    }
+  switch (endgame.endgame_climb_level) {
+    case 'L1':
+      return points.climb_L1;
+    case 'L2':
+      return points.climb_L2;
+    case 'L3':
+      return points.climb_L3;
+    default:
+      return 0;
   }
-
-  return total;
 }
 
 /**
- * Calculate total match points from all periods
+ * Calculate total scouted points (climbs only)
+ * Ball scoring points come from TBA data, not scouting
  */
-export function calculateTotalMatchPoints2026(
+export function calculateScoutedPoints2026(
   auto: AutoPerformance2026,
-  teleop: TeleopPerformance2026,
   endgame: EndgamePerformance2026
 ): number {
-  return (
-    calculateAutoPoints2026(auto) +
-    calculateTeleopPoints2026(teleop) +
-    calculateEndgamePoints2026(endgame)
-  );
+  return calculateAutoClimbPoints2026(auto) + calculateEndgameClimbPoints2026(endgame);
+}
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Get average rating across all teleop categories
+ */
+export function getAverageRating2026(teleop: TeleopPerformance2026): number {
+  const ratings = [
+    teleop.scoring_rating,
+    teleop.feeding_rating,
+    teleop.defense_rating,
+    teleop.reliability_rating,
+  ];
+  return ratings.reduce((a, b) => a + b, 0) / ratings.length;
 }
 
 /**
- * Get total pieces scored across all locations
+ * Check if a robot had any climb success
  */
-export function getTotalPiecesScored2026(
-  data: AutoPerformance2026 | TeleopPerformance2026
-): number {
-  return data.pieces_scored_low + data.pieces_scored_mid + data.pieces_scored_high;
+export function hadAnyClimbSuccess2026(
+  auto: AutoPerformance2026,
+  endgame: EndgamePerformance2026
+): boolean {
+  return auto.auto_climb_success || endgame.endgame_climb_success;
 }
 
 /**
- * Get highest scoring location achieved
+ * Get the highest climb level achieved
  */
-export function getHighestScoringLocation2026(
-  data: AutoPerformance2026 | TeleopPerformance2026
-): ScoringLocation2026 | null {
-  if (data.pieces_scored_high > 0) return 'high';
-  if (data.pieces_scored_mid > 0) return 'mid';
-  if (data.pieces_scored_low > 0) return 'low';
-  return null;
+export function getHighestClimbLevel2026(endgame: EndgamePerformance2026): ClimbLevel2026 {
+  if (!endgame.endgame_climb_success) {
+    return 'none';
+  }
+  return endgame.endgame_climb_level;
+}
+
+/**
+ * Format climb position for display
+ */
+export function formatClimbPosition2026(position?: ClimbPosition2026): string {
+  if (!position) return 'Unknown';
+  return position.charAt(0).toUpperCase() + position.slice(1);
+}
+
+/**
+ * Format climb level for display
+ */
+export function formatClimbLevel2026(level: ClimbLevel2026): string {
+  if (level === 'none') return 'None';
+  return level; // L1, L2, L3 are already formatted
+}
+
+/**
+ * Format disabled reason for display
+ */
+export function formatDisabledReason2026(reason?: DisabledReason2026): string {
+  if (!reason) return 'Unknown';
+
+  const labels: Record<DisabledReason2026, string> = {
+    robot_died: 'Robot Died',
+    stuck_on_bump: 'Stuck on Bump',
+    stuck_on_balls: 'Stuck on Balls',
+    stuck_in_trench: 'Stuck in Trench',
+    disabled_by_refs: 'Disabled by Refs',
+    other: 'Other',
+  };
+
+  return labels[reason];
 }

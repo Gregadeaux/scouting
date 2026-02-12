@@ -21,11 +21,16 @@ interface OPRLeaderboardProps {
   selectedTeams: number[];
 }
 
-type SortMetric = 'opr' | 'dpr' | 'ccwm' | 'reliability';
+type SortMetric = 'opr' | 'dpr' | 'ccwm' | 'reliability' | 'auto_opr' | 'teleop_hub_opr' | 'endgame_opr';
 
 export function OPRLeaderboard({ teamStats, onTeamSelect, selectedTeams }: OPRLeaderboardProps) {
   const [sortBy, setSortBy] = useState<SortMetric>('opr');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  // Detect if component OPR data exists
+  const hasComponentOPR = teamStats.some(
+    (t) => t.auto_opr != null || t.teleop_hub_opr != null || t.endgame_opr != null
+  );
 
   const sortedTeams = [...teamStats].sort((a, b) => {
     let aVal = 0;
@@ -47,6 +52,18 @@ export function OPRLeaderboard({ teamStats, onTeamSelect, selectedTeams }: OPRLe
       case 'reliability':
         aVal = a.reliability_score || 0;
         bVal = b.reliability_score || 0;
+        break;
+      case 'auto_opr':
+        aVal = a.auto_opr || 0;
+        bVal = b.auto_opr || 0;
+        break;
+      case 'teleop_hub_opr':
+        aVal = a.teleop_hub_opr || 0;
+        bVal = b.teleop_hub_opr || 0;
+        break;
+      case 'endgame_opr':
+        aVal = a.endgame_opr || 0;
+        bVal = b.endgame_opr || 0;
         break;
     }
 
@@ -98,6 +115,28 @@ export function OPRLeaderboard({ teamStats, onTeamSelect, selectedTeams }: OPRLe
           direction={sortBy === 'reliability' ? sortDirection : undefined}
           onClick={() => handleSort('reliability')}
         />
+        {hasComponentOPR && (
+          <>
+            <SortButton
+              label="Auto OPR"
+              active={sortBy === 'auto_opr'}
+              direction={sortBy === 'auto_opr' ? sortDirection : undefined}
+              onClick={() => handleSort('auto_opr')}
+            />
+            <SortButton
+              label="Teleop OPR"
+              active={sortBy === 'teleop_hub_opr'}
+              direction={sortBy === 'teleop_hub_opr' ? sortDirection : undefined}
+              onClick={() => handleSort('teleop_hub_opr')}
+            />
+            <SortButton
+              label="Endgame OPR"
+              active={sortBy === 'endgame_opr'}
+              direction={sortBy === 'endgame_opr' ? sortDirection : undefined}
+              onClick={() => handleSort('endgame_opr')}
+            />
+          </>
+        )}
       </div>
 
       {/* Leaderboard Table */}
@@ -111,6 +150,13 @@ export function OPRLeaderboard({ teamStats, onTeamSelect, selectedTeams }: OPRLe
               <th className="text-right p-2">DPR</th>
               <th className="text-right p-2">CCWM</th>
               <th className="text-right p-2">Rel%</th>
+              {hasComponentOPR && (
+                <>
+                  <th className="text-right p-2">Auto</th>
+                  <th className="text-right p-2">Teleop</th>
+                  <th className="text-right p-2">Endgame</th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -145,6 +191,19 @@ export function OPRLeaderboard({ teamStats, onTeamSelect, selectedTeams }: OPRLe
                   <td className="p-2 text-right font-mono text-sm">
                     {team.reliability_score?.toFixed(0) || 'N/A'}
                   </td>
+                  {hasComponentOPR && (
+                    <>
+                      <td className="p-2 text-right font-mono text-sm">
+                        {team.auto_opr?.toFixed(1) || 'N/A'}
+                      </td>
+                      <td className="p-2 text-right font-mono text-sm">
+                        {team.teleop_hub_opr?.toFixed(1) || 'N/A'}
+                      </td>
+                      <td className="p-2 text-right font-mono text-sm">
+                        {team.endgame_opr?.toFixed(1) || 'N/A'}
+                      </td>
+                    </>
+                  )}
                 </tr>
               );
             })}

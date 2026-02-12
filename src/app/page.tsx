@@ -2,9 +2,9 @@
  * Root Page - Authentication Router
  *
  * This page serves as the entry point and redirects users based on authentication state:
- * - Scouters → /pit-scouting
+ * - Scouters → /scouting/pit
  * - Admins → /admin
- * - Mentors → /dashboard (future)
+ * - Mentors → /dashboard
  * - Unauthenticated → /auth/login
  *
  * Note: Middleware handles the redirect, so this page should never actually render.

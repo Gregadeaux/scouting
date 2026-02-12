@@ -67,10 +67,12 @@ const nextConfig: NextConfig = {
               "form-action 'self'",
               // Frame ancestors: block all framing (duplicates X-Frame-Options)
               "frame-ancestors 'none'",
-              // Upgrade insecure requests in production
-              "upgrade-insecure-requests",
-              // Block mixed content
-              "block-all-mixed-content",
+              // Upgrade insecure requests in production only
+              // (breaks local dev over IP since there's no HTTPS)
+              ...(process.env.NODE_ENV === 'production' ? [
+                "upgrade-insecure-requests",
+                "block-all-mixed-content",
+              ] : []),
             ].join('; '),
           },
           // Permissions Policy - Disable unnecessary browser features

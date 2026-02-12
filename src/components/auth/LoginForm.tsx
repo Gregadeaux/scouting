@@ -12,7 +12,7 @@ import { loginAction } from '@/app/auth/login/actions';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/Card';
-import { supabase } from '@/lib/supabase/client';
+import { authClient } from '@/lib/api/auth-client';
 
 export interface LoginFormProps {
   onSuccess?: () => void;
@@ -34,19 +34,12 @@ export function LoginForm({ onSuccess, onForgotPassword, onSignUp }: LoginFormPr
     setIsGoogleLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-
-      if (error) {
-        setFormError(error.message);
-        setIsGoogleLoading(false);
-      }
+      const url = await authClient.getOAuthUrl('google');
+      window.location.href = url;
     } catch (error) {
-      setFormError('Failed to sign in with Google');
+      setFormError(
+        error instanceof Error ? error.message : 'Failed to sign in with Google'
+      );
       setIsGoogleLoading(false);
     }
   };

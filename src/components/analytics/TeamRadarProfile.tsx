@@ -147,16 +147,63 @@ export function TeamRadarProfile({ eventKey, topTeamsCount = 5, sortBy = 'opr', 
     );
   }
 
+  // Detect if component OPR data exists (2026+)
+  const hasComponentOPR = teamStats.some(
+    (t) => t.auto_opr != null || t.teleop_hub_opr != null || t.endgame_opr != null
+  );
+
   // Calculate max values across ALL teams for normalization (not just top N)
   const maxOPR = Math.max(...teamStats.map(s => s.opr || 0), 1);
   const maxCCWM = Math.max(...teamStats.map(s => s.ccwm || 0), 1);
+  const maxReliability = 100;
+
+  // 2025 max values
   const maxAuto = Math.max(...teamStats.map(s => s.avg_auto_score || 0), 1);
   const maxTeleop = Math.max(...teamStats.map(s => s.avg_teleop_score || 0), 1);
   const maxEndgame = Math.max(...teamStats.map(s => s.avg_endgame_score || 0), 1);
-  const maxReliability = 100;
+
+  // 2026 max values
+  const maxAutoOPR = Math.max(...teamStats.map(s => s.auto_opr || 0), 1);
+  const maxTeleopOPR = Math.max(...teamStats.map(s => s.teleop_hub_opr || 0), 1);
+  const maxEndgameOPR = Math.max(...teamStats.map(s => s.endgame_opr || 0), 1);
 
   // Prepare radar data for each team
   const prepareRadarData = (team: TeamStatistics): RadarDataPoint[] => {
+    if (hasComponentOPR) {
+      return [
+        {
+          metric: 'OPR',
+          value: ((team.opr || 0) / maxOPR) * 100,
+          fullValue: team.opr?.toFixed(1) || 'N/A',
+        },
+        {
+          metric: 'CCWM',
+          value: ((team.ccwm || 0) / maxCCWM) * 100,
+          fullValue: team.ccwm?.toFixed(1) || 'N/A',
+        },
+        {
+          metric: 'Auto OPR',
+          value: ((team.auto_opr || 0) / maxAutoOPR) * 100,
+          fullValue: team.auto_opr?.toFixed(1) || 'N/A',
+        },
+        {
+          metric: 'Teleop OPR',
+          value: ((team.teleop_hub_opr || 0) / maxTeleopOPR) * 100,
+          fullValue: team.teleop_hub_opr?.toFixed(1) || 'N/A',
+        },
+        {
+          metric: 'Endgame OPR',
+          value: ((team.endgame_opr || 0) / maxEndgameOPR) * 100,
+          fullValue: team.endgame_opr?.toFixed(1) || 'N/A',
+        },
+        {
+          metric: 'Reliability',
+          value: ((team.reliability_score || 0) / maxReliability) * 100,
+          fullValue: `${team.reliability_score?.toFixed(0) || 'N/A'}%`,
+        },
+      ];
+    }
+
     return [
       {
         metric: 'OPR',

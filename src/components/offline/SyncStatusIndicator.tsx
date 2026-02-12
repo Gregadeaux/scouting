@@ -57,7 +57,7 @@ export function SyncStatusIndicator() {
         <button
           onClick={sync}
           disabled={isSyncing}
-          className="ml-2 px-3 py-1 bg-white text-blue-500 rounded text-sm font-medium hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="ml-2 px-3 py-1 bg-white dark:bg-gray-800 text-blue-500 dark:text-blue-400 rounded text-sm font-medium hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSyncing ? 'Syncing...' : 'Sync Now'}
         </button>

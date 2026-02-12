@@ -13,8 +13,6 @@
 import type {
   AggregatedStatistics,
   MatchScouting,
-
-
   JSONBData,
   AutoPerformance2025,
   TeleopPerformance2025,
@@ -25,10 +23,8 @@ import type { IScoutingDataRepository } from '@/lib/repositories/scouting-data.r
 import type { IMatchRepository } from '@/lib/repositories/match.repository';
 import {
   consolidateMatchScoutingObservations,
-
   detectOutliers,
   calculateTrend,
-
   type ConsolidatedMatchScouting,
 } from '@/lib/supabase/consolidation';
 import {
@@ -36,6 +32,12 @@ import {
   calculateTeleopPoints,
   calculateEndgamePoints,
 } from '@/types/season-2025';
+import {
+  calculateAutoClimbPoints2026,
+  calculateEndgameClimbPoints2026,
+  type AutoPerformance2026,
+  type EndgamePerformance2026,
+} from '@/types/season-2026';
 
 /**
  * Statistics service interface
@@ -270,18 +272,15 @@ export class StatisticsService implements IStatisticsService {
       // Use season-specific calculation functions based on schema version or event year
       try {
         if (schemaVersion === '2025.1' || eventYear === 2025) {
-          // 2025 Reefscape season
           autoPoints.push(calculateAutoPoints(auto as unknown as AutoPerformance2025));
           teleopPoints.push(calculateTeleopPoints(teleop as unknown as TeleopPerformance2025));
           endgamePoints.push(calculateEndgamePoints(endgame as unknown as EndgamePerformance2025));
-        }
-        // Add more seasons here as needed:
-        // else if (schemaVersion === '2026.1' || eventYear === 2026) {
-        //   autoPoints.push(calculateAutoPoints2026(auto as AutoPerformance2026));
-        //   teleopPoints.push(calculateTeleopPoints2026(teleop as TeleopPerformance2026));
-        //   endgamePoints.push(calculateEndgamePoints2026(endgame as EndgamePerformance2026));
-        // }
-        else {
+        } else if (schemaVersion === '2026.1' || eventYear === 2026) {
+          // 2026 season: climb points only; teleop is ratings (not points)
+          autoPoints.push(calculateAutoClimbPoints2026(auto as unknown as AutoPerformance2026));
+          teleopPoints.push(0);
+          endgamePoints.push(calculateEndgameClimbPoints2026(endgame as unknown as EndgamePerformance2026));
+        } else {
           // Fallback for unknown seasons
           autoPoints.push(this.extractPoints(auto, 'auto'));
           teleopPoints.push(this.extractPoints(teleop, 'teleop'));
@@ -485,8 +484,17 @@ export class StatisticsService implements IStatisticsService {
       return a.match_id - b.match_id;
     });
 
-    // Calculate total points for each match
+    // Calculate total points for each match (season-aware)
     const totalPoints = sortedMatches.map(m => {
+      const schemaVersion = (m.auto_performance?.schema_version as string) ||
+        (m.teleop_performance?.schema_version as string);
+
+      if (schemaVersion === '2026.1') {
+        const auto = calculateAutoClimbPoints2026(m.auto_performance as unknown as AutoPerformance2026) || 0;
+        const endgame = calculateEndgameClimbPoints2026(m.endgame_performance as unknown as EndgamePerformance2026) || 0;
+        return auto + endgame;
+      }
+
       const auto = calculateAutoPoints(m.auto_performance as unknown as AutoPerformance2025) || 0;
       const teleop = calculateTeleopPoints(m.teleop_performance as unknown as TeleopPerformance2025) || 0;
       const endgame = calculateEndgamePoints(m.endgame_performance as unknown as EndgamePerformance2025) || 0;

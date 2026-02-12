@@ -22,6 +22,9 @@ export const ROUTE_CONFIG = {
     '/auth/reset-password',
     '/auth/verify-email',
     '/auth/callback',
+    '/auth/complete-profile',
+    '/match-scouting-demo',
+    '/match-scouting-2026-demo',
   ],
 
   // Routes that should redirect authenticated users
@@ -29,13 +32,14 @@ export const ROUTE_CONFIG = {
     '/auth/login',
     '/auth/signup',
     '/auth/forgot-password',
+    '/auth/complete-profile',
   ],
 
   // Default landing pages by role
   roleDefaults: {
     admin: '/admin',
-    mentor: '/dashboard', // Future: will have subset of admin features
-    scouter: '/pit-scouting',
+    mentor: '/dashboard',
+    scouter: '/scouting/pit',
   },
 
   // Fallback for unauthenticated users
@@ -97,7 +101,15 @@ export function getAuthenticatedRedirect(
   redirectParam?: string | null
 ): string {
   // If there's a valid redirect parameter, use it
-  if (redirectParam && !isAuthPage(redirectParam) && !isPublicRoute(redirectParam)) {
+  // Security: validate redirect is a safe relative path (no open redirect)
+  if (
+    redirectParam &&
+    redirectParam.startsWith('/') &&
+    !redirectParam.startsWith('//') &&
+    !redirectParam.includes('://') &&
+    !isAuthPage(redirectParam) &&
+    !isPublicRoute(redirectParam)
+  ) {
     return redirectParam;
   }
 

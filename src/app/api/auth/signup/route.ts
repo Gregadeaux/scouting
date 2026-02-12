@@ -7,7 +7,7 @@
 
 import { NextRequest } from 'next/server';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
-import { signUp } from '@/lib/supabase/auth';
+import { signUp, validatePasswordStrength } from '@/lib/supabase/auth';
 import { successResponse, errorResponse } from '@/lib/api/auth-middleware';
 import type { SignupFormData } from '@/types/auth';
 import { applyRateLimit, signupRateLimit } from '@/lib/middleware/rate-limit';
@@ -49,6 +49,15 @@ export async function POST(request: NextRequest) {
     // Validate required fields (400 Bad Request)
     if (!body.email || !body.password) {
       return errorResponse('Email and password are required', 400);
+    }
+
+    // Validate password strength (400 Bad Request)
+    const passwordValidation = validatePasswordStrength(body.password);
+    if (!passwordValidation.valid) {
+      return errorResponse(
+        `Password does not meet requirements: ${passwordValidation.errors.join('; ')}`,
+        400
+      );
     }
 
     // Sanitize inputs

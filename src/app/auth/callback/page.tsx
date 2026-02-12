@@ -6,7 +6,7 @@
  * Processes the hash fragment tokens and redirects based on user role
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { getRedirectPathForRole } from '@/lib/services/redirect.service';
@@ -15,6 +15,7 @@ import type { UserRole } from '@/types/auth';
 export default function AuthCallbackPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const hasRedirected = useRef(false);
 
   useEffect(() => {
     // Listen for auth state changes - this will fire when Supabase
@@ -38,6 +39,9 @@ export default function AuthCallbackPage() {
 
             userRole = profile?.role as UserRole | undefined;
           }
+
+          if (hasRedirected.current) return;
+          hasRedirected.current = true;
 
           if (userRole) {
             const redirectPath = getRedirectPathForRole(userRole);
@@ -73,6 +77,9 @@ export default function AuthCallbackPage() {
 
           userRole = profile?.role as UserRole | undefined;
         }
+
+        if (hasRedirected.current) return;
+        hasRedirected.current = true;
 
         if (userRole) {
           const redirectPath = getRedirectPathForRole(userRole);

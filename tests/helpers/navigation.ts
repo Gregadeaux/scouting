@@ -40,7 +40,7 @@ export async function navigateToAdmin(
  * ```
  */
 export async function navigateToPitScouting(page: Page): Promise<void> {
-  await page.goto('/pit-scouting');
+  await page.goto('/scouting/pit');
   await waitForPageLoad(page);
 }
 
@@ -61,7 +61,7 @@ export async function navigateToMatchScouting(
   page: Page,
   matchId?: string
 ): Promise<void> {
-  const path = matchId ? `/match-scouting/${matchId}` : '/match-scouting';
+  const path = matchId ? `/scouting/match/${matchId}` : '/scouting/match';
   await page.goto(path);
   await waitForPageLoad(page);
 }

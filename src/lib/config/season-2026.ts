@@ -1,13 +1,13 @@
 /**
  * 2026 Season Configuration
  *
- * PLACEHOLDER FILE - UPDATE AFTER GAME REVEAL (January 10, 2026)
+ * SIMPLIFIED SCOUTING APPROACH:
+ * - Ball scoring is too fast to scout manually - TBA provides this data
+ * - Scouts focus on: Climbs (auto/endgame), qualitative ratings, disabled tracking
+ * - Target: <60 seconds per robot to complete scouting form
  *
  * This configuration file defines the structure for data collection forms,
  * validation rules, and season-specific settings.
- *
- * NON-PROGRAMMERS: This file can be edited to adapt to new seasons!
- * Update field definitions, labels, and validation rules without touching code.
  */
 
 import type { FieldDefinition, FieldType } from './season-2025';
@@ -21,11 +21,11 @@ export type { FieldDefinition, FieldType };
 
 export const SEASON_2026_CONFIG = {
   year: 2026,
-  gameName: 'TBD', // Update after game reveal
+  gameName: '[GAME NAME]', // Update after official reveal
   gameDescription:
-    'PLACEHOLDER: Update with game description after the January 10, 2026 reveal.',
+    'Auto climb (L1 only), massive ball scoring (tracked via TBA), endgame climb (L1/L2/L3). Scouts record climbs, qualitative ratings, and disabled status.',
 
-  // Duration (seconds) - typically consistent across years
+  // Duration (seconds)
   matchDuration: 150,
   autoDuration: 15,
   teleopDuration: 135,
@@ -41,87 +41,45 @@ export const SEASON_2026_CONFIG = {
 } as const;
 
 // ============================================================================
-// AUTONOMOUS PERIOD FIELDS (PLACEHOLDER)
+// AUTONOMOUS PERIOD FIELDS (~3 fields, ~15 seconds to fill)
 // ============================================================================
 
 export const AUTO_FIELDS_2026: FieldDefinition[] = [
-  // Mobility (common across most FRC games)
   {
-    key: 'left_starting_zone',
-    label: 'Left Starting Zone?',
+    key: 'auto_climb_attempted',
+    label: 'Attempted Auto Climb?',
     type: 'boolean',
     defaultValue: false,
     required: true,
-    section: 'Mobility',
+    section: 'Auto Climb',
     order: 1,
-    helpText: 'Did the robot completely leave the starting zone?',
-  },
-
-  // PLACEHOLDER: Scoring fields - update after reveal
-  {
-    key: 'pieces_scored_low',
-    label: 'Pieces Scored - Low',
-    type: 'counter',
-    defaultValue: 0,
-    min: 0,
-    max: 20,
-    section: 'Scoring',
-    order: 10,
+    helpText: 'Did the robot attempt to climb during autonomous?',
   },
   {
-    key: 'pieces_scored_mid',
-    label: 'Pieces Scored - Mid',
-    type: 'counter',
-    defaultValue: 0,
-    min: 0,
-    max: 20,
-    section: 'Scoring',
-    order: 11,
+    key: 'auto_climb_success',
+    label: 'Auto Climb Successful?',
+    type: 'boolean',
+    defaultValue: false,
+    section: 'Auto Climb',
+    order: 2,
+    helpText: 'Did they successfully complete the auto climb?',
+    // Note: Only show if auto_climb_attempted is true
   },
   {
-    key: 'pieces_scored_high',
-    label: 'Pieces Scored - High',
-    type: 'counter',
-    defaultValue: 0,
-    min: 0,
-    max: 20,
-    section: 'Scoring',
-    order: 12,
-  },
-  {
-    key: 'pieces_missed',
-    label: 'Pieces Missed',
-    type: 'counter',
-    defaultValue: 0,
-    min: 0,
-    max: 20,
-    section: 'Scoring',
-    order: 13,
-  },
-
-  // Preloaded Piece (common pattern)
-  {
-    key: 'preloaded_piece_type',
-    label: 'Preloaded Piece Type',
+    key: 'auto_climb_position',
+    label: 'Climb Position',
     type: 'select',
     defaultValue: null,
     options: [
-      { value: 'piece_a', label: 'Piece A' },
-      { value: 'piece_b', label: 'Piece B' },
+      { value: 'left', label: 'Left' },
+      { value: 'center', label: 'Center' },
+      { value: 'right', label: 'Right' },
     ],
-    section: 'Preloaded',
-    order: 20,
+    section: 'Auto Climb',
+    order: 3,
+    helpText: 'Which position did they climb from?',
+    // Note: Only show if auto_climb_success is true
   },
-  {
-    key: 'preloaded_piece_scored',
-    label: 'Preloaded Piece Scored?',
-    type: 'boolean',
-    defaultValue: false,
-    section: 'Preloaded',
-    order: 21,
-  },
-
-  // Notes
   {
     key: 'notes',
     label: 'Auto Notes',
@@ -129,134 +87,63 @@ export const AUTO_FIELDS_2026: FieldDefinition[] = [
     defaultValue: '',
     section: 'Notes',
     order: 100,
-    helpText: 'Describe the autonomous routine, consistency, issues, etc.',
+    helpText: 'Any notable observations about autonomous?',
   },
 ];
 
 // ============================================================================
-// TELEOPERATED PERIOD FIELDS (PLACEHOLDER)
+// TELEOPERATED PERIOD FIELDS (~4 ratings, ~20 seconds to fill)
 // ============================================================================
 
 export const TELEOP_FIELDS_2026: FieldDefinition[] = [
-  // Scoring fields - PLACEHOLDER
   {
-    key: 'pieces_scored_low',
-    label: 'Pieces Scored - Low',
-    type: 'counter',
-    defaultValue: 0,
-    min: 0,
-    section: 'Scoring',
-    order: 10,
+    key: 'scoring_rating',
+    label: 'Scoring Ability',
+    type: 'rating',
+    defaultValue: 3,
+    required: true,
+    min: 1,
+    max: 5,
+    section: 'Performance Ratings',
+    order: 1,
+    helpText: 'How well did they score? (1=Poor, 5=Excellent)',
   },
   {
-    key: 'pieces_scored_mid',
-    label: 'Pieces Scored - Mid',
-    type: 'counter',
-    defaultValue: 0,
-    min: 0,
-    section: 'Scoring',
-    order: 11,
+    key: 'feeding_rating',
+    label: 'Feeding Ability',
+    type: 'rating',
+    defaultValue: 3,
+    required: true,
+    min: 1,
+    max: 5,
+    section: 'Performance Ratings',
+    order: 2,
+    helpText: 'How well did they feed balls to alliance partners?',
   },
   {
-    key: 'pieces_scored_high',
-    label: 'Pieces Scored - High',
-    type: 'counter',
-    defaultValue: 0,
-    min: 0,
-    section: 'Scoring',
-    order: 12,
-  },
-  {
-    key: 'pieces_missed',
-    label: 'Pieces Missed',
-    type: 'counter',
-    defaultValue: 0,
-    min: 0,
-    section: 'Scoring',
-    order: 13,
-  },
-
-  // Cycle Tracking
-  {
-    key: 'cycles_completed',
-    label: 'Cycles Completed',
-    type: 'counter',
-    defaultValue: 0,
-    min: 0,
-    section: 'Cycle Tracking',
-    order: 30,
-    helpText: 'How many complete scoring cycles did the robot finish?',
-  },
-
-  // Pickup Locations - PLACEHOLDER
-  {
-    key: 'ground_pickups',
-    label: 'Ground Pickups',
-    type: 'counter',
-    defaultValue: 0,
-    min: 0,
-    section: 'Pickup',
-    order: 40,
-  },
-  {
-    key: 'station_pickups',
-    label: 'Station Pickups',
-    type: 'counter',
-    defaultValue: 0,
-    min: 0,
-    section: 'Pickup',
-    order: 41,
-  },
-
-  // Defense (common fields)
-  {
-    key: 'defense_time_seconds',
-    label: 'Time Spent on Defense (seconds)',
-    type: 'number',
-    defaultValue: 0,
-    min: 0,
-    max: 135,
-    section: 'Defense',
-    order: 60,
-  },
-  {
-    key: 'defense_effectiveness',
+    key: 'defense_rating',
     label: 'Defense Effectiveness',
-    type: 'select',
-    defaultValue: null,
-    options: [
-      { value: 'none', label: 'None' },
-      { value: 'minimal', label: 'Minimal' },
-      { value: 'moderate', label: 'Moderate' },
-      { value: 'effective', label: 'Effective' },
-      { value: 'dominant', label: 'Dominant' },
-    ],
-    section: 'Defense',
-    order: 61,
+    type: 'rating',
+    defaultValue: 3,
+    required: true,
+    min: 1,
+    max: 5,
+    section: 'Performance Ratings',
+    order: 3,
+    helpText: 'How effective was their defense? (1=None/Poor, 5=Dominant)',
   },
   {
-    key: 'defended_by_opponent_seconds',
-    label: 'Time Defended by Opponent (seconds)',
-    type: 'number',
-    defaultValue: 0,
-    min: 0,
-    max: 135,
-    section: 'Defense',
-    order: 62,
+    key: 'reliability_rating',
+    label: 'Robot Reliability',
+    type: 'rating',
+    defaultValue: 3,
+    required: true,
+    min: 1,
+    max: 5,
+    section: 'Performance Ratings',
+    order: 4,
+    helpText: 'How reliable/consistent was the robot overall?',
   },
-
-  // Penalties
-  {
-    key: 'penalties_caused',
-    label: 'Penalties Caused',
-    type: 'counter',
-    defaultValue: 0,
-    min: 0,
-    section: 'Penalties',
-    order: 70,
-  },
-
-  // Notes
   {
     key: 'notes',
     label: 'Teleop Notes',
@@ -264,92 +151,110 @@ export const TELEOP_FIELDS_2026: FieldDefinition[] = [
     defaultValue: '',
     section: 'Notes',
     order: 100,
+    helpText: 'Notable plays, strategies, or issues during teleop?',
   },
 ];
 
 // ============================================================================
-// ENDGAME PERIOD FIELDS (PLACEHOLDER)
+// ENDGAME PERIOD FIELDS (~8 fields, ~25 seconds to fill)
 // ============================================================================
 
 export const ENDGAME_FIELDS_2026: FieldDefinition[] = [
-  // Endgame Action - PLACEHOLDER
+  // Climb tracking
   {
-    key: 'endgame_attempted',
-    label: 'Endgame Attempted?',
+    key: 'endgame_climb_attempted',
+    label: 'Attempted Endgame Climb?',
     type: 'boolean',
     defaultValue: false,
-    section: 'Endgame Action',
-    order: 10,
+    required: true,
+    section: 'Endgame Climb',
+    order: 1,
+    helpText: 'Did the robot attempt to climb during endgame?',
   },
   {
-    key: 'endgame_successful',
-    label: 'Endgame Successful?',
+    key: 'endgame_climb_level',
+    label: 'Climb Level',
+    type: 'select',
+    defaultValue: 'none',
+    required: true,
+    options: [
+      { value: 'none', label: 'None' },
+      { value: 'L1', label: 'Level 1' },
+      { value: 'L2', label: 'Level 2' },
+      { value: 'L3', label: 'Level 3' },
+    ],
+    section: 'Endgame Climb',
+    order: 2,
+    helpText: 'What level did they attempt/achieve?',
+    // Note: Only show if endgame_climb_attempted is true
+  },
+  {
+    key: 'endgame_climb_success',
+    label: 'Climb Successful?',
     type: 'boolean',
     defaultValue: false,
-    section: 'Endgame Action',
-    order: 11,
+    section: 'Endgame Climb',
+    order: 3,
+    helpText: 'Did they successfully complete the climb?',
+    // Note: Only show if endgame_climb_level is not 'none'
   },
   {
-    key: 'endgame_action_achieved',
-    label: 'Endgame Action Achieved',
+    key: 'endgame_climb_position',
+    label: 'Climb Position',
     type: 'select',
     defaultValue: null,
     options: [
-      { value: 'action_1', label: 'Action 1' },
-      { value: 'action_2', label: 'Action 2' },
-      { value: 'action_3', label: 'Action 3' },
+      { value: 'left', label: 'Left' },
+      { value: 'center', label: 'Center' },
+      { value: 'right', label: 'Right' },
     ],
-    section: 'Endgame Action',
-    order: 12,
+    section: 'Endgame Climb',
+    order: 4,
+    helpText: 'Which position did they climb from? (for coordination)',
+    // Note: Only show if endgame_climb_success is true
   },
 
-  // Timing
+  // Disabled tracking
   {
-    key: 'endgame_start_time_seconds',
-    label: 'Endgame Start Time (seconds)',
-    type: 'number',
+    key: 'was_disabled',
+    label: 'Robot Disabled?',
+    type: 'boolean',
+    defaultValue: false,
+    required: true,
+    section: 'Robot Issues',
+    order: 10,
+    helpText: 'Was the robot disabled at any point during the match?',
+  },
+  {
+    key: 'disabled_reason',
+    label: 'Disabled Reason',
+    type: 'select',
     defaultValue: null,
-    min: 120,
-    max: 150,
-    section: 'Timing',
-    order: 20,
-    helpText: 'When did they start their endgame? (120-150)',
+    options: [
+      { value: 'robot_died', label: 'Robot Died' },
+      { value: 'stuck_on_bump', label: 'Stuck on Bump' },
+      { value: 'stuck_on_balls', label: 'Stuck on Balls' },
+      { value: 'stuck_in_trench', label: 'Stuck in Trench' },
+      { value: 'disabled_by_refs', label: 'Disabled by Refs' },
+      { value: 'other', label: 'Other' },
+    ],
+    section: 'Robot Issues',
+    order: 11,
+    helpText: 'Why was the robot disabled?',
+    // Note: Only show if was_disabled is true
   },
   {
-    key: 'endgame_completion_time_seconds',
-    label: 'Time to Complete Endgame (seconds)',
-    type: 'number',
-    defaultValue: null,
-    min: 0,
-    max: 30,
-    section: 'Timing',
-    order: 21,
-  },
-
-  // Points
-  {
-    key: 'endgame_points',
-    label: 'Endgame Points',
-    type: 'number',
-    defaultValue: 0,
-    min: 0,
-    section: 'Points',
-    order: 30,
-    helpText: 'Calculated endgame points',
-  },
-
-  // Cooperation
-  {
-    key: 'cooperation_with_alliance',
-    label: 'Alliance Cooperation Notes',
-    type: 'textarea',
+    key: 'disabled_notes',
+    label: 'Disabled Details',
+    type: 'text',
     defaultValue: '',
-    section: 'Cooperation',
-    order: 40,
-    helpText: 'How did they coordinate with alliance partners?',
+    section: 'Robot Issues',
+    order: 12,
+    helpText: 'Additional details about the disability',
+    // Note: Only show if was_disabled is true
   },
 
-  // Notes
+  // General notes
   {
     key: 'notes',
     label: 'Endgame Notes',
@@ -357,111 +262,177 @@ export const ENDGAME_FIELDS_2026: FieldDefinition[] = [
     defaultValue: '',
     section: 'Notes',
     order: 100,
+    helpText: 'Any other observations about endgame?',
   },
 ];
 
 // ============================================================================
-// VALIDATION SCHEMAS (JSON Schema format) - PLACEHOLDER
+// VALIDATION SCHEMAS (JSON Schema format)
 // ============================================================================
 
 export const AUTO_SCHEMA_2026 = {
   type: 'object',
-  required: ['schema_version', 'left_starting_zone'],
+  required: ['schema_version', 'auto_climb_attempted', 'auto_climb_success'],
   properties: {
     schema_version: { type: 'string', const: '2026.1' },
-    left_starting_zone: { type: 'boolean' },
-    pieces_scored_low: { type: 'number', minimum: 0 },
-    pieces_scored_mid: { type: 'number', minimum: 0 },
-    pieces_scored_high: { type: 'number', minimum: 0 },
-    pieces_missed: { type: 'number', minimum: 0 },
-    preloaded_piece_type: { type: 'string', enum: ['piece_a', 'piece_b'] },
-    preloaded_piece_scored: { type: 'boolean' },
+    auto_climb_attempted: { type: 'boolean' },
+    auto_climb_success: { type: 'boolean' },
+    auto_climb_position: {
+      type: 'string',
+      enum: ['left', 'center', 'right'],
+    },
     notes: { type: 'string' },
   },
 };
 
 export const TELEOP_SCHEMA_2026 = {
   type: 'object',
-  required: ['schema_version', 'cycles_completed'],
+  required: [
+    'schema_version',
+    'scoring_rating',
+    'feeding_rating',
+    'defense_rating',
+    'reliability_rating',
+  ],
   properties: {
     schema_version: { type: 'string', const: '2026.1' },
-    pieces_scored_low: { type: 'number', minimum: 0 },
-    pieces_scored_mid: { type: 'number', minimum: 0 },
-    pieces_scored_high: { type: 'number', minimum: 0 },
-    pieces_missed: { type: 'number', minimum: 0 },
-    cycles_completed: { type: 'number', minimum: 0 },
-    ground_pickups: { type: 'number', minimum: 0 },
-    station_pickups: { type: 'number', minimum: 0 },
-    defense_time_seconds: { type: 'number', minimum: 0, maximum: 135 },
-    defense_effectiveness: {
-      type: 'string',
-      enum: ['none', 'minimal', 'moderate', 'effective', 'dominant'],
-    },
-    defended_by_opponent_seconds: { type: 'number', minimum: 0, maximum: 135 },
-    penalties_caused: { type: 'number', minimum: 0 },
+    scoring_rating: { type: 'number', minimum: 1, maximum: 5 },
+    feeding_rating: { type: 'number', minimum: 1, maximum: 5 },
+    defense_rating: { type: 'number', minimum: 1, maximum: 5 },
+    reliability_rating: { type: 'number', minimum: 1, maximum: 5 },
     notes: { type: 'string' },
   },
 };
 
 export const ENDGAME_SCHEMA_2026 = {
   type: 'object',
-  required: ['schema_version', 'endgame_points'],
+  required: [
+    'schema_version',
+    'endgame_climb_attempted',
+    'endgame_climb_level',
+    'endgame_climb_success',
+    'was_disabled',
+  ],
   properties: {
     schema_version: { type: 'string', const: '2026.1' },
-    endgame_attempted: { type: 'boolean' },
-    endgame_successful: { type: 'boolean' },
-    endgame_action_achieved: { type: 'string', enum: ['action_1', 'action_2', 'action_3'] },
-    endgame_start_time_seconds: { type: 'number', minimum: 120, maximum: 150 },
-    endgame_completion_time_seconds: { type: 'number', minimum: 0, maximum: 30 },
-    endgame_points: { type: 'number', minimum: 0 },
-    cooperation_with_alliance: { type: 'string' },
+    endgame_climb_attempted: { type: 'boolean' },
+    endgame_climb_level: {
+      type: 'string',
+      enum: ['none', 'L1', 'L2', 'L3'],
+    },
+    endgame_climb_success: { type: 'boolean' },
+    endgame_climb_position: {
+      type: 'string',
+      enum: ['left', 'center', 'right'],
+    },
+    was_disabled: { type: 'boolean' },
+    disabled_reason: {
+      type: 'string',
+      enum: [
+        'robot_died',
+        'stuck_on_bump',
+        'stuck_on_balls',
+        'stuck_in_trench',
+        'disabled_by_refs',
+        'other',
+      ],
+    },
+    disabled_notes: { type: 'string' },
     notes: { type: 'string' },
   },
 };
+
+// ============================================================================
+// PIT SCOUTING SCHEMAS (Simplified for 2026)
+// ============================================================================
 
 export const ROBOT_CAPABILITIES_SCHEMA_2026 = {
   type: 'object',
   required: ['schema_version'],
   properties: {
     schema_version: { type: 'string', const: '2026.1' },
-    can_handle_piece_a: { type: 'boolean' },
-    can_handle_piece_b: { type: 'boolean' },
-    can_handle_both_simultaneously: { type: 'boolean' },
-    preferred_game_piece: { type: 'string', enum: ['piece_a', 'piece_b'] },
-    can_score: { type: 'boolean' },
-    can_score_low: { type: 'boolean' },
-    can_score_mid: { type: 'boolean' },
-    can_score_high: { type: 'boolean' },
-    max_scoring_location: { type: 'string', enum: ['low', 'mid', 'high'] },
-    can_pickup_from_ground: { type: 'boolean' },
-    can_pickup_from_station: { type: 'boolean' },
-    pickup_mechanism_type: { type: 'string' },
-    estimated_cycle_time_seconds: { type: 'number', minimum: 0 },
-    scoring_consistency: { type: 'string', enum: ['low', 'medium', 'high'] },
-    has_vision_targeting: { type: 'boolean' },
-    has_automated_scoring: { type: 'boolean' },
-    programming_features: { type: 'array', items: { type: 'string' } },
+    can_auto_climb: { type: 'boolean' },
+    can_endgame_climb: { type: 'boolean' },
+    max_climb_level: { type: 'string', enum: ['none', 'L1', 'L2', 'L3'] },
+    preferred_climb_position: { type: 'string', enum: ['left', 'center', 'right'] },
+    estimated_climb_time_seconds: { type: 'number', minimum: 0 },
+    can_feed: { type: 'boolean' },
+    plays_defense: { type: 'boolean' },
+    drive_train_type: { type: 'string' },
+    special_features: { type: 'string' },
     notes: { type: 'string' },
   },
 };
 
 export const AUTONOMOUS_CAPABILITIES_SCHEMA_2026 = {
   type: 'object',
-  required: ['schema_version', 'auto_scoring_capability', 'auto_max_pieces'],
+  required: ['schema_version'],
   properties: {
     schema_version: { type: 'string', const: '2026.1' },
-    auto_scoring_capability: { type: 'boolean' },
-    auto_max_pieces: { type: 'number', minimum: 0 },
-    auto_preferred_starting_position: { type: 'number', enum: [1, 2, 3] },
-    auto_uses_vision: { type: 'boolean' },
-    auto_path_planning: { type: 'boolean' },
-    auto_multi_piece_capable: { type: 'boolean' },
+    has_auto_routine: { type: 'boolean' },
+    auto_climb_capable: { type: 'boolean' },
+    preferred_starting_position: { type: 'number', enum: [1, 2, 3] },
     auto_success_rate_estimate: { type: 'number', minimum: 0, maximum: 100 },
-    auto_tested_at_competitions: { type: 'boolean' },
     auto_strategy_description: { type: 'string' },
     notes: { type: 'string' },
   },
 };
+
+// ============================================================================
+// CONDITIONAL FIELD VISIBILITY RULES
+// ============================================================================
+
+/**
+ * Defines when fields should be shown/hidden based on other field values
+ * Used by the form renderer to conditionally display fields
+ */
+export const FIELD_VISIBILITY_RULES_2026 = {
+  // Auto section
+  auto_climb_success: {
+    dependsOn: 'auto_climb_attempted',
+    showWhen: (value: boolean) => value === true,
+  },
+  auto_climb_position: {
+    dependsOn: 'auto_climb_success',
+    showWhen: (value: boolean) => value === true,
+  },
+
+  // Endgame climb section
+  endgame_climb_level: {
+    dependsOn: 'endgame_climb_attempted',
+    showWhen: (value: boolean) => value === true,
+  },
+  endgame_climb_success: {
+    dependsOn: 'endgame_climb_level',
+    showWhen: (value: string) => value !== 'none',
+  },
+  endgame_climb_position: {
+    dependsOn: 'endgame_climb_success',
+    showWhen: (value: boolean) => value === true,
+  },
+
+  // Disabled section
+  disabled_reason: {
+    dependsOn: 'was_disabled',
+    showWhen: (value: boolean) => value === true,
+  },
+  disabled_notes: {
+    dependsOn: 'was_disabled',
+    showWhen: (value: boolean) => value === true,
+  },
+} as const;
+
+// ============================================================================
+// RATING SCALE LABELS (for UI display)
+// ============================================================================
+
+export const RATING_LABELS_2026 = {
+  1: 'Poor',
+  2: 'Below Average',
+  3: 'Average',
+  4: 'Good',
+  5: 'Excellent',
+} as const;
 
 // ============================================================================
 // EXPORT ALL CONFIGURATION
@@ -477,4 +448,6 @@ export const SEASON_2026_FULL_CONFIG = {
   endgameSchema: ENDGAME_SCHEMA_2026,
   robotCapabilitiesSchema: ROBOT_CAPABILITIES_SCHEMA_2026,
   autonomousCapabilitiesSchema: AUTONOMOUS_CAPABILITIES_SCHEMA_2026,
+  fieldVisibilityRules: FIELD_VISIBILITY_RULES_2026,
+  ratingLabels: RATING_LABELS_2026,
 } as const;

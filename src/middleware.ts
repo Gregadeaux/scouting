@@ -54,7 +54,7 @@ export async function middleware(req: NextRequest) {
   if (user) {
     // PERFORMANCE OPTIMIZATION: Try to get role from JWT first (fast path, ~5-10ms)
     // This avoids a database query on every request for users with role in JWT
-    userRole = (user.user_metadata?.role || user.app_metadata?.role) as UserRole | undefined;
+    userRole = (user.app_metadata?.role || user.user_metadata?.role) as UserRole | undefined;
 
     if (!userRole) {
       // Fallback: Query database for existing users without role in JWT (~50-100ms)
