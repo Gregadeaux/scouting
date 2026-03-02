@@ -35,6 +35,7 @@ export interface ManualMatchSubmission {
   notes?: string;
   confidence_level?: number;
   device_id?: string;
+  shooting_time_seconds?: number;
 }
 
 export interface ManualMatchResult {
@@ -100,6 +101,7 @@ export class ManualMatchService {
       notes: submission.notes,
       confidence_level: submission.confidence_level,
       device_id: submission.device_id,
+      shooting_time_seconds: submission.shooting_time_seconds,
     };
 
     const { data, error } = await supabase

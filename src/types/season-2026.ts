@@ -43,6 +43,7 @@ export type DisabledReason2026 =
  * Rating scale labels for display
  */
 export const RATING_LABELS_2026 = {
+  0: 'N/A',
   1: 'Poor',
   2: 'Below Average',
   3: 'Average',
@@ -269,14 +270,14 @@ export const DEFAULT_AUTO_PERFORMANCE_2026: AutoPerformance2026 = {
 
 /**
  * Default/empty teleop performance for form initialization
- * Ratings default to 3 (Average) to encourage scouts to adjust
+ * Ratings default to 0 (N/A) so scouts must explicitly rate each category
  */
 export const DEFAULT_TELEOP_PERFORMANCE_2026: TeleopPerformance2026 = {
   schema_version: '2026.1',
-  scoring_rating: 3,
-  feeding_rating: 3,
-  defense_rating: 3,
-  reliability_rating: 3,
+  scoring_rating: 0,
+  feeding_rating: 0,
+  defense_rating: 0,
+  reliability_rating: 0,
 };
 
 /**

@@ -6,12 +6,25 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Trash2, ExternalLink, Users, Calendar, Trophy } from 'lucide-react';
+import { X, Trash2, ExternalLink, Users, Calendar, Trophy, Timer } from 'lucide-react';
 import { JSONBDataDisplay } from '@/components/scouting/JSONBDataDisplay';
 import { Button } from '@/components/ui/button';
 import { REEFSCAPE_CONFIG } from '@/lib/config/season-2025';
+import { SEASON_2026_FULL_CONFIG } from '@/lib/config/season-2026';
+import { formatRatingWithScale, formatShootingTime } from '@/lib/scouting-display';
 import type { ScoutingEntryWithDetails } from '@/types/admin';
 import Link from 'next/link';
+
+function getSeasonConfig(entry: ScoutingEntryWithDetails) {
+  const schemaVersion = entry.auto_performance?.schema_version as string | undefined;
+  if (schemaVersion?.startsWith('2026')) {
+    return SEASON_2026_FULL_CONFIG;
+  }
+  if (entry.event_key?.startsWith('2026')) {
+    return SEASON_2026_FULL_CONFIG;
+  }
+  return REEFSCAPE_CONFIG;
+}
 
 interface ScoutingDataDetailProps {
   entry: ScoutingEntryWithDetails | null;
@@ -31,6 +44,9 @@ export function ScoutingDataDetail({
   const [copied, setCopied] = useState(false);
 
   if (!isOpen || !entry) return null;
+
+  const seasonConfig = getSeasonConfig(entry);
+  const is2026 = seasonConfig === SEASON_2026_FULL_CONFIG;
 
   const handleCopy = async () => {
     try {
@@ -192,7 +208,7 @@ export function ScoutingDataDetail({
                 </div>
                 <JSONBDataDisplay
                   data={entry.auto_performance}
-                  seasonConfig={REEFSCAPE_CONFIG}
+                  seasonConfig={seasonConfig}
                   compact={false}
                   collapsible={false}
                   showCopy={false}
@@ -214,7 +230,7 @@ export function ScoutingDataDetail({
                 </div>
                 <JSONBDataDisplay
                   data={entry.teleop_performance}
-                  seasonConfig={REEFSCAPE_CONFIG}
+                  seasonConfig={seasonConfig}
                   compact={false}
                   collapsible={false}
                   showCopy={false}
@@ -236,7 +252,7 @@ export function ScoutingDataDetail({
                 </div>
                 <JSONBDataDisplay
                   data={entry.endgame_performance}
-                  seasonConfig={REEFSCAPE_CONFIG}
+                  seasonConfig={seasonConfig}
                   compact={false}
                   collapsible={false}
                   showCopy={false}
@@ -292,33 +308,102 @@ export function ScoutingDataDetail({
                   <h3 className="mb-3 text-lg font-medium text-gray-900 dark:text-gray-100">
                     Score Breakdown
                   </h3>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
-                      <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                        {entry.preview_metrics.auto_points}
+                  {is2026 ? (
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                      <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
+                        <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                          {formatRatingWithScale(entry.teleop_performance?.scoring_rating)}
+                        </div>
+                        <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                          Scoring
+                        </div>
                       </div>
-                      <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        Autonomous
+                      <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
+                        <div className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">
+                          {formatRatingWithScale(entry.teleop_performance?.feeding_rating)}
+                        </div>
+                        <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                          Feeding
+                        </div>
+                      </div>
+                      <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
+                        <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                          {formatRatingWithScale(entry.teleop_performance?.defense_rating)}
+                        </div>
+                        <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                          Defense
+                        </div>
+                      </div>
+                      <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
+                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                          {formatRatingWithScale(entry.teleop_performance?.reliability_rating)}
+                        </div>
+                        <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                          Reliability
+                        </div>
                       </div>
                     </div>
-                    <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
-                      <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                        {entry.preview_metrics.teleop_points}
+                  ) : (
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
+                        <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                          {entry.preview_metrics.auto_points}
+                        </div>
+                        <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                          Autonomous
+                        </div>
                       </div>
-                      <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        Teleoperated
+                      <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
+                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                          {entry.preview_metrics.teleop_points}
+                        </div>
+                        <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                          Teleoperated
+                        </div>
+                      </div>
+                      <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
+                        <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                          {entry.preview_metrics.endgame_points}
+                        </div>
+                        <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                          Endgame
+                        </div>
                       </div>
                     </div>
-                    <div className="rounded-lg border border-gray-200 bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
-                      <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                        {entry.preview_metrics.endgame_points}
-                      </div>
-                      <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        Endgame
-                      </div>
+                  )}
+                </div>
+
+                {/* Shooting Time (2026 only) */}
+                {entry.shooting_time_seconds != null && entry.shooting_time_seconds > 0 && (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/20">
+                    <div className="flex items-center gap-2">
+                      <Timer className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                      <h3 className="font-medium text-amber-900 dark:text-amber-100">
+                        Shooting Time
+                      </h3>
+                    </div>
+                    <div className="mt-2 text-2xl font-bold text-amber-600 dark:text-amber-400">
+                      {formatShootingTime(entry.shooting_time_seconds)}
+                    </div>
+                    <p className="mt-1 text-sm text-amber-700 dark:text-amber-300">
+                      Time spent actively shooting balls
+                    </p>
+                  </div>
+                )}
+
+                {/* Scout Notes */}
+                {entry.notes && (
+                  <div>
+                    <h3 className="mb-3 text-lg font-medium text-gray-900 dark:text-gray-100">
+                      Scout Notes
+                    </h3>
+                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+                      <p className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">
+                        {entry.notes}
+                      </p>
                     </div>
                   </div>
-                </div>
+                )}
 
                 <div>
                   <h3 className="mb-3 text-lg font-medium text-gray-900 dark:text-gray-100">

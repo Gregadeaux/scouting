@@ -4,6 +4,16 @@ import { successResponse, errorResponse, serverError } from '@/lib/api/response'
 import { getManualMatchService } from '@/lib/services/manual-match.service';
 
 /**
+ * Map service-layer error messages to HTTP status codes.
+ * Duplicates are 409, client errors (bad input) are 400, everything else is 500.
+ */
+function getServiceErrorStatus(message: string): number {
+  if (message.includes('Duplicate')) return 409;
+  if (message.includes('not a manual-schedule') || message.includes('not found')) return 400;
+  return 500;
+}
+
+/**
  * POST /api/manual-match-scouting
  * Submit scouting data for a manual-schedule event.
  * Separate from /api/match-scouting to keep the TBA workflow untouched.
@@ -58,12 +68,8 @@ export async function POST(request: NextRequest) {
     console.error('Error in POST /api/manual-match-scouting:', error);
 
     if (error instanceof Error) {
-      if (error.message.includes('Duplicate')) {
-        return errorResponse(error.message, 409);
-      }
-      if (error.message.includes('not a manual-schedule') || error.message.includes('not found')) {
-        return errorResponse(error.message, 400);
-      }
+      const status = getServiceErrorStatus(error.message);
+      return errorResponse(error.message, status);
     }
 
     return serverError('Failed to submit manual match scouting data');

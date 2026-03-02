@@ -57,6 +57,22 @@ function isNetworkError(error: unknown): boolean {
 }
 
 /**
+ * Extract an error message from a fetch Response.
+ * Tries to parse the JSON body for `error` or `message` fields,
+ * falling back to the HTTP status line.
+ */
+export async function parseResponseError(response: Response): Promise<string> {
+  try {
+    const body = await response.json();
+    const message = body?.error || body?.message;
+    if (message) return message;
+  } catch {
+    // Response body wasn't JSON -- fall through
+  }
+  return `HTTP ${response.status}: ${response.statusText}`;
+}
+
+/**
  * Make an offline-aware API request
  *
  * Automatically queues POST/PUT/PATCH/DELETE requests when offline.
@@ -124,7 +140,7 @@ export async function offlineApi<T = unknown>(
     const response = await fetch(url, requestOptions);
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      throw new Error(await parseResponseError(response));
     }
 
     const data = await response.json();

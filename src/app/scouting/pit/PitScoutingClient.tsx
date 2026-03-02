@@ -7,6 +7,7 @@ import { DEFAULT_ROBOT_CAPABILITIES_2026 } from '@/types/season-2026';
 import { usePitScouting } from '@/hooks/usePitScouting';
 import { useScouterEvent } from '@/contexts/ScouterEventContext';
 import { TeamSelector } from '@/components/pit-scouting/TeamSelector';
+import { ManualTeamInput } from '@/components/pit-scouting/ManualTeamInput';
 import { ImageUploadSection } from '@/components/pit-scouting/ImageUploadSection';
 import { cn } from '@/lib/utils';
 
@@ -21,7 +22,8 @@ interface FormState {
 }
 
 export function PitScoutingClient({ userId }: Props) {
-  const { selectedEventKey } = useScouterEvent();
+  const { selectedEventKey, selectedEvent } = useScouterEvent();
+  const isManualEvent = selectedEvent?.manual_schedule === true;
 
   const [selectedTeamNumber, setSelectedTeamNumber] = useState<number | null>(null);
 
@@ -100,7 +102,7 @@ export function PitScoutingClient({ userId }: Props) {
     setSaveStatus('idle');
   }, [selectedEventKey]);
 
-  function handleTeamChange(teamNumber: number | null, _team: unknown): void {
+  function handleTeamChange(teamNumber: number | null): void {
     setSelectedTeamNumber(teamNumber);
     setSaveStatus('idle');
     skipNextAutoSave.current = true;
@@ -141,11 +143,16 @@ export function PitScoutingClient({ userId }: Props) {
               to choose an event.
             </p>
           </div>
+        ) : isManualEvent ? (
+          <ManualTeamInput
+            value={selectedTeamNumber}
+            onChange={handleTeamChange}
+          />
         ) : (
           <TeamSelector
             eventKey={selectedEventKey}
             value={selectedTeamNumber}
-            onChange={handleTeamChange}
+            onChange={(teamNumber) => handleTeamChange(teamNumber)}
           />
         )}
       </div>

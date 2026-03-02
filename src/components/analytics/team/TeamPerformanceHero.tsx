@@ -1,14 +1,17 @@
 'use client';
 
 import React from 'react';
-import { TrendingUp, TrendingDown, Minus, Activity, Zap, Target, Award, Shield } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Activity, Zap, Target, Award, Shield, Database } from 'lucide-react';
 import type { TeamScoutingAggregates } from '@/types/admin';
 import type { Team } from '@/types';
+import type { TeamMatchStats } from '@/hooks/useTeamTBAData';
 
 interface TeamPerformanceHeroProps {
   team: Team;
   aggregates: TeamScoutingAggregates | null;
   isLoading?: boolean;
+  tbaStats?: TeamMatchStats | null;
+  tbaMatchCount?: number;
 }
 
 interface StatCardProps {
@@ -51,7 +54,9 @@ function StatCard({ label, value, subValue, trend, color, icon: Icon }: StatCard
 
   const colors = colorClasses[color];
 
-  const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus;
+  const trendIcons = { up: TrendingUp, down: TrendingDown, neutral: Minus } as const;
+  const trendColors = { up: 'text-emerald-400', down: 'text-red-400', neutral: 'text-slate-500' } as const;
+  const TrendIcon = trend ? trendIcons[trend] : Minus;
 
   return (
     <div className={`relative overflow-hidden rounded-xl border ${colors.bg} p-4`}>
@@ -74,13 +79,7 @@ function StatCard({ label, value, subValue, trend, color, icon: Icon }: StatCard
           <Icon className={`h-5 w-5 ${colors.text} opacity-60`} />
           {trend && (
             <TrendIcon
-              className={`h-4 w-4 ${
-                trend === 'up'
-                  ? 'text-emerald-400'
-                  : trend === 'down'
-                  ? 'text-red-400'
-                  : 'text-slate-500'
-              }`}
+              className={`h-4 w-4 ${trendColors[trend]}`}
             />
           )}
         </div>
@@ -93,6 +92,8 @@ export function TeamPerformanceHero({
   team,
   aggregates,
   isLoading = false,
+  tbaStats,
+  tbaMatchCount = 0,
 }: TeamPerformanceHeroProps) {
   if (isLoading) {
     return (
@@ -109,7 +110,9 @@ export function TeamPerformanceHero({
     );
   }
 
-  const hasData = aggregates && aggregates.total_matches > 0;
+  const hasScoutingData = aggregates && aggregates.total_matches > 0;
+  const hasTBAData = tbaStats && tbaMatchCount > 0;
+  const hasData = hasScoutingData || hasTBAData;
   const is2026 = aggregates?.season === 2026;
 
   return (
@@ -121,9 +124,14 @@ export function TeamPerformanceHero({
             <span className="font-mono text-5xl font-black tracking-tighter text-white">
               {team.team_number}
             </span>
-            {hasData && (
+            {hasScoutingData && (
               <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-400">
                 {aggregates.total_matches} MATCHES SCOUTED
+              </span>
+            )}
+            {!hasScoutingData && hasTBAData && (
+              <span className="rounded-full bg-blue-500/20 px-3 py-1 text-xs font-semibold text-blue-400 border border-blue-500/30">
+                {tbaMatchCount} MATCHES (TBA)
               </span>
             )}
           </div>
@@ -137,8 +145,8 @@ export function TeamPerformanceHero({
           )}
         </div>
         <div className="text-right">
-          {hasData && (
-            <div className="text-right">
+          {hasScoutingData && (
+            <>
               <p className="text-xs uppercase tracking-wider text-slate-500">
                 {is2026 ? 'Avg Climb Pts' : 'Avg Total'}
               </p>
@@ -147,77 +155,120 @@ export function TeamPerformanceHero({
                   ? (aggregates.avg_climb_points ?? aggregates.avg_total_points).toFixed(1)
                   : aggregates.avg_total_points.toFixed(1)}
               </p>
-            </div>
+            </>
+          )}
+          {!hasScoutingData && hasTBAData && tbaStats.opr != null && (
+            <>
+              <p className="text-xs uppercase tracking-wider text-slate-500">OPR</p>
+              <p className="font-mono text-4xl font-bold text-white">
+                {tbaStats.opr.toFixed(1)}
+              </p>
+            </>
           )}
         </div>
       </div>
 
       {/* Stats Grid */}
-      {hasData ? (
-        is2026 ? (
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <StatCard
-              label="Climb Points"
-              value={(aggregates.avg_climb_points ?? 0).toFixed(1)}
-              subValue={`Auto: ${((aggregates.auto_climb_rate ?? 0)).toFixed(0)}% | Endgame: ${((aggregates.endgame_climb_rate ?? 0)).toFixed(0)}%`}
-              color="cyan"
-              icon={Zap}
-            />
-            <StatCard
-              label="Scoring Rating"
-              value={(aggregates.avg_scoring_rating ?? 0).toFixed(1)}
-              subValue="1-5 scale"
-              color="amber"
-              icon={Target}
-            />
-            <StatCard
-              label="Reliability"
-              value={(aggregates.avg_reliability_rating ?? 0).toFixed(1)}
-              subValue={`${((aggregates.disabled_rate ?? 0)).toFixed(0)}% disabled`}
-              color="rose"
-              icon={Shield}
-            />
-            <StatCard
-              label="Data Quality"
-              value={`${aggregates.complete_entries}/${aggregates.total_matches}`}
-              subValue="Complete entries"
-              color="emerald"
-              icon={Activity}
-            />
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <StatCard
-              label="Auto Score"
-              value={aggregates.avg_auto_points.toFixed(1)}
-              subValue={`${((aggregates.avg_auto_points / aggregates.avg_total_points) * 100).toFixed(0)}% of total`}
-              color="cyan"
-              icon={Zap}
-            />
-            <StatCard
-              label="Teleop Score"
-              value={aggregates.avg_teleop_points.toFixed(1)}
-              subValue={`${((aggregates.avg_teleop_points / aggregates.avg_total_points) * 100).toFixed(0)}% of total`}
-              color="amber"
-              icon={Target}
-            />
-            <StatCard
-              label="Endgame Score"
-              value={aggregates.avg_endgame_points.toFixed(1)}
-              subValue={`${((aggregates.avg_endgame_points / aggregates.avg_total_points) * 100).toFixed(0)}% of total`}
-              color="rose"
-              icon={Award}
-            />
-            <StatCard
-              label="Data Quality"
-              value={`${aggregates.complete_entries}/${aggregates.total_matches}`}
-              subValue="Complete entries"
-              color="emerald"
-              icon={Activity}
-            />
-          </div>
-        )
-      ) : (
+      {hasScoutingData && is2026 && (
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatCard
+            label="Climb Points"
+            value={(aggregates.avg_climb_points ?? 0).toFixed(1)}
+            subValue={`Auto: ${(aggregates.auto_climb_rate ?? 0).toFixed(0)}% | Endgame: ${(aggregates.endgame_climb_rate ?? 0).toFixed(0)}%`}
+            color="cyan"
+            icon={Zap}
+          />
+          <StatCard
+            label="Scoring Rating"
+            value={(aggregates.avg_scoring_rating ?? 0).toFixed(1)}
+            subValue="1-5 scale"
+            color="amber"
+            icon={Target}
+          />
+          <StatCard
+            label="Reliability"
+            value={(aggregates.avg_reliability_rating ?? 0).toFixed(1)}
+            subValue={`${(aggregates.disabled_rate ?? 0).toFixed(0)}% disabled`}
+            color="rose"
+            icon={Shield}
+          />
+          <StatCard
+            label="Data Quality"
+            value={`${aggregates.complete_entries}/${aggregates.total_matches}`}
+            subValue="Complete entries"
+            color="emerald"
+            icon={Activity}
+          />
+        </div>
+      )}
+
+      {hasScoutingData && !is2026 && (
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatCard
+            label="Auto Score"
+            value={aggregates.avg_auto_points.toFixed(1)}
+            subValue={`${((aggregates.avg_auto_points / aggregates.avg_total_points) * 100).toFixed(0)}% of total`}
+            color="cyan"
+            icon={Zap}
+          />
+          <StatCard
+            label="Teleop Score"
+            value={aggregates.avg_teleop_points.toFixed(1)}
+            subValue={`${((aggregates.avg_teleop_points / aggregates.avg_total_points) * 100).toFixed(0)}% of total`}
+            color="amber"
+            icon={Target}
+          />
+          <StatCard
+            label="Endgame Score"
+            value={aggregates.avg_endgame_points.toFixed(1)}
+            subValue={`${((aggregates.avg_endgame_points / aggregates.avg_total_points) * 100).toFixed(0)}% of total`}
+            color="rose"
+            icon={Award}
+          />
+          <StatCard
+            label="Data Quality"
+            value={`${aggregates.complete_entries}/${aggregates.total_matches}`}
+            subValue="Complete entries"
+            color="emerald"
+            icon={Activity}
+          />
+        </div>
+      )}
+
+      {!hasScoutingData && hasTBAData && (
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatCard
+            label="Auto OPR"
+            value={tbaStats.auto_opr?.toFixed(1) ?? '—'}
+            subValue="From TBA"
+            color="cyan"
+            icon={Zap}
+          />
+          <StatCard
+            label="Teleop Hub OPR"
+            value={tbaStats.teleop_hub_opr?.toFixed(1) ?? '—'}
+            subValue="From TBA"
+            color="amber"
+            icon={Target}
+          />
+          <StatCard
+            label="Endgame OPR"
+            value={tbaStats.endgame_opr?.toFixed(1) ?? '—'}
+            subValue="From TBA"
+            color="rose"
+            icon={Award}
+          />
+          <StatCard
+            label="Total OPR"
+            value={tbaStats.opr?.toFixed(1) ?? '—'}
+            subValue="From TBA"
+            color="emerald"
+            icon={Database}
+          />
+        </div>
+      )}
+
+      {!hasData && (
         <div className="flex items-center justify-center py-8">
           <div className="text-center">
             <Activity className="mx-auto h-8 w-8 text-slate-600" />

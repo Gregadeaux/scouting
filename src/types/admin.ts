@@ -267,8 +267,11 @@ export interface ScoutingEntryWithDetails {
   event_name?: string;
   match_number?: number;
   comp_level?: string;
+  notes?: string;
+  shooting_time_seconds?: number;
   preview_metrics: PreviewMetrics;
   data_quality: 'complete' | 'partial' | 'issues';
+  data_quality_reasons?: string[];
 }
 
 export interface ScoutingListResult {

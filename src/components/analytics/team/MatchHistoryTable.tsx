@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
-import { FileText, ChevronRight, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { FileText, ChevronRight } from 'lucide-react';
 import type { ScoutingEntryWithDetails } from '@/types/admin';
+import { DataQualityBadge } from '@/components/scouting/DataQualityBadge';
 
 interface MatchHistoryTableProps {
   scoutingData: ScoutingEntryWithDetails[];
@@ -46,38 +47,6 @@ function MiniSparkline({ values, color }: { values: number[]; color: string }) {
         />
       )}
     </svg>
-  );
-}
-
-function DataQualityBadge({ quality }: { quality: 'complete' | 'partial' | 'issues' }) {
-  const config = {
-    complete: {
-      icon: CheckCircle2,
-      color: 'text-emerald-400',
-      bg: 'bg-emerald-500/10',
-      label: 'Complete',
-    },
-    partial: {
-      icon: AlertCircle,
-      color: 'text-amber-400',
-      bg: 'bg-amber-500/10',
-      label: 'Partial',
-    },
-    issues: {
-      icon: AlertCircle,
-      color: 'text-red-400',
-      bg: 'bg-red-500/10',
-      label: 'Issues',
-    },
-  };
-
-  const { icon: Icon, color, bg, label } = config[quality];
-
-  return (
-    <span className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs font-medium ${color} ${bg}`}>
-      <Icon className="h-3 w-3" />
-      {label}
-    </span>
   );
 }
 
@@ -242,7 +211,7 @@ export function MatchHistoryTable({ scoutingData, isLoading = false, onRowClick 
                     </>
                   )}
                   <td className="px-4 py-3">
-                    <DataQualityBadge quality={entry.data_quality} />
+                    <DataQualityBadge quality={entry.data_quality} reasons={entry.data_quality_reasons} variant="analytics" />
                   </td>
                   <td className="px-4 py-3">
                     <span className="text-sm text-slate-400 truncate max-w-[100px] block">

@@ -81,6 +81,7 @@ export default function MatchDetailClient({
           <ScoreBreakdownCard
             redBreakdown={scoreBreakdown.red as Record<string, number | null> | null}
             blueBreakdown={scoreBreakdown.blue as Record<string, number | null> | null}
+            eventKey={match.event_key}
           />
           <VideoLinksCard videos={videoLinks} />
         </div>

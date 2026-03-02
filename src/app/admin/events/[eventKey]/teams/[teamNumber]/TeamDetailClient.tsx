@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ArrowLeft, Camera, ClipboardList, ChevronDown, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -12,9 +12,14 @@ import {
   MatchHistoryTable,
   GamePieceBreakdown,
 } from '@/components/analytics/team';
+import { GamePieceBoxplotFull } from '@/components/analytics/GamePieceBoxplotFull';
+import { TeamRadarProfile } from '@/components/analytics/TeamRadarProfile';
+import { TBAMatchHistoryTable } from '@/components/analytics/TBAMatchHistoryTable';
+import { TBAPerformanceTrend } from '@/components/analytics/TBAPerformanceTrend';
 import { PitScoutingViewer } from '@/components/mentor/PitScoutingViewer';
 import { TeamPhotosGallery } from '@/components/mentor/TeamPhotosGallery';
 import { useTeamScouting } from '@/hooks/useTeamScouting';
+import { useTeamTBAData } from '@/hooks/useTeamTBAData';
 import type { TeamDetail } from '@/types/team-detail';
 import type { ScoutingEntryWithDetails } from '@/types/admin';
 
@@ -71,7 +76,6 @@ export default function TeamDetailClient({ teamDetail, eventKey }: TeamDetailCli
   const [selectedEntry, setSelectedEntry] = useState<ScoutingEntryWithDetails | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  // Fetch scouting data using the hook
   const {
     data: scoutingData,
     aggregates,
@@ -85,20 +89,36 @@ export default function TeamDetailClient({ teamDetail, eventKey }: TeamDetailCli
     limit: 100,
   });
 
-  const handleRowClick = (entry: ScoutingEntryWithDetails) => {
+  const {
+    matches: tbaMatches,
+    stats: tbaStats,
+    allTeamStats,
+    isLoading: tbaLoading,
+  } = useTeamTBAData({
+    teamNumber: team.team_number,
+    eventKey,
+  });
+
+  const hasScoutingData = !isLoading && scoutingData.length > 0;
+  const hasTBAData = !tbaLoading && tbaMatches.length > 0;
+
+  const thisTeamStats = useMemo(
+    () => allTeamStats.filter((s) => s.team_number === team.team_number),
+    [allTeamStats, team.team_number]
+  );
+
+  function handleRowClick(entry: ScoutingEntryWithDetails): void {
     setSelectedEntry(entry);
     setIsDetailModalOpen(true);
-  };
+  }
 
-  const photoCount = teamDetail.photos?.length || 0;
+  const photoCount = teamDetail.photos?.length ?? 0;
 
   return (
     <div className="min-h-screen bg-slate-950">
-      {/* Background gradient */}
       <div className="pointer-events-none fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900" />
 
       <div className="relative mx-auto max-w-7xl px-4 py-6">
-        {/* Navigation */}
         <nav className="mb-6">
           <Link
             href={`/admin/events/${eventKey}`}
@@ -109,52 +129,74 @@ export default function TeamDetailClient({ teamDetail, eventKey }: TeamDetailCli
           </Link>
         </nav>
 
-        {/* Error State */}
         {error && (
           <div className="rounded-xl border border-red-700 bg-red-500/10 p-6">
             <p className="text-red-400">Failed to load scouting data: {error}</p>
           </div>
         )}
 
-        {/* Main Content */}
         <div className="space-y-6">
-          {/* Hero Section */}
           <TeamPerformanceHero
             team={team}
             aggregates={aggregates}
-            isLoading={isLoading}
+            isLoading={isLoading && tbaLoading}
+            tbaStats={tbaStats}
+            tbaMatchCount={tbaMatches.length}
           />
 
-          {/* Charts Row */}
           {aggregates && aggregates.total_matches > 0 && (
             <div className="grid gap-6 lg:grid-cols-5">
-              {/* Trend Chart - Wider */}
               <div className="lg:col-span-3">
                 <MatchTrendChart scoutingData={scoutingData} isLoading={isLoading} />
               </div>
-
-              {/* Breakdown Chart - Narrower */}
               <div className="lg:col-span-2">
                 <ScoringBreakdownChart aggregates={aggregates} isLoading={isLoading} />
               </div>
             </div>
           )}
 
-          {/* Game Piece Breakdown - 2025 Reefscape specific */}
           {scoutingData.length > 0 && (
             <GamePieceBreakdown scoutingData={scoutingData} isLoading={isLoading} />
           )}
 
-          {/* Match History Table */}
-          <MatchHistoryTable
-            scoutingData={scoutingData}
-            isLoading={isLoading}
-            onRowClick={handleRowClick}
-          />
+          {hasScoutingData && (
+            <MatchHistoryTable
+              scoutingData={scoutingData}
+              isLoading={isLoading}
+              onRowClick={handleRowClick}
+            />
+          )}
 
-          {/* Collapsible Sections for Secondary Content */}
+          {hasTBAData && (
+            <>
+              <TBAPerformanceTrend
+                matches={tbaMatches}
+                isLoading={tbaLoading}
+              />
+
+              <GamePieceBoxplotFull
+                eventKey={eventKey}
+                teamNumbers={[team.team_number]}
+              />
+
+              {thisTeamStats.length > 0 && (
+                <TeamRadarProfile
+                  eventKey={eventKey}
+                  teams={thisTeamStats}
+                  topTeamsCount={1}
+                />
+              )}
+
+              <TBAMatchHistoryTable
+                matches={tbaMatches}
+                eventKey={eventKey}
+                teamNumber={team.team_number}
+                isLoading={tbaLoading}
+              />
+            </>
+          )}
+
           <div className="space-y-4">
-            {/* Pit Scouting */}
             {teamDetail.pit_scouting && (
               <CollapsibleSection
                 title="Pit Scouting Data"
@@ -168,7 +210,6 @@ export default function TeamDetailClient({ teamDetail, eventKey }: TeamDetailCli
               </CollapsibleSection>
             )}
 
-            {/* Photos */}
             {photoCount > 0 && (
               <CollapsibleSection
                 title="Robot Photos"
@@ -182,11 +223,9 @@ export default function TeamDetailClient({ teamDetail, eventKey }: TeamDetailCli
           </div>
         </div>
 
-        {/* Spacing at bottom */}
         <div className="h-8" />
       </div>
 
-      {/* Match Detail Modal */}
       <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
         <DialogContent className="max-h-[90vh] max-w-6xl overflow-y-auto border-slate-700 bg-slate-900">
           <DialogHeader>
@@ -201,7 +240,6 @@ export default function TeamDetailClient({ teamDetail, eventKey }: TeamDetailCli
           </DialogHeader>
           {selectedEntry && (
             <div className="space-y-6">
-              {/* Quick Stats */}
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 <div className="rounded-lg bg-slate-800 p-4 text-center">
                   <p className="text-xs uppercase tracking-wider text-slate-500">Auto</p>
@@ -229,14 +267,12 @@ export default function TeamDetailClient({ teamDetail, eventKey }: TeamDetailCli
                 </div>
               </div>
 
-              {/* Metadata */}
               <div className="flex flex-wrap gap-4 text-sm text-slate-400">
                 <span>Scout: {selectedEntry.scout_name}</span>
                 <span>Match: {selectedEntry.match_key}</span>
                 {selectedEntry.team_name && <span>Team: {selectedEntry.team_name}</span>}
               </div>
 
-              {/* Performance Data */}
               <div className="space-y-4">
                 <div>
                   <h4 className="mb-2 flex items-center gap-2 font-semibold text-cyan-400">

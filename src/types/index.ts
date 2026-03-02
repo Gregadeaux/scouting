@@ -179,6 +179,9 @@ export interface MatchScouting<
   // Scout performance tracking
   confidence_level?: number;
 
+  // 2026+ shooting time (seconds, accumulated via hold-button timer)
+  shooting_time_seconds?: number;
+
   created_at?: string;
   updated_at?: string;
 }
@@ -454,6 +457,7 @@ export interface MatchScoutingSubmission<
   weaknesses?: string;
   notes?: string;
   confidence_level?: number;
+  shooting_time_seconds?: number;
 }
 
 /**

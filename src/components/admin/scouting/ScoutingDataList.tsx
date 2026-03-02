@@ -6,9 +6,18 @@
 'use client';
 
 import React from 'react';
-import { ChevronUp, ChevronDown, Clock, User, Hash } from 'lucide-react';
+import { ChevronUp, ChevronDown, Clock, User, Hash, Timer } from 'lucide-react';
 import type { ScoutingEntryWithDetails } from '@/types/admin';
 import { formatDistanceToNow } from '@/lib/utils';
+import { formatRatingDisplay, formatShootingTime } from '@/lib/scouting-display';
+import { DataQualityBadge } from '@/components/scouting/DataQualityBadge';
+
+function is2026Entry(entry: ScoutingEntryWithDetails): boolean {
+  const schemaVersion = entry.auto_performance?.schema_version as string | undefined;
+  if (schemaVersion?.startsWith('2026')) return true;
+  if (entry.event_key?.startsWith('2026')) return true;
+  return false;
+}
 
 interface ScoutingDataListProps {
   data: ScoutingEntryWithDetails[];
@@ -34,32 +43,6 @@ export function ScoutingDataList({
     ) : (
       <ChevronDown className="inline h-3 w-3" />
     );
-  };
-
-  const getQualityBadge = (quality: 'complete' | 'partial' | 'issues') => {
-    switch (quality) {
-      case 'complete':
-        return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200">
-            <span className="h-1.5 w-1.5 rounded-full bg-green-600" />
-            Complete
-          </span>
-        );
-      case 'partial':
-        return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-            <span className="h-1.5 w-1.5 rounded-full bg-yellow-600" />
-            Partial
-          </span>
-        );
-      case 'issues':
-        return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900 dark:text-red-200">
-            <span className="h-1.5 w-1.5 rounded-full bg-red-600" />
-            Issues
-          </span>
-        );
-    }
   };
 
   const getCompLevelDisplay = (level?: string) => {
@@ -89,6 +72,9 @@ export function ScoutingDataList({
       </div>
     );
   }
+
+  // Detect if entries are 2026 based on first entry
+  const show2026Columns = data.length > 0 && is2026Entry(data[0]);
 
   return (
     <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
@@ -138,24 +124,46 @@ export function ScoutingDataList({
                   <SortIcon field="created_at" />
                 </div>
               </th>
-              <th className="px-2 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Auto
-              </th>
-              <th className="px-2 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Tele
-              </th>
-              <th className="px-2 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                End
-              </th>
-              <th
-                className="cursor-pointer px-2 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                onClick={() => onSort('total_points')}
-              >
-                <div className="flex items-center justify-center gap-1">
-                  Total
-                  <SortIcon field="total_points" />
-                </div>
-              </th>
+              {show2026Columns ? (
+                <>
+                  <th className="px-2 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Score
+                  </th>
+                  <th className="px-2 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Feed
+                  </th>
+                  <th className="px-2 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Def
+                  </th>
+                  <th className="px-2 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center justify-center gap-1">
+                      <Timer className="h-3 w-3" />
+                      Shoot
+                    </div>
+                  </th>
+                </>
+              ) : (
+                <>
+                  <th className="px-2 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Auto
+                  </th>
+                  <th className="px-2 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Tele
+                  </th>
+                  <th className="px-2 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    End
+                  </th>
+                  <th
+                    className="cursor-pointer px-2 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    onClick={() => onSort('total_points')}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      Total
+                      <SortIcon field="total_points" />
+                    </div>
+                  </th>
+                </>
+              )}
               <th className="px-3 py-2 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Quality
               </th>
@@ -201,28 +209,55 @@ export function ScoutingDataList({
                 <td className="whitespace-nowrap px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
                   {formatDistanceToNow(new Date(entry.created_at))}
                 </td>
-                <td className="whitespace-nowrap px-2 py-2 text-center">
-                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                    {entry.preview_metrics.auto_points ?? '-'}
-                  </span>
-                </td>
-                <td className="whitespace-nowrap px-2 py-2 text-center">
-                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                    {entry.preview_metrics.teleop_points ?? '-'}
-                  </span>
-                </td>
-                <td className="whitespace-nowrap px-2 py-2 text-center">
-                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                    {entry.preview_metrics.endgame_points ?? '-'}
-                  </span>
-                </td>
-                <td className="whitespace-nowrap px-2 py-2 text-center">
-                  <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
-                    {entry.preview_metrics.total_points ?? '-'}
-                  </span>
-                </td>
+                {show2026Columns ? (
+                  <>
+                    <td className="whitespace-nowrap px-2 py-2 text-center">
+                      <span className="text-sm font-bold text-amber-600 dark:text-amber-400">
+                        {formatRatingDisplay(entry.teleop_performance?.scoring_rating)}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-2 py-2 text-center">
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {formatRatingDisplay(entry.teleop_performance?.feeding_rating)}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-2 py-2 text-center">
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {formatRatingDisplay(entry.teleop_performance?.defense_rating)}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-2 py-2 text-center">
+                      <span className="text-sm font-medium text-amber-600 dark:text-amber-400">
+                        {formatShootingTime(entry.shooting_time_seconds)}
+                      </span>
+                    </td>
+                  </>
+                ) : (
+                  <>
+                    <td className="whitespace-nowrap px-2 py-2 text-center">
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {entry.preview_metrics.auto_points ?? '-'}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-2 py-2 text-center">
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {entry.preview_metrics.teleop_points ?? '-'}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-2 py-2 text-center">
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {entry.preview_metrics.endgame_points ?? '-'}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-2 py-2 text-center">
+                      <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                        {entry.preview_metrics.total_points ?? '-'}
+                      </span>
+                    </td>
+                  </>
+                )}
                 <td className="whitespace-nowrap px-3 py-2 text-center">
-                  {getQualityBadge(entry.data_quality)}
+                  <DataQualityBadge quality={entry.data_quality} reasons={entry.data_quality_reasons} />
                 </td>
               </tr>
             ))}

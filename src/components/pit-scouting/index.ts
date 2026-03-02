@@ -8,6 +8,7 @@
 
 export { EventSelector } from './EventSelector';
 export { TeamSelector } from './TeamSelector';
+export { ManualTeamInput } from './ManualTeamInput';
 export { RobotCapabilitiesSection } from './RobotCapabilitiesSection';
 export { AutonomousCapabilitiesSection } from './AutonomousCapabilitiesSection';
 export { PhysicalSpecsSection } from './PhysicalSpecsSection';

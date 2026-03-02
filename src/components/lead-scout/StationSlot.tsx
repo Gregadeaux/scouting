@@ -19,6 +19,8 @@ interface StationSlotProps {
   onTeamNumberChange?: (teamNumber: number | null) => void;
   /** Whether the slot is in read-only mode (monitoring) */
   readOnly?: boolean;
+  /** Called when lead wants to scout this station (monitoring mode, unscouted stations only) */
+  onScoutStation?: () => void;
 }
 
 export function StationSlot({
@@ -31,13 +33,60 @@ export function StationSlot({
   onAssignScouter,
   onTeamNumberChange,
   readOnly = false,
+  onScoutStation,
 }: StationSlotProps) {
-  const { alliance, position } = parseStationKey(stationKey);
+  const { alliance } = parseStationKey(stationKey);
   const label = stationLabel(stationKey);
   const isRed = alliance === 'red';
 
   // Monitoring mode display
   if (readOnly) {
+    const hasSubmitted = submission?.submitted || presenceStatus === 'submitted';
+    const hasScouter = Boolean(assignment?.user_id);
+
+    function renderStationStatus() {
+      if (hasScouter && hasSubmitted) {
+        return (
+          <div className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-cyan-500" />
+            <span className="text-xs text-cyan-400">
+              Submitted{submission?.submitted_at
+                ? ` (${getTimeAgo(submission.submitted_at)})`
+                : ''}
+            </span>
+          </div>
+        );
+      }
+
+      if (hasScouter) {
+        return (
+          <div className="flex items-center gap-1.5">
+            <span className={cn(
+              'h-2 w-2 rounded-full',
+              presenceStatus === 'scouting' ? 'bg-yellow-500 animate-pulse' : 'bg-green-500'
+            )} />
+            <span className="text-xs text-slate-400">
+              {presenceStatus === 'scouting' ? 'Scouting' : 'Connected'}
+            </span>
+          </div>
+        );
+      }
+
+      if (onScoutStation) {
+        return (
+          <button
+            type="button"
+            onClick={onScoutStation}
+            className="mt-1 rounded bg-amber-600 hover:bg-amber-500 px-3 py-1 text-xs font-medium text-white transition-colors"
+          >
+            Scout
+          </button>
+        );
+      }
+
+      return <span className="text-xs text-slate-600">No scouter assigned</span>;
+    }
+
     return (
       <div className={cn(
         'rounded-lg border p-3',
@@ -54,33 +103,7 @@ export function StationSlot({
             {assignment?.scout_name ?? 'Unassigned'}
           </span>
         </div>
-        {assignment && (
-          <div className="flex items-center gap-1.5">
-            {(submission?.submitted || presenceStatus === 'submitted') ? (
-              <>
-                <span className="h-2 w-2 rounded-full bg-cyan-500" />
-                <span className="text-xs text-cyan-400">
-                  Submitted{submission?.submitted_at
-                    ? ` (${getTimeAgo(submission.submitted_at)})`
-                    : ''}
-                </span>
-              </>
-            ) : (
-              <>
-                <span className={cn(
-                  'h-2 w-2 rounded-full',
-                  presenceStatus === 'scouting' ? 'bg-yellow-500 animate-pulse' : 'bg-green-500'
-                )} />
-                <span className="text-xs text-slate-400">
-                  {presenceStatus === 'scouting' ? 'Scouting' : 'Connected'}
-                </span>
-              </>
-            )}
-          </div>
-        )}
-        {!assignment && (
-          <span className="text-xs text-slate-600">No scouter assigned</span>
-        )}
+        {renderStationStatus()}
       </div>
     );
   }

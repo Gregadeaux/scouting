@@ -60,6 +60,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ChevronDown, ChevronUp, Download, RefreshCw, User } from 'lucide-react';
 import { JSONBDataDisplay } from '@/components/scouting/JSONBDataDisplay';
+import { DataQualityBadge } from '@/components/scouting/DataQualityBadge';
 import { useMatchScouting } from '@/hooks/useMatchScouting';
 import type { ScoutingEntryWithDetails } from '@/types/admin';
 
@@ -98,17 +99,6 @@ function TeamScoutingCard({
     endgame: entries.reduce((sum, e) => sum + e.preview_metrics.endgame_points, 0) / entries.length,
     total: entries.reduce((sum, e) => sum + e.preview_metrics.total_points, 0) / entries.length,
   } : null;
-
-  const getQualityBadge = (quality: 'complete' | 'partial' | 'issues') => {
-    switch (quality) {
-      case 'complete':
-        return <Badge variant="success">Complete</Badge>;
-      case 'partial':
-        return <Badge variant="warning">Partial</Badge>;
-      case 'issues':
-        return <Badge variant="danger">Issues</Badge>;
-    }
-  };
 
   return (
     <Card className={`border-2 ${allianceColor}`}>
@@ -165,7 +155,7 @@ function TeamScoutingCard({
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {getQualityBadge(entry.data_quality)}
+                  <DataQualityBadge quality={entry.data_quality} reasons={entry.data_quality_reasons} />
                   <Button
                     size="sm"
                     variant="outline"

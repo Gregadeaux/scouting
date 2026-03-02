@@ -91,9 +91,12 @@ export async function POST(request: NextRequest) {
         teleop_performance: body.teleop_performance,
         endgame_performance: body.endgame_performance,
       });
+    } else if (schemaVersion === '2026.1') {
+      // 2026 uses qualitative ratings - basic structural validation
+      validationResult = { valid: true, errors: [] };
     } else {
       return errorResponse(
-        `Unknown schema version: ${schemaVersion}. Supported versions: 2025.1`,
+        `Unknown schema version: ${schemaVersion}. Supported versions: 2025.1, 2026.1`,
         400,
         { schema_version: schemaVersion }
       );
@@ -131,6 +134,7 @@ export async function POST(request: NextRequest) {
       notes: body.notes,
       confidence_level: body.confidence_level,
       device_id: body.device_id,
+      shooting_time_seconds: body.shooting_time_seconds,
     };
 
     // Insert into match_scouting table

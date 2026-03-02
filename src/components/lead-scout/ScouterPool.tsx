@@ -1,7 +1,11 @@
 'use client';
 
 import type { ScouterPresenceState } from '@/types/scouting-session';
+import type { ScouterStatus } from './ScouterChip';
 import { ScouterChip } from './ScouterChip';
+
+/** Scouters that haven't checked in for this long are shown as "reconnecting" */
+const RECONNECTING_THRESHOLD_MS = 30_000; // 30 seconds
 
 interface ScouterPoolProps {
   scouters: ScouterPresenceState[];
@@ -24,24 +28,30 @@ export function ScouterPool({ scouters, clockedOut, onRestoreScouter, onClockOut
           {activeScouters.length === 0 && (
             <p className="text-sm text-slate-500 py-2">No scouters connected</p>
           )}
-          {activeScouters.map((scouter) => (
-            <div key={scouter.userId} className="flex items-center gap-2">
-              <ScouterChip
-                name={scouter.scoutName}
-                status={scouter.status}
-                className="flex-1"
-              />
-              {onClockOutScouter && (
-                <button
-                  type="button"
-                  onClick={() => onClockOutScouter(scouter.userId)}
-                  className="text-xs text-slate-500 hover:text-red-400 transition-colors px-2 py-1"
-                >
-                  Clock Out
-                </button>
-              )}
-            </div>
-          ))}
+          {activeScouters.map((scouter) => {
+            // joinedAt doubles as lastSeen timestamp from HTTP checkins
+            const lastSeenMs = scouter.joinedAt ? new Date(scouter.joinedAt).getTime() : 0;
+            const isReconnecting = lastSeenMs > 0 && (Date.now() - lastSeenMs) > RECONNECTING_THRESHOLD_MS;
+            const displayStatus: ScouterStatus = isReconnecting ? 'reconnecting' : scouter.status;
+            return (
+              <div key={scouter.userId} className="flex items-center gap-2">
+                <ScouterChip
+                  name={scouter.scoutName}
+                  status={displayStatus}
+                  className="flex-1"
+                />
+                {onClockOutScouter && (
+                  <button
+                    type="button"
+                    onClick={() => onClockOutScouter(scouter.userId)}
+                    className="text-xs text-slate-500 hover:text-red-400 transition-colors px-2 py-1"
+                  >
+                    Clock Out
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 

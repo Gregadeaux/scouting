@@ -20,11 +20,31 @@ interface ManualMatchInputProps {
 }
 
 /**
+ * Fires onSelectionComplete when all three values are present.
+ * Extracted to avoid duplicating the guard logic.
+ */
+function fireIfComplete(
+  teamNumber: string,
+  allianceColor: 'red' | 'blue' | null,
+  matchNumber: number,
+  cb: ManualMatchInputProps['onSelectionComplete']
+) {
+  const tn = Number(teamNumber);
+  if (teamNumber && tn > 0 && allianceColor) {
+    cb({ matchNumber, teamNumber: tn, allianceColor });
+  }
+}
+
+/**
  * ManualMatchInput Component
  *
  * Replaces MatchSelector + MatchTeamSelector for manual-schedule events.
  * Shows live-synced match number with +/- controls, team number input,
  * and alliance color toggle.
+ *
+ * Performance: The team number input uses local state and only propagates
+ * to the parent on blur (or Enter), avoiding expensive re-renders of the
+ * entire form tree on every keystroke.
  */
 export function ManualMatchInput({ eventKey, onSelectionComplete, resetKey = 0, disabled, canControlMatch = true }: ManualMatchInputProps) {
   const {
@@ -37,63 +57,72 @@ export function ManualMatchInput({ eventKey, onSelectionComplete, resetKey = 0, 
     decrementMatch,
   } = useLiveScoutingSession(eventKey);
 
-  const [teamNumber, setTeamNumber] = useState<string>('');
+  // Local-only state for the text input - NOT propagated on every keystroke
+  const [localTeamInput, setLocalTeamInput] = useState<string>('');
+  // The "committed" team number that has been propagated to the parent
+  const [committedTeamNumber, setCommittedTeamNumber] = useState<string>('');
   const [allianceColor, setAllianceColor] = useState<'red' | 'blue' | null>(null);
 
   // Reset inputs when resetKey changes (parent signals a reset after submission)
   useEffect(() => {
     if (resetKey > 0) {
-      setTeamNumber('');
+      setLocalTeamInput('');
+      setCommittedTeamNumber('');
       setAllianceColor(null);
     }
   }, [resetKey]);
 
   // Refs keep fresh values accessible to the realtime match-number effect
   // without adding them to its dependency array
-  const teamNumberRef = useRef(teamNumber);
+  const committedTeamRef = useRef(committedTeamNumber);
   const allianceColorRef = useRef(allianceColor);
   const onSelectionCompleteRef = useRef(onSelectionComplete);
 
   useEffect(() => {
-    teamNumberRef.current = teamNumber;
+    committedTeamRef.current = committedTeamNumber;
     allianceColorRef.current = allianceColor;
     onSelectionCompleteRef.current = onSelectionComplete;
-  }, [teamNumber, allianceColor, onSelectionComplete]);
+  }, [committedTeamNumber, allianceColor, onSelectionComplete]);
 
-  const handleTeamChange = useCallback(
-    (value: string) => {
-      const cleaned = value.replace(/\D/g, '');
-      setTeamNumber(cleaned);
+  const handleTeamInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalTeamInput(e.target.value.replace(/\D/g, ''));
+  }, []);
 
-      if (cleaned && Number(cleaned) > 0 && allianceColor) {
-        onSelectionComplete({
-          matchNumber: currentMatchNumber,
-          teamNumber: Number(cleaned),
-          allianceColor,
-        });
+  // Commit the team number on blur or Enter - propagates to parent
+  const commitTeamNumber = useCallback(() => {
+    if (localTeamInput !== committedTeamNumber) {
+      setCommittedTeamNumber(localTeamInput);
+      fireIfComplete(localTeamInput, allianceColor, currentMatchNumber, onSelectionComplete);
+    }
+  }, [localTeamInput, committedTeamNumber, allianceColor, currentMatchNumber, onSelectionComplete]);
+
+  const handleTeamKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        e.currentTarget.blur();
       }
     },
-    [allianceColor, currentMatchNumber, onSelectionComplete]
+    []
   );
 
   const handleAllianceChange = useCallback(
     (color: 'red' | 'blue') => {
       setAllianceColor(color);
 
-      if (teamNumber && Number(teamNumber) > 0) {
-        onSelectionComplete({
-          matchNumber: currentMatchNumber,
-          teamNumber: Number(teamNumber),
-          allianceColor: color,
-        });
+      // Use the local input value (may not be committed yet) so tapping
+      // alliance right after typing still works without needing to blur first
+      const teamToUse = localTeamInput || committedTeamNumber;
+      if (teamToUse !== committedTeamNumber) {
+        setCommittedTeamNumber(teamToUse);
       }
+      fireIfComplete(teamToUse, color, currentMatchNumber, onSelectionComplete);
     },
-    [teamNumber, currentMatchNumber, onSelectionComplete]
+    [localTeamInput, committedTeamNumber, currentMatchNumber, onSelectionComplete]
   );
 
   // Re-fire callback when match number changes from realtime, using refs for fresh values
   useEffect(() => {
-    const tn = teamNumberRef.current;
+    const tn = committedTeamRef.current;
     const ac = allianceColorRef.current;
     if (tn && Number(tn) > 0 && ac) {
       onSelectionCompleteRef.current({
@@ -191,12 +220,13 @@ export function ManualMatchInput({ eventKey, onSelectionComplete, resetKey = 0, 
           Team Number
         </label>
         <input
-          type="number"
+          type="text"
           inputMode="numeric"
-          min={1}
-          max={99999}
-          value={teamNumber}
-          onChange={(e) => handleTeamChange(e.target.value)}
+          pattern="[0-9]*"
+          value={localTeamInput}
+          onChange={handleTeamInputChange}
+          onBlur={commitTeamNumber}
+          onKeyDown={handleTeamKeyDown}
           placeholder="Enter team #"
           disabled={disabled}
           className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-center text-2xl font-bold tabular-nums text-gray-900 focus:border-frc-blue focus:outline-none focus:ring-2 focus:ring-frc-blue dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"

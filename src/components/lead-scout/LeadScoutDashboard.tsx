@@ -52,21 +52,23 @@ export function LeadScoutDashboard({ userId, userName }: LeadScoutDashboardProps
     [session?.session_data]
   );
 
-  // Build scouter list from session_data checkins (HTTP-based, reliable)
-  // merged with Realtime presence (fast, but may not connect)
+  // Merge HTTP checkins (reliable) with Realtime presence (fast) into a unified pool.
+  // Scouters missing for >45s are removed; 30-45s shows as "reconnecting" (in ScouterPool).
   const scouterPool = useMemo(() => {
     const seen = new Set<string>();
     const result: ScouterPresenceState[] = [];
+    const staleThreshold = Date.now() - 45_000;
 
-    // 1. Checkins from session_data (always works via polling)
+    // HTTP checkins from session_data
     const checkins = (session?.session_data?.checkins ?? {}) as Record<
       string,
       { scoutName?: string; status?: string; lastSeen?: string }
     >;
-    const staleThreshold = Date.now() - 15_000; // 15 seconds
     for (const [uid, info] of Object.entries(checkins)) {
-      if (uid === userId) continue; // exclude lead
-      if (info.lastSeen && new Date(info.lastSeen).getTime() < staleThreshold) continue;
+      if (uid === userId) continue;
+      const lastSeenMs = info.lastSeen ? new Date(info.lastSeen).getTime() : 0;
+      if (lastSeenMs < staleThreshold) continue;
+
       seen.add(uid);
       result.push({
         userId: uid,
@@ -76,11 +78,10 @@ export function LeadScoutDashboard({ userId, userName }: LeadScoutDashboardProps
       });
     }
 
-    // 2. Merge Realtime presence (may have fresher status like 'scouting')
+    // Realtime presence may have fresher status (e.g. 'scouting')
     for (const s of connectedScouters) {
       if (s.userId === userId) continue;
       if (seen.has(s.userId)) {
-        // Update status from presence if it's more specific
         const existing = result.find((r) => r.userId === s.userId);
         if (existing && s.status !== 'connected') {
           existing.status = s.status;
@@ -218,6 +219,16 @@ export function LeadScoutDashboard({ userId, userName }: LeadScoutDashboardProps
     [orchestration.clocked_out, updateOrchestration]
   );
 
+  // Self-assign the lead to a station and open the scouting form
+  const handleScoutStation = useCallback(
+    async (stationKey: StationKey) => {
+      // Reuse handleAssignScouter which already clears other station assignments
+      await handleAssignScouter(stationKey, userId, userName);
+      window.open('/scouting/match', '_blank');
+    },
+    [handleAssignScouter, userId, userName]
+  );
+
   // --- Event selector ---
 
   function handleEventChange(eventKey: string) {
@@ -339,6 +350,7 @@ export function LeadScoutDashboard({ userId, userName }: LeadScoutDashboardProps
               orchestration={orchestration}
               connectedScouters={scouterPool}
               onPrepareNextMatch={handlePrepareNextMatch}
+              onScoutStation={handleScoutStation}
             />
           )}
         </>

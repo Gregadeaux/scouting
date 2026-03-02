@@ -12,6 +12,7 @@ import {
   cleanupOldSubmissions,
   type QueuedSubmission,
 } from './queue';
+import { parseResponseError } from './api';
 
 const MAX_RETRIES = 5;
 const BASE_DELAY = 1000; // 1 second
@@ -103,7 +104,38 @@ class SyncManager {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        // 409 Conflict means the data already exists (duplicate submission).
+        // Treat as success so we don't keep retrying data that was already saved.
+        if (response.status === 409) {
+          console.warn(
+            `[SyncManager] Submission ${submission.id} returned 409 (duplicate) - treating as success`
+          );
+          await deleteSubmission(submission.id);
+          this.emit({
+            type: 'submission-success',
+            submissionId: submission.id,
+          });
+          return true;
+        }
+
+        const errorMsg = await parseResponseError(response);
+
+        // 400-level errors (except 409 handled above) are non-retryable
+        if (response.status >= 400 && response.status < 500) {
+          await updateSubmission(submission.id, {
+            status: 'failed',
+            retryCount: submission.retryCount + 1,
+            error: errorMsg,
+          });
+          this.emit({
+            type: 'submission-failed',
+            submissionId: submission.id,
+            error: errorMsg,
+          });
+          return false;
+        }
+
+        throw new Error(errorMsg);
       }
 
       // Success! Delete from queue
@@ -117,31 +149,26 @@ class SyncManager {
       return true;
     } catch (error) {
       const retryCount = submission.retryCount + 1;
-      const shouldRetry = retryCount < MAX_RETRIES;
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
 
-      if (shouldRetry) {
-        // Update with retry count and pending status
+      if (retryCount < MAX_RETRIES) {
         await updateSubmission(submission.id, {
           status: 'pending',
           retryCount,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: errorMsg,
         });
-
-        // Schedule retry with backoff
         const delay = this.getBackoffDelay(retryCount);
         setTimeout(() => this.syncSubmission(submission), delay);
       } else {
-        // Max retries reached, mark as failed
         await updateSubmission(submission.id, {
           status: 'failed',
           retryCount,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: errorMsg,
         });
-
         this.emit({
           type: 'submission-failed',
           submissionId: submission.id,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: errorMsg,
         });
       }
 

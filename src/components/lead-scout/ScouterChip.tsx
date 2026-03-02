@@ -2,9 +2,11 @@
 
 import { cn } from '@/lib/utils';
 
+export type ScouterStatus = 'connected' | 'scouting' | 'submitted' | 'reconnecting' | 'offline';
+
 interface ScouterChipProps {
   name: string;
-  status: 'connected' | 'scouting' | 'submitted' | 'offline';
+  status: ScouterStatus;
   className?: string;
 }
 
@@ -12,6 +14,7 @@ const STATUS_STYLES = {
   connected: { dot: 'bg-green-500', text: 'text-green-400', label: 'Online' },
   scouting: { dot: 'bg-yellow-500 animate-pulse', text: 'text-yellow-400', label: 'Scouting' },
   submitted: { dot: 'bg-cyan-500', text: 'text-cyan-400', label: 'Submitted' },
+  reconnecting: { dot: 'bg-orange-500 animate-pulse', text: 'text-orange-400', label: 'Reconnecting' },
   offline: { dot: 'bg-slate-600', text: 'text-slate-500', label: 'Offline' },
 } as const;
 

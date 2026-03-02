@@ -637,22 +637,7 @@ export class ScoutingDataRepository implements IScoutingDataRepository {
         throw new DatabaseOperationError('list scouting entries', error);
       }
 
-      // Calculate preview metrics and data quality for each entry
-      const enrichedData = (data || []).map((entry: MatchScoutingEntry) => {
-        const preview = this.calculatePreviewMetrics(entry);
-        const quality = this.assessDataQuality(entry);
-
-        return {
-          ...entry,
-          team_name: entry.teams?.team_name,
-          event_name: entry.match_schedule?.events?.event_name,
-          event_key: entry.event_key || entry.match_schedule?.event_key,
-          match_number: entry.match_schedule?.match_number,
-          comp_level: entry.match_schedule?.comp_level,
-          preview_metrics: preview,
-          data_quality: quality,
-        } as ScoutingEntryWithDetails;
-      });
+      const enrichedData = (data || []).map((entry: MatchScoutingEntry) => this.enrichEntry(entry));
 
       return {
         data: enrichedData,
@@ -669,6 +654,26 @@ export class ScoutingDataRepository implements IScoutingDataRepository {
       }
       throw new DatabaseOperationError('list scouting entries', error);
     }
+  }
+
+  /**
+   * Enrich a raw database entry with computed preview metrics and data quality
+   */
+  private enrichEntry(entry: MatchScoutingEntry): ScoutingEntryWithDetails {
+    const preview = this.calculatePreviewMetrics(entry);
+    const { quality, reasons } = this.assessDataQuality(entry);
+
+    return {
+      ...entry,
+      team_name: entry.teams?.team_name,
+      event_name: entry.match_schedule?.events?.event_name,
+      event_key: entry.event_key || entry.match_schedule?.event_key,
+      match_number: entry.match_schedule?.match_number,
+      comp_level: entry.match_schedule?.comp_level,
+      preview_metrics: preview,
+      data_quality: quality,
+      data_quality_reasons: reasons,
+    } as ScoutingEntryWithDetails;
   }
 
   /**
@@ -738,33 +743,92 @@ export class ScoutingDataRepository implements IScoutingDataRepository {
 
   /**
    * Assess data quality based on completeness and validity
+   * Returns quality level and human-readable reasons
    */
-  private assessDataQuality(entry: MatchScoutingEntry): 'complete' | 'partial' | 'issues' {
-    // Check if all required periods exist
+  private assessDataQuality(entry: MatchScoutingEntry): { quality: 'complete' | 'partial' | 'issues'; reasons: string[] } {
+    const auto = entry.auto_performance as Record<string, unknown> | undefined;
+    const teleop = entry.teleop_performance as Record<string, unknown> | undefined;
+    const endgame = entry.endgame_performance as Record<string, unknown> | undefined;
+    const schemaVersion = (auto?.schema_version ?? teleop?.schema_version) as string | undefined;
+
+    // 2026 season: ratings-based, not points-based
+    if (schemaVersion?.startsWith('2026')) {
+      return this.assessDataQuality2026(auto, teleop, endgame);
+    }
+
+    // 2025 / default season: points-based
+    return this.assessDataQuality2025(entry);
+  }
+
+  /**
+   * Data quality assessment for 2025 season (points-based)
+   */
+  private assessDataQuality2025(entry: MatchScoutingEntry): { quality: 'complete' | 'partial' | 'issues'; reasons: string[] } {
     const hasAuto = entry.auto_performance && Object.keys(entry.auto_performance).length > 1;
     const hasTeleop = entry.teleop_performance && Object.keys(entry.teleop_performance).length > 1;
     const hasEndgame = entry.endgame_performance && Object.keys(entry.endgame_performance).length > 1;
 
     // All periods present with data
     if (hasAuto && hasTeleop && hasEndgame) {
-      // Check for suspicious values (e.g., unrealistic scoring)
       const metrics = this.calculatePreviewMetrics(entry);
 
-      // If total points are suspiciously high (>200) or 0, mark as issues
-      if (metrics.total_points > 200 || metrics.total_points === 0) {
-        return 'issues';
+      if (metrics.total_points > 200) {
+        return { quality: 'issues', reasons: ['Unrealistic total points (>200)'] };
+      }
+      if (metrics.total_points === 0) {
+        return { quality: 'issues', reasons: ['Total points is 0'] };
       }
 
-      return 'complete';
+      return { quality: 'complete', reasons: ['All periods complete'] };
     }
 
     // Some periods missing
     if (hasAuto || hasTeleop || hasEndgame) {
-      return 'partial';
+      const missing: string[] = [];
+      if (!hasAuto) missing.push('Missing auto data');
+      if (!hasTeleop) missing.push('Missing teleop data');
+      if (!hasEndgame) missing.push('Missing endgame data');
+      return { quality: 'partial', reasons: missing };
     }
 
     // No useful data
-    return 'issues';
+    return { quality: 'issues', reasons: ['No period data found'] };
+  }
+
+  /**
+   * Data quality assessment for 2026 season (ratings-based)
+   * Complete: Has teleop ratings (scoring_rating > 0) AND endgame data (endgame_climb_attempted defined)
+   * Partial: Has some but not all expected 2026 data
+   * Issues: No meaningful data at all
+   */
+  private assessDataQuality2026(
+    auto: Record<string, unknown> | undefined,
+    teleop: Record<string, unknown> | undefined,
+    endgame: Record<string, unknown> | undefined,
+  ): { quality: 'complete' | 'partial' | 'issues'; reasons: string[] } {
+    const hasTeleopRatings = teleop != null
+      && typeof teleop.scoring_rating === 'number'
+      && teleop.scoring_rating > 0;
+
+    const hasEndgameData = endgame != null
+      && typeof endgame.endgame_climb_attempted !== 'undefined';
+
+    const hasAutoData = auto != null && Object.keys(auto).length > 1;
+
+    if (hasTeleopRatings && hasEndgameData) {
+      return { quality: 'complete', reasons: ['Teleop ratings and endgame data present'] };
+    }
+
+    // Has some data but not all
+    if (hasTeleopRatings || hasEndgameData || hasAutoData) {
+      const missing: string[] = [];
+      if (!hasTeleopRatings) missing.push('Missing teleop ratings');
+      if (!hasEndgameData) missing.push('Missing endgame data');
+      if (!hasAutoData) missing.push('Missing auto data');
+      return { quality: 'partial', reasons: missing };
+    }
+
+    return { quality: 'issues', reasons: ['No meaningful 2026 data found'] };
   }
 
   /**
@@ -836,22 +900,7 @@ export class ScoutingDataRepository implements IScoutingDataRepository {
         throw new DatabaseOperationError('get scouting by match', error);
       }
 
-      // Calculate preview metrics and enrich data
-      const enrichedEntries = (data || []).map((entry: MatchScoutingEntry) => {
-        const preview = this.calculatePreviewMetrics(entry);
-        const quality = this.assessDataQuality(entry);
-
-        return {
-          ...entry,
-          team_name: entry.teams?.team_name,
-          event_name: entry.match_schedule?.events?.event_name,
-          event_key: entry.event_key || entry.match_schedule?.event_key,
-          match_number: entry.match_schedule?.match_number,
-          comp_level: entry.match_schedule?.comp_level,
-          preview_metrics: preview,
-          data_quality: quality,
-        } as ScoutingEntryWithDetails;
-      });
+      const enrichedEntries = (data || []).map((entry: MatchScoutingEntry) => this.enrichEntry(entry));
 
       // Group by alliance using match schedule data
       const schedule = matchSchedule as MatchScheduleRow;
@@ -970,22 +1019,7 @@ export class ScoutingDataRepository implements IScoutingDataRepository {
 
       const total = count || 0;
 
-      // Calculate preview metrics and enrich data
-      let enrichedEntries = (data || []).map((entry: MatchScoutingEntry) => {
-        const preview = this.calculatePreviewMetrics(entry);
-        const quality = this.assessDataQuality(entry);
-
-        return {
-          ...entry,
-          team_name: entry.teams?.team_name,
-          event_name: entry.match_schedule?.events?.event_name,
-          event_key: entry.event_key || entry.match_schedule?.event_key,
-          match_number: entry.match_schedule?.match_number,
-          comp_level: entry.match_schedule?.comp_level,
-          preview_metrics: preview,
-          data_quality: quality,
-        } as ScoutingEntryWithDetails;
-      });
+      let enrichedEntries = (data || []).map((entry: MatchScoutingEntry) => this.enrichEntry(entry));
 
       // Sort in-memory for match_number and total_points
       if (sortBy === 'match_number') {
@@ -1018,7 +1052,7 @@ export class ScoutingDataRepository implements IScoutingDataRepository {
       // Calculate aggregates
       const allEntries = (allData || []).map((entry: MatchScoutingEntry) => {
         const preview = this.calculatePreviewMetrics(entry);
-        const quality = this.assessDataQuality(entry);
+        const { quality } = this.assessDataQuality(entry);
         return { ...entry, preview_metrics: preview, data_quality: quality };
       });
 

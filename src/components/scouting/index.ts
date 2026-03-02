@@ -6,3 +6,4 @@
 
 export { JSONBDataDisplay, JSONBDataDisplayInline } from './JSONBDataDisplay';
 export { FieldDisplay, FieldDisplayCompact } from './FieldDisplay';
+export { DataQualityBadge } from './DataQualityBadge';

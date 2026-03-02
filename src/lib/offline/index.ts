@@ -32,6 +32,7 @@ export {
   offlinePut,
   offlinePatch,
   offlineDelete,
+  parseResponseError,
   type OfflineApiOptions,
   type ApiResponse,
 } from './api';

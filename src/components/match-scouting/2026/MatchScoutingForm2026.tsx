@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useState, useEffect, useCallback } from 'react';
+import { type ReactNode, useState, useEffect, useCallback, useRef } from 'react';
 import type { Event, MatchSchedule } from '@/types';
 import type {
   AutoPerformance2026,
@@ -18,7 +18,8 @@ import {
 } from '@/types/season-2026';
 
 import Link from 'next/link';
-import { useOptimisticSubmission, useOfflineStatus } from '@/lib/offline';
+import { useOptimisticSubmission, useOfflineStatus, syncManager } from '@/lib/offline';
+import type { SyncEvent } from '@/lib/offline';
 import { useScouterEventSafe } from '@/contexts/ScouterEventContext';
 import { useLiveScoutingSession } from '@/hooks/useLiveScoutingSession';
 import { getOrchestration } from '@/types/scouting-session';
@@ -140,7 +141,9 @@ function SegmentedButtons<T extends string>({
 
 /**
  * Rating Slider Component
- * Touch-friendly 1-5 rating slider with labels
+ * Touch-friendly 0-5 rating slider with labels
+ * 0 = N/A (didn't do this activity), 1-5 = Poor to Excellent
+ * Clicking the currently selected 1-5 rating deselects it back to 0 (N/A)
  */
 function RatingSlider({
   value,
@@ -156,15 +159,30 @@ function RatingSlider({
       <div className="flex items-center justify-between">
         <span className="font-medium text-gray-700 dark:text-gray-200">{label}</span>
         <span className="text-sm text-gray-500 dark:text-gray-400">
-          {value} - {RATING_LABELS_2026[value as keyof typeof RATING_LABELS_2026]}
+          {value === 0
+            ? 'N/A'
+            : `${value} - ${RATING_LABELS_2026[value as keyof typeof RATING_LABELS_2026]}`}
         </span>
       </div>
       <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => onChange(0)}
+          className={cn(
+            'min-h-[48px] rounded-lg border-2 px-3 text-sm font-bold transition-all',
+            'focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2',
+            value === 0
+              ? 'border-gray-500 bg-gray-500 text-white dark:border-gray-400 dark:bg-gray-400 dark:text-gray-900'
+              : 'border-gray-300 bg-white text-gray-500 hover:border-gray-400 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400'
+          )}
+        >
+          N/A
+        </button>
         {[1, 2, 3, 4, 5].map((rating) => (
           <button
             key={rating}
             type="button"
-            onClick={() => onChange(rating)}
+            onClick={() => onChange(value === rating ? 0 : rating)}
             className={cn(
               'min-h-[48px] flex-1 rounded-lg border-2 text-lg font-bold transition-all',
               'focus:outline-none focus:ring-2 focus:ring-frc-blue focus:ring-offset-2',
@@ -178,7 +196,7 @@ function RatingSlider({
         ))}
       </div>
       <div className="flex justify-between text-xs text-gray-500">
-        <span>Poor</span>
+        <span className="ml-14">Poor</span>
         <span>Excellent</span>
       </div>
     </div>
@@ -307,7 +325,21 @@ export function MatchScoutingForm2026({
 
     doCheckin(); // immediate first checkin
     const id = setInterval(doCheckin, 5000);
-    return () => clearInterval(id);
+
+    // When the tab regains visibility (e.g. user switches back from another app),
+    // fire an immediate checkin so the lead scouter sees them right away instead
+    // of waiting for the next interval tick (which may have been throttled by the browser).
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        doCheckin();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [selectedEventKey, scoutName, isDemoMode]);
 
   const [selectedMatchKey, setSelectedMatchKey] = useState<string | null>(null);
@@ -329,6 +361,27 @@ export function MatchScoutingForm2026({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [syncFailure, setSyncFailure] = useState<string | null>(null);
+
+  // Track whether a submission is in-flight to prevent premature form reset
+  const submissionInFlight = useRef(false);
+
+  // Listen for background sync failures so users know when queued submissions fail
+  useEffect(() => {
+    const handleSyncEvent = (event: SyncEvent) => {
+      if (event.type === 'submission-failed' && event.error) {
+        setSyncFailure(
+          `A queued submission failed to sync: ${event.error}. Check your connection and try again.`
+        );
+      }
+      if (event.type === 'submission-success') {
+        // Clear any previous sync failure when a submission succeeds
+        setSyncFailure(null);
+      }
+    };
+    const unsubscribe = syncManager.on(handleSyncEvent);
+    return unsubscribe;
+  }, []);
 
   // Auto-save to localStorage
   const draftIdentifier = isManualEvent
@@ -501,8 +554,17 @@ export function MatchScoutingForm2026({
     updatePresenceStatus('scouting');
   }, [updatePresenceStatus]);
 
+  function getSubmitButtonLabel(): string {
+    if (isPending) return 'Saving...';
+    if (isSubmitting) return 'Submitting...';
+    return 'Submit';
+  }
+
   // Submit handler
   async function handleSubmit(): Promise<void> {
+    // Prevent double-submission if already in flight
+    if (submissionInFlight.current) return;
+
     // Validation differs for manual vs TBA mode
     if (isManualEvent) {
       if (!selectedEventKey || !manualMatchNumber || !selectedTeamNumber || !allianceColor) {
@@ -526,9 +588,13 @@ export function MatchScoutingForm2026({
       return;
     }
 
+    submissionInFlight.current = true;
     setIsSubmitting(true);
     setSuccessMessage(null);
     setError(null);
+
+    // Capture team number before any state resets for use in callbacks
+    const submittedTeamNumber = selectedTeamNumber;
 
     const commonFields = {
       team_number: selectedTeamNumber,
@@ -554,57 +620,65 @@ export function MatchScoutingForm2026({
       ? { ...commonFields, event_key: selectedEventKey, match_number: manualMatchNumber }
       : { ...commonFields, match_id: selectedMatch!.match_id, match_key: selectedMatchKey, starting_position: startingPosition };
 
-    await submit({
-      url,
-      method: 'POST',
-      data: payload,
-      onSuccess: (response) => {
-        localStorage.removeItem(DRAFT_KEY);
+    try {
+      await submit({
+        url,
+        method: 'POST',
+        data: payload,
+        onSuccess: (response) => {
+          localStorage.removeItem(DRAFT_KEY);
 
-        if (response.queued) {
-          setSuccessMessage(
-            `Saved offline - will sync when connected. Team ${selectedTeamNumber} data queued.`
-          );
-        } else {
-          setSuccessMessage(`Match data submitted for Team ${selectedTeamNumber}!`);
-        }
+          if (response.queued) {
+            setSuccessMessage(
+              `Saved offline - will sync when connected. Team ${submittedTeamNumber} data queued.`
+            );
+          } else {
+            setSuccessMessage(`Match data submitted for Team ${submittedTeamNumber}!`);
+          }
 
-        resetForm();
+          resetForm();
 
-        // Notify lead scouter of submission (presence + durable DB update)
-        if (isManagedMode && selectedEventKey) {
-          updatePresenceStatus('submitted');
-          fetch('/api/scouting-session/notify-submission', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ event_key: selectedEventKey }),
-          }).catch(() => {/* best-effort — presence is the fast path */});
-        }
+          // Notify lead scouter of submission (presence + durable DB update)
+          if (isManagedMode && selectedEventKey) {
+            updatePresenceStatus('submitted');
+            fetch('/api/scouting-session/notify-submission', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ event_key: selectedEventKey }),
+            }).catch(() => {/* best-effort -- presence is the fast path */});
+          }
 
-        // For manual events, clear team/alliance but keep match number (driven by session)
-        if (isManualEvent) {
-          setSelectedTeamNumber(null);
-          setAllianceColor(null);
-          setManualResetKey((k) => k + 1);
-        }
+          // For manual events, clear team/alliance but keep match number (driven by session)
+          if (isManualEvent) {
+            setSelectedTeamNumber(null);
+            setAllianceColor(null);
+            setManualResetKey((k) => k + 1);
+          }
 
-        onSubmitSuccess?.(response.data || payload);
+          onSubmitSuccess?.(response.data || payload);
 
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      },
-      onError: (err) => {
-        if (err.message.includes('Duplicate') || err.message.includes('already submitted')) {
-          setError(
-            `Duplicate submission: You already submitted data for Team ${selectedTeamNumber} in this match.`
-          );
-        } else {
-          setError(`Error: ${err.message}`);
-        }
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      },
-    });
-
-    setIsSubmitting(false);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+        onError: (err) => {
+          if (err.message.includes('Duplicate') || err.message.includes('already submitted')) {
+            setError(
+              `Duplicate submission: You already submitted data for Team ${submittedTeamNumber} in this match.`
+            );
+          } else {
+            setError(`Submission failed: ${err.message}. Your data has NOT been saved - please try again.`);
+          }
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+      });
+    } catch (unexpectedErr) {
+      // Catch any unexpected errors that slip past the optimistic submission hook
+      const message = unexpectedErr instanceof Error ? unexpectedErr.message : 'Unknown error';
+      setError(`Unexpected error during submission: ${message}. Your data has NOT been saved - please try again.`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } finally {
+      setIsSubmitting(false);
+      submissionInFlight.current = false;
+    }
   }
 
   return (
@@ -662,6 +736,22 @@ export function MatchScoutingForm2026({
       {error && (
         <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200">
           {error}
+        </div>
+      )}
+
+      {/* Background sync failure warning */}
+      {syncFailure && (
+        <div className="mb-4 rounded-lg border border-orange-200 bg-orange-50 p-3 text-sm text-orange-800 dark:border-orange-700 dark:bg-orange-900/30 dark:text-orange-200">
+          <div className="flex items-center justify-between">
+            <span>{syncFailure}</span>
+            <button
+              type="button"
+              onClick={() => setSyncFailure(null)}
+              className="ml-2 text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-200"
+            >
+              Dismiss
+            </button>
+          </div>
         </div>
       )}
 
@@ -979,9 +1069,7 @@ export function MatchScoutingForm2026({
                 size="lg"
                 className="w-full py-6 text-lg"
               >
-                {isPending && 'Saving...'}
-                {!isPending && isSubmitting && 'Submitting...'}
-                {!isPending && !isSubmitting && 'Submit'}
+                {getSubmitButtonLabel()}
               </Button>
             </div>
           </div>

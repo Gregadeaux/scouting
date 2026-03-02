@@ -15,6 +15,8 @@ interface MonitoringViewProps {
   orchestration: MatchOrchestrationState;
   connectedScouters: ScouterPresenceState[];
   onPrepareNextMatch: () => void;
+  /** Called when lead wants to self-assign and scout a station */
+  onScoutStation?: (stationKey: StationKey) => void;
 }
 
 const RED_STATIONS: StationKey[] = ['red_1', 'red_2', 'red_3'];
@@ -25,6 +27,7 @@ export function MonitoringView({
   orchestration,
   connectedScouters,
   onPrepareNextMatch,
+  onScoutStation,
 }: MonitoringViewProps) {
   // Build presence lookup
   const presenceMap = new Map<string, ScouterPresenceState['status']>();
@@ -43,6 +46,14 @@ export function MonitoringView({
   }).length;
   const totalAssigned = assignedStations.length;
   const allSubmitted = totalAssigned > 0 && submittedCount === totalAssigned;
+
+  // Stations with a team but no scouter -- the lead can fill in
+  const unscoutedSet = new Set(
+    ALL_STATION_KEYS.filter((k) => {
+      const a = orchestration.assignments[k];
+      return a && a.team_number > 0 && !a.user_id;
+    })
+  );
 
   function renderStationGroup(label: string, stations: StationKey[], colorClass: string) {
     return (
@@ -63,6 +74,11 @@ export function MonitoringView({
                     : undefined
                 }
                 readOnly
+                onScoutStation={
+                  unscoutedSet.has(key) && onScoutStation
+                    ? () => onScoutStation(key)
+                    : undefined
+                }
               />
             );
           })}
@@ -89,6 +105,12 @@ export function MonitoringView({
       <div className="text-center text-sm text-slate-400">
         Submitted: {submittedCount}/{totalAssigned}
       </div>
+
+      {unscoutedSet.size > 0 && (
+        <div className="text-center text-xs text-amber-400">
+          {unscoutedSet.size} station{unscoutedSet.size > 1 ? 's' : ''} without a scouter — tap &quot;Scout&quot; to fill in
+        </div>
+      )}
 
       <Button
         size="lg"

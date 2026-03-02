@@ -128,13 +128,13 @@ function AllianceTeamCard({
           </div>
           <div>
             <p className="text-lg font-semibold text-slate-300">
-              {stats.avg_auto_score?.toFixed(1) || '—'}
+              {(stats.auto_opr ?? stats.avg_auto_score)?.toFixed(1) || '—'}
             </p>
             <p className="text-[10px] uppercase tracking-wider text-slate-500">Auto</p>
           </div>
           <div>
             <p className="text-lg font-semibold text-slate-300">
-              {stats.avg_teleop_score?.toFixed(1) || '—'}
+              {(stats.teleop_hub_opr ?? stats.avg_teleop_score)?.toFixed(1) || '—'}
             </p>
             <p className="text-[10px] uppercase tracking-wider text-slate-500">Teleop</p>
           </div>
@@ -237,9 +237,9 @@ function TeamComparisonTable({
                   <td className="px-4 py-3 font-semibold text-white">{teamNumber}</td>
                   <td className="px-4 py-3 text-right font-mono text-cyan-400">{teamStats?.opr?.toFixed(1) || '—'}</td>
                   <td className="px-4 py-3 text-right font-mono text-slate-300">{teamStats?.ccwm?.toFixed(1) || '—'}</td>
-                  <td className="px-4 py-3 text-right font-mono text-slate-300">{teamStats?.avg_auto_score?.toFixed(1) || '—'}</td>
-                  <td className="px-4 py-3 text-right font-mono text-slate-300">{teamStats?.avg_teleop_score?.toFixed(1) || '—'}</td>
-                  <td className="px-4 py-3 text-right font-mono text-slate-300">{teamStats?.avg_endgame_score?.toFixed(1) || '—'}</td>
+                  <td className="px-4 py-3 text-right font-mono text-slate-300">{(teamStats?.auto_opr ?? teamStats?.avg_auto_score)?.toFixed(1) || '—'}</td>
+                  <td className="px-4 py-3 text-right font-mono text-slate-300">{(teamStats?.teleop_hub_opr ?? teamStats?.avg_teleop_score)?.toFixed(1) || '—'}</td>
+                  <td className="px-4 py-3 text-right font-mono text-slate-300">{(teamStats?.endgame_opr ?? teamStats?.avg_endgame_score)?.toFixed(1) || '—'}</td>
                   <td className="px-4 py-3 text-right font-mono text-slate-300">{teamStats?.reliability_score?.toFixed(0) || '—'}%</td>
                 </tr>
               );
@@ -252,9 +252,9 @@ function TeamComparisonTable({
                   <td className="px-4 py-3 font-semibold text-white">{teamNumber}</td>
                   <td className="px-4 py-3 text-right font-mono text-cyan-400">{teamStats?.opr?.toFixed(1) || '—'}</td>
                   <td className="px-4 py-3 text-right font-mono text-slate-300">{teamStats?.ccwm?.toFixed(1) || '—'}</td>
-                  <td className="px-4 py-3 text-right font-mono text-slate-300">{teamStats?.avg_auto_score?.toFixed(1) || '—'}</td>
-                  <td className="px-4 py-3 text-right font-mono text-slate-300">{teamStats?.avg_teleop_score?.toFixed(1) || '—'}</td>
-                  <td className="px-4 py-3 text-right font-mono text-slate-300">{teamStats?.avg_endgame_score?.toFixed(1) || '—'}</td>
+                  <td className="px-4 py-3 text-right font-mono text-slate-300">{(teamStats?.auto_opr ?? teamStats?.avg_auto_score)?.toFixed(1) || '—'}</td>
+                  <td className="px-4 py-3 text-right font-mono text-slate-300">{(teamStats?.teleop_hub_opr ?? teamStats?.avg_teleop_score)?.toFixed(1) || '—'}</td>
+                  <td className="px-4 py-3 text-right font-mono text-slate-300">{(teamStats?.endgame_opr ?? teamStats?.avg_endgame_score)?.toFixed(1) || '—'}</td>
                   <td className="px-4 py-3 text-right font-mono text-slate-300">{teamStats?.reliability_score?.toFixed(0) || '—'}%</td>
                 </tr>
               );
@@ -297,7 +297,7 @@ export default function AdminEventMatchPage() {
       const [matchResponse, statsResponse, scoutingResponse] = await Promise.all([
         fetch(`/api/analytics/match/${matchKey}`),
         fetch(`/api/analytics/event/${eventKey}`),
-        fetch(`/api/admin/scouting?match_key=${matchKey}&limit=100`),
+        fetch(`/api/admin/scouting?matchKey=${matchKey}&limit=100`),
       ]);
 
       const [matchData, statsData, scoutingData] = await Promise.all([
@@ -354,6 +354,28 @@ export default function AdminEventMatchPage() {
   const getScoutedTeams = () => {
     const scouted = new Set(scoutingEntries.map(e => e.team_number));
     return scouted;
+  };
+
+  // Deduplicate scouting entries: keep only the most recent entry per team
+  const getDeduplicatedEntries = () => {
+    const byTeam = new Map<number, ScoutingEntry[]>();
+    for (const entry of scoutingEntries) {
+      if (!byTeam.has(entry.team_number)) {
+        byTeam.set(entry.team_number, []);
+      }
+      byTeam.get(entry.team_number)!.push(entry);
+    }
+
+    const deduped: ScoutingEntry[] = [];
+    let hasDuplicates = false;
+    for (const [, entries] of byTeam) {
+      if (entries.length > 1) hasDuplicates = true;
+      // Sort by created_at descending, keep the most recent
+      entries.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      deduped.push(entries[0]);
+    }
+
+    return { entries: deduped, hasDuplicates, totalRaw: scoutingEntries.length };
   };
 
   if (isLoading) {
@@ -626,54 +648,64 @@ export default function AdminEventMatchPage() {
         </div>
 
         {/* Scouting Entries Quick View */}
-        {scoutingEntries.length > 0 && (
-          <div className="rounded-xl border border-slate-700/50 bg-slate-900/50 p-6 no-print">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/10">
-                  <Shield className="h-4 w-4 text-cyan-400" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-white">Scouting Entries</h2>
-                  <p className="text-xs text-slate-500">{scoutingEntries.length} entries for this match</p>
-                </div>
-              </div>
-              <Link
-                href={`/admin/events/${eventKey}/scouting?match_key=${matchKey}`}
-                className="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300"
-              >
-                View All
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-            </div>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {scoutingEntries.slice(0, 6).map(entry => (
-                <div
-                  key={entry.id}
-                  className={cn(
-                    "rounded-lg border px-3 py-2 text-sm",
-                    entry.alliance === 'red'
-                      ? "border-red-500/30 bg-red-500/5"
-                      : "border-blue-500/30 bg-blue-500/5"
-                  )}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-white">{entry.team_number}</span>
-                    <span className={cn(
-                      "text-xs",
-                      entry.alliance === 'red' ? "text-red-400" : "text-blue-400"
-                    )}>
-                      {entry.alliance} {entry.alliance_position}
-                    </span>
+        {scoutingEntries.length > 0 && (() => {
+          const { entries: dedupedEntries, hasDuplicates, totalRaw } = getDeduplicatedEntries();
+          return (
+            <div className="rounded-xl border border-slate-700/50 bg-slate-900/50 p-6 no-print">
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/10">
+                    <Shield className="h-4 w-4 text-cyan-400" />
                   </div>
-                  {entry.scouter_name && (
-                    <p className="mt-1 text-xs text-slate-500">by {entry.scouter_name}</p>
-                  )}
+                  <div>
+                    <h2 className="text-lg font-semibold text-white">Scouting Entries</h2>
+                    <p className="text-xs text-slate-500">
+                      {dedupedEntries.length} of 6 teams scouted
+                      {hasDuplicates && (
+                        <span className="ml-1 text-amber-400">
+                          ({totalRaw} total entries, showing most recent per team)
+                        </span>
+                      )}
+                    </p>
+                  </div>
                 </div>
-              ))}
+                <Link
+                  href={`/admin/scouting?matchKey=${matchKey}&eventKey=${eventKey}`}
+                  className="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300"
+                >
+                  View All
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {dedupedEntries.slice(0, 6).map(entry => (
+                  <div
+                    key={entry.id}
+                    className={cn(
+                      "rounded-lg border px-3 py-2 text-sm",
+                      entry.alliance === 'red'
+                        ? "border-red-500/30 bg-red-500/5"
+                        : "border-blue-500/30 bg-blue-500/5"
+                    )}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-white">{entry.team_number}</span>
+                      <span className={cn(
+                        "text-xs",
+                        entry.alliance === 'red' ? "text-red-400" : "text-blue-400"
+                      )}>
+                        {entry.alliance} {entry.alliance_position}
+                      </span>
+                    </div>
+                    {entry.scouter_name && (
+                      <p className="mt-1 text-xs text-slate-500">by {entry.scouter_name}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Footer */}
         <div className="mt-12 pt-6 border-t border-slate-700/50 text-xs text-slate-500 print-section">

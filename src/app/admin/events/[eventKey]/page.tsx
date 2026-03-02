@@ -153,13 +153,13 @@ function TeamRankingRow({
         </div>
         <div>
           <p className="text-sm font-medium text-slate-300">
-            {team.avg_auto_score?.toFixed(1) || '—'}
+            {(team.auto_opr ?? team.avg_auto_score)?.toFixed(1) || '—'}
           </p>
           <p className="text-[10px] uppercase tracking-wider text-slate-500">Auto</p>
         </div>
         <div>
           <p className="text-sm font-medium text-slate-300">
-            {team.avg_teleop_score?.toFixed(1) || '—'}
+            {(team.teleop_hub_opr ?? team.avg_teleop_score)?.toFixed(1) || '—'}
           </p>
           <p className="text-[10px] uppercase tracking-wider text-slate-500">Teleop</p>
         </div>
@@ -265,34 +265,37 @@ export default function EventAnalyticsPage() {
     fetchData();
   }, [fetchData]);
 
-  // Calculate aggregate stats
+  // Detect if component OPR data is available (from TBA score_breakdown)
+  const hasComponentOPR = teamStats.some(t => t.auto_opr != null || t.teleop_hub_opr != null);
+
+  // Calculate aggregate stats — prefer component OPR (from TBA) over scouting averages
   const topTeams = [...teamStats].sort((a, b) => (b.opr || 0) - (a.opr || 0)).slice(0, 10);
   const avgOpr = teamStats.length > 0
     ? teamStats.reduce((sum, t) => sum + (t.opr || 0), 0) / teamStats.length
     : 0;
   const avgAuto = teamStats.length > 0
-    ? teamStats.reduce((sum, t) => sum + (t.avg_auto_score || 0), 0) / teamStats.length
+    ? teamStats.reduce((sum, t) => sum + (t.auto_opr ?? t.avg_auto_score ?? 0), 0) / teamStats.length
     : 0;
   const avgTeleop = teamStats.length > 0
-    ? teamStats.reduce((sum, t) => sum + (t.avg_teleop_score || 0), 0) / teamStats.length
+    ? teamStats.reduce((sum, t) => sum + (t.teleop_hub_opr ?? t.avg_teleop_score ?? 0), 0) / teamStats.length
     : 0;
   const totalMatches = teamStats.reduce((sum, t) => sum + (t.matches_scouted || 0), 0);
 
-  // Category leaders
+  // Category leaders — prefer component OPR when available
   const autoLeaders = [...teamStats]
-    .sort((a, b) => (b.avg_auto_score || 0) - (a.avg_auto_score || 0))
+    .sort((a, b) => (b.auto_opr ?? b.avg_auto_score ?? 0) - (a.auto_opr ?? a.avg_auto_score ?? 0))
     .slice(0, 5)
-    .map(t => ({ team_number: t.team_number, value: t.avg_auto_score || 0 }));
+    .map(t => ({ team_number: t.team_number, value: t.auto_opr ?? t.avg_auto_score ?? 0 }));
 
   const teleopLeaders = [...teamStats]
-    .sort((a, b) => (b.avg_teleop_score || 0) - (a.avg_teleop_score || 0))
+    .sort((a, b) => (b.teleop_hub_opr ?? b.avg_teleop_score ?? 0) - (a.teleop_hub_opr ?? a.avg_teleop_score ?? 0))
     .slice(0, 5)
-    .map(t => ({ team_number: t.team_number, value: t.avg_teleop_score || 0 }));
+    .map(t => ({ team_number: t.team_number, value: t.teleop_hub_opr ?? t.avg_teleop_score ?? 0 }));
 
   const endgameLeaders = [...teamStats]
-    .sort((a, b) => (b.avg_endgame_score || 0) - (a.avg_endgame_score || 0))
+    .sort((a, b) => (b.endgame_opr ?? b.avg_endgame_score ?? 0) - (a.endgame_opr ?? a.avg_endgame_score ?? 0))
     .slice(0, 5)
-    .map(t => ({ team_number: t.team_number, value: t.avg_endgame_score || 0 }));
+    .map(t => ({ team_number: t.team_number, value: t.endgame_opr ?? t.avg_endgame_score ?? 0 }));
 
   const handleExportCSV = () => {
     if (!teamStats.length) return;
@@ -302,6 +305,9 @@ export default function EventAnalyticsPage() {
       'OPR',
       'DPR',
       'CCWM',
+      'Auto OPR',
+      'Teleop Hub OPR',
+      'Endgame OPR',
       'Avg Auto',
       'Avg Teleop',
       'Avg Endgame',
@@ -316,6 +322,9 @@ export default function EventAnalyticsPage() {
         stat.opr?.toFixed(2) || '',
         stat.dpr?.toFixed(2) || '',
         stat.ccwm?.toFixed(2) || '',
+        stat.auto_opr?.toFixed(2) || '',
+        stat.teleop_hub_opr?.toFixed(2) || '',
+        stat.endgame_opr?.toFixed(2) || '',
         stat.avg_auto_score?.toFixed(1) || '',
         stat.avg_teleop_score?.toFixed(1) || '',
         stat.avg_endgame_score?.toFixed(1) || '',
@@ -445,14 +454,14 @@ export default function EventAnalyticsPage() {
           color="emerald"
         />
         <StatCard
-          label="Avg Auto Score"
+          label={hasComponentOPR ? "Auto OPR" : "Avg Auto Score"}
           value={avgAuto.toFixed(1)}
           subValue="Points per match"
           icon={Zap}
           color="amber"
         />
         <StatCard
-          label="Avg Teleop Score"
+          label={hasComponentOPR ? "Teleop Hub OPR" : "Avg Teleop Score"}
           value={avgTeleop.toFixed(1)}
           subValue="Points per match"
           icon={Activity}
@@ -496,19 +505,19 @@ export default function EventAnalyticsPage() {
           <CategoryCard
             title="Auto Leaders"
             teams={autoLeaders}
-            metric="Avg Auto Points"
+            metric={hasComponentOPR ? "Auto OPR" : "Avg Auto Points"}
             color="emerald"
           />
           <CategoryCard
             title="Teleop Leaders"
             teams={teleopLeaders}
-            metric="Avg Teleop Points"
+            metric={hasComponentOPR ? "Teleop Hub OPR" : "Avg Teleop Points"}
             color="blue"
           />
           <CategoryCard
             title="Endgame Leaders"
             teams={endgameLeaders}
-            metric="Avg Endgame Points"
+            metric={hasComponentOPR ? "Endgame OPR" : "Avg Endgame Points"}
             color="violet"
           />
         </div>
