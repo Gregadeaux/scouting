@@ -23,6 +23,9 @@
 # planning files (AI assistant working files)
 .planning/
 
+# sprint artifacts (session-specific, not for history)
+.claude/sprints/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
