@@ -99,6 +99,8 @@ Personas live in `.claude/agents/`. They are Claude subagents invoked by the orc
 
 **Output**: Structured PASS/FAIL with severity levels (BLOCKER / HIGH / MEDIUM / INFO).
 
+> **Model note**: The security reviewer runs on `haiku` (vs. `sonnet` for all other gates). This is intentional — it runs on every iteration and the checklist is pattern-based. The tradeoff is lower confidence on subtle findings. MEDIUM/INFO findings from this gate should be verified by a human before being dismissed.
+
 ---
 
 ## Sprint Ceremony Commands
